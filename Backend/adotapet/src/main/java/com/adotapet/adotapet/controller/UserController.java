@@ -1,0 +1,54 @@
+package com.adotapet.adotapet.controller;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.adotapet.adotapet.ApiResponse;
+import com.adotapet.adotapet.entities.UserEntity;
+import com.adotapet.adotapet.repository.UserRepository;
+import com.adotapet.adotapet.services.UserService;
+
+import jakarta.annotation.PostConstruct;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam; //remover
+import org.springframework.web.bind.annotation.GetMapping;
+
+
+
+
+
+@RestController
+public class UserController {
+
+    @Autowired
+    private UserRepository userRepository;
+    private UserService userService;
+
+    @PostConstruct
+    public void init(){
+        
+        userService = new UserService(userRepository);
+    }
+
+    // @PostMapping("/user/create")
+    // public ApiResponse<UserEntity> createUser(@RequestBody UserEntity user) {
+        
+    //     return userService.criarUserWithBody(user);
+    // }
+
+    //apenas teste (deletar)
+    @PostMapping ("/user/create")
+    public ApiResponse<UserEntity> createUser(@RequestParam String email, @RequestParam(defaultValue = "") String password) {
+    
+        userRepository.save(new UserEntity(email, password));
+
+        return new ApiResponse<UserEntity>("Usuário criado com sucesso", new UserEntity(email, password));      
+    }
+
+    @GetMapping("/user/all")
+    public Iterable<UserEntity> getAllUsers() {
+        return userRepository.findAll();
+    }
+    
+}
