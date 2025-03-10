@@ -12,7 +12,7 @@ import com.adotapet.adotapet.repository.UserRepository;
 public class UserService {
 
     private UserRepository userRepository;
-    // private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+    private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserService(UserRepository userRepository) {
         this.userRepository = userRepository;
