@@ -1,11 +1,8 @@
 package com.adotapet.adotapet.entities;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import jakarta.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 public class DogEntity {
@@ -18,6 +15,11 @@ public class DogEntity {
     private String breed;
     private String age;
     private String size;
+
+    @ElementCollection
+    @CollectionTable(name = "dog_images", joinColumns = @JoinColumn(name = "dog_id"))
+    @Column(name = "url")
+    private List<String> urlImg = new ArrayList<>();
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -82,9 +84,21 @@ public class DogEntity {
         this.user = user;
     }
 
+    public List<String> getUrlImg() {
+        return urlImg;
+    }
+
+    public void addUrlImg(String url) {
+        this.urlImg.add(url);
+    }
+
+    public void setUrlImg(List<String> urls) {
+        this.urlImg = urls;
+    }
+
     @Override
     public String toString() {
         return "DogEntity [id=" + id + ", name=" + name + ", breed=" + breed + ", age=" + age + ", size=" + size
-                + ", user=" + user + "]";
+                + ", user=" + user + ", urlImg=" + urlImg + "]";
     }
 }

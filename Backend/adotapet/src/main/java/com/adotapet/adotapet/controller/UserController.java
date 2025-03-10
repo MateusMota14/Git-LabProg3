@@ -37,18 +37,34 @@ public class UserController {
     //     return userService.criarUserWithBody(user);
     // }
 
-    //apenas teste (deletar)
-    @PostMapping ("/user/create")
-    public ApiResponse<UserEntity> createUser(@RequestParam String email, @RequestParam(defaultValue = "") String password) {
+    // //apenas teste (deletar)
+    // @PostMapping ("/user/create")
+    // public ApiResponse<UserEntity> createUser(@RequestParam String email, @RequestParam(defaultValue = "") String password) {
     
-        userRepository.save(new UserEntity(email, password));
+    //     userRepository.save(new UserEntity(email, password));
 
-        return new ApiResponse<UserEntity>("Usuário criado com sucesso", new UserEntity(email, password));      
-    }
+    //     return new ApiResponse<UserEntity>("Usuário criado com sucesso", new UserEntity(email, password));      
+    // }
 
     @GetMapping("/user/all")
     public Iterable<UserEntity> getAllUsers() {
         return userRepository.findAll();
+    }
+    
+    @GetMapping("/user/email")
+    public ApiResponse<Iterable<UserEntity>> getUserByEmail(@RequestParam String email) {
+        return userService.findByEmail(email);
+    }
+
+    @GetMapping("/user/id")
+    public ApiResponse<UserEntity> getUserById(@RequestParam Integer id) {
+        return userService.findById(id);
+    }
+    
+    @PostMapping("/user/create")
+    public ApiResponse<UserEntity> createUser(@RequestBody UserEntity user) {
+                
+        return userService.createUser(user);
     }
     
 }

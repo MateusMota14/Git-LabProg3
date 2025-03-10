@@ -28,13 +28,25 @@ public class UserEntity {
     private String authToken;
     private LocalDateTime authTokenExpiration;
 
+    public UserEntity(String name, String email, String password, String country, String state, String city,
+            String zCode, boolean isAdopter) {
+        this.name = name;
+        this.email = email;
+        this.password = password;
+        this.country = country;
+        this.state = state;
+        this.city = city;
+        this.zCode = zCode;
+        this.isAdopter = isAdopter;
+    }
+
     public UserEntity() {
     } // para o JPA
 
-    public UserEntity(String email, String password) {
-        this.email = email;
-        this.password = password;
-    }
+    // public UserEntity(String email, String password) {
+    //     this.email = email;
+    //     this.password = password;
+    // }
 
     public String getName() {
         return name;
@@ -131,7 +143,7 @@ public class UserEntity {
                 + ", authTokenExpiration: " + authTokenExpiration + "]";
     }
 
-    public boolean isIsAdopter() {
+    public boolean getIsAdopter() {
         return isAdopter;
     }
 
