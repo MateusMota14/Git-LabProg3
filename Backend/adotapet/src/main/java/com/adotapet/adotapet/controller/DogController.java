@@ -57,8 +57,8 @@ public class DogController {
         return dogService.createDog(dog, dog.getUser().getId());
     }
 
-    // @DeleteMapping("/user/delete")
-    // public ApiResponse<UserEntity> deleteUser(@RequestBody UserEntity user) {
-    //     return userService.deleteUser(user);
-    //     }
+    @DeleteMapping("/dog/delete")
+    public ApiResponse<DogEntity> deleteDog(@RequestBody DogEntity dog) {
+        return dogService.deleteDog(dog);
+        }
 }

@@ -44,6 +44,17 @@ public class DogService {
         return new ApiResponse<>("Dog created", savedDog);
     }
 
+    public ApiResponse<DogEntity> deleteDog(DogEntity dog){
+        Optional<DogEntity> dogOptional = dogRepository.findById(dog.getId()); // Retorna um Optional
+        if (dogOptional.isPresent()) { // Verifica se o usuário existe
+            dogRepository.delete(dog);
+            return new ApiResponse<>("Dog deleted", null);
+        } 
+        else {
+            return new ApiResponse<>("Dog not found", null);
+        }
+    }
+
     
 
 
