@@ -52,4 +52,14 @@ public class UserService {
 
         return new ApiResponse<>("User created", new UserEntity(user.getName(),user.getEmail(), hashedPassword, user.getCountry(), user.getState(), user.getCity(), user.getzCode(), user.getIsAdopter()));
     }
+
+    public ApiResponse<UserEntity> deleteUser(UserEntity user) {
+        Optional<UserEntity> userOptional = userRepository.findById(user.getId()); // Retorna um Optional
+        if (userOptional.isPresent()) { // Verifica se o usuário existe
+            userRepository.delete(user);
+            return new ApiResponse<>("User deleted", null);
+        } else {
+            return new ApiResponse<>("User not found", null);
+        }
+    }
 }
