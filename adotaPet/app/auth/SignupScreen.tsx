@@ -8,7 +8,6 @@ import {
   Alert 
 } from "react-native";
 import { useNavigation } from "@react-navigation/native";
-import { Switch } from "react-native-gesture-handler";
 
 // Definição do tipo para o formulário
 interface SignupForm {
@@ -20,7 +19,7 @@ interface SignupForm {
   state: string;
   city: string;
   zCode: string;
-  isAdopter: boolean;
+  
 }
 
 const SignupScreen: React.FC = () => {
@@ -34,11 +33,10 @@ const SignupScreen: React.FC = () => {
     state: "",
     city: "",
     zCode: "",
-    isAdopter: false,
-  });
+   });
 
   // Função para manipular mudanças no input
-  const handleChange = (field: keyof SignupForm, value: string | boolean) => {
+  const handleChange = (field: keyof SignupForm, value: string) => {
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -62,7 +60,6 @@ const SignupScreen: React.FC = () => {
           state: form.state,
           city: form.city,
           zCode: form.zCode,
-          isAdopter: form.isAdopter,
         }),
       });
 
@@ -142,15 +139,6 @@ const SignupScreen: React.FC = () => {
         value={form.zCode}
         onChangeText={(value) => handleChange("zCode", value)}
       />
-
-      <View style={styles.switchContainer}>
-        <Text style={styles.switchLabel}>Sou um adotante</Text>
-        <Switch
-          value={form.isAdopter}
-          onValueChange={(value) => handleChange("isAdopter", value)}
-        />
-      </View>
-
       <TouchableOpacity style={styles.button} onPress={handleSignup}>
         <Text style={styles.buttonText}>Criar Conta</Text>
       </TouchableOpacity>

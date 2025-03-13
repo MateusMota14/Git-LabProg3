@@ -1,0 +1,27 @@
+# Usar uma imagem do OpenJDK
+FROM openjdk:17-jdk-slim
+
+# Criar o diretório de trabalho
+WORKDIR /app
+
+# Copiar apenas o necessário primeiro
+COPY adotapet/gradlew ./gradlew
+COPY adotapet/gradle ./gradle
+
+# Garantir permissões adequadas antes de copiar tudo
+RUN chmod +x gradlew && chmod -R 755 gradle/wrapper
+
+# Copiar o restante do código do backend
+COPY adotapet/ /app/adotapet
+
+# Definir o diretório correto para executar os comandos
+WORKDIR /app/adotapet
+
+# Construir o projeto com Gradle
+RUN ./gradlew build
+
+# Expor a porta do backend
+EXPOSE 8080
+
+# Comando para rodar a aplicação
+CMD ["./gradlew", "bootRun"]
