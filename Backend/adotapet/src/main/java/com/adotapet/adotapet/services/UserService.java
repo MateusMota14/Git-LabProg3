@@ -5,6 +5,7 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 
 import com.adotapet.adotapet.ApiResponse;
+import com.adotapet.adotapet.DTO.ChangePassword;
 import com.adotapet.adotapet.entities.UserEntity;
 import com.adotapet.adotapet.repository.UserRepository;
 
@@ -69,7 +70,7 @@ public class UserService {
     public ApiResponse<UserEntity> updateUser(UserEntity user) {
         Optional<UserEntity> userOptional = userRepository.findById(user.getId()); // Retorna um Optional
         if (userOptional.isPresent()) { // Verifica se o usuário existe
-            if (this.checkPassword(user)) {
+            if (passwordEncoder.matches(user.getPassword(), userOptional.get().getPassword())) { //verificação se a senha fornecida confere
 
                 userOptional.get().setName(user.getName());
                 userOptional.get().setCountry(user.getCountry());
@@ -86,32 +87,25 @@ public class UserService {
         }
     }
 
-    //FAZER -> NECESSARIO RECEBER A NOVA SENHA
-    public ApiResponse<UserEntity> chagePassword(UserEntity user) {
-        Optional<UserEntity> userOptional = userRepository.findById(user.getId()); // Retorna um Optional
-        if (userOptional.isPresent()) { // Verifica se o usuário existe
-            if (this.checkPassword(user)) {
-                String hashedPassword = passwordEncoder.encode(user.getPassword());
-                userOptional.get().setPassword(hashedPassword);
-                userRepository.save(userOptional.get());
-                return new ApiResponse<>("Password changed", userOptional.get());
-            }
-            return new ApiResponse<>("invalid password", null);
-        } else {
-            return new ApiResponse<>("User not found", null);
+    public ApiResponse<UserEntity> changePassword(ChangePassword change, Integer id) {
+    Optional<UserEntity> userOptional = userRepository.findById(id); // Retorna um Optional
+    if (userOptional.isPresent()) { // Verifica se o usuário existe
+        UserEntity user = userOptional.get(); // Acessa o usuário dentro do Optional
+        // Agora passando o objeto 'change' junto com 'user'
+        if (this.checkPassword(change, user)) { 
+            String hashedPassword = passwordEncoder.encode(change.getNewPassword());
+            user.setPassword(hashedPassword);
+            userRepository.save(user);
+            return new ApiResponse<>("Password changed", user);
         }
+        return new ApiResponse<>("Invalid password", null);
+    } else {
+        return new ApiResponse<>("User not found", null);
     }
-
-    public Boolean checkPassword(UserEntity user) {
-        Optional<UserEntity> userOptional = userRepository.findById(user.getId());
-        if (userOptional.isPresent()) // Verifica se o usuário existe
-        {
-            if (passwordEncoder.matches(user.getPassword(), userOptional.get().getPassword())) {
-                return true;
-            }
-            return false;
-        }
-        return false;
+}
+    
+    public Boolean checkPassword(ChangePassword change, UserEntity user) {
+        return passwordEncoder.matches(change.getOldPassword(), user.getPassword());
     }
 
 }

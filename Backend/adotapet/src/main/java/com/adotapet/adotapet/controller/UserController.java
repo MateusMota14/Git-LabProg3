@@ -4,6 +4,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.adotapet.adotapet.ApiResponse;
+import com.adotapet.adotapet.DTO.ChangePassword;
 import com.adotapet.adotapet.entities.UserEntity;
 import com.adotapet.adotapet.repository.UserRepository;
 import com.adotapet.adotapet.services.UserService;
@@ -64,5 +65,9 @@ public class UserController {
     public ApiResponse<UserEntity> updateUser(@RequestBody UserEntity user) {
         return userService.updateUser(user);
         }
-    
+
+    @PostMapping ("/user/changepassword")
+    public ApiResponse<UserEntity> changePassword(@RequestBody ChangePassword change, @RequestParam Integer id) {
+        return userService.changePassword(change, id);
+        }  
 }
