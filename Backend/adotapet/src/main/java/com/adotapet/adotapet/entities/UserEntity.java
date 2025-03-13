@@ -22,14 +22,13 @@ public class UserEntity {
     private String city;
     private String zCode;
 
-    private boolean isAdopter;
 
     private String img;
     private String authToken;
     private LocalDateTime authTokenExpiration;
 
     public UserEntity(String name, String email, String password, String country, String state, String city,
-            String zCode, boolean isAdopter) {
+            String zCode) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -37,7 +36,6 @@ public class UserEntity {
         this.state = state;
         this.city = city;
         this.zCode = zCode;
-        this.isAdopter = isAdopter;
     }
 
     public UserEntity() {
@@ -141,13 +139,5 @@ public class UserEntity {
         return "UserEntity [id: " + id + ", name: " + name + ", email: " + email + ", country: " + country + ", state: "
                 + state + ", city: " + city + ", zCode: " + zCode + ", authToken" + authToken
                 + ", authTokenExpiration: " + authTokenExpiration + "]";
-    }
-
-    public boolean getIsAdopter() {
-        return isAdopter;
-    }
-
-    public void setIsAdopter(boolean isAdopter) {
-        this.isAdopter = isAdopter;
     }
 }

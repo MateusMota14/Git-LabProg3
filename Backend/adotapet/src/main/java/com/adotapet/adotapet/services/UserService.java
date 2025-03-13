@@ -48,9 +48,9 @@ public class UserService {
         }
 
         String hashedPassword = passwordEncoder.encode(user.getPassword());
-        userRepository.save(new UserEntity(user.getName(),user.getEmail(), hashedPassword, user.getCountry(), user.getState(), user.getCity(), user.getzCode(), user.getIsAdopter()));
+        userRepository.save(new UserEntity(user.getName(),user.getEmail(), hashedPassword, user.getCountry(), user.getState(), user.getCity(), user.getzCode()));
 
-        return new ApiResponse<>("User created", new UserEntity(user.getName(),user.getEmail(), hashedPassword, user.getCountry(), user.getState(), user.getCity(), user.getzCode(), user.getIsAdopter()));
+        return new ApiResponse<>("User created", new UserEntity(user.getName(),user.getEmail(), hashedPassword, user.getCountry(), user.getState(), user.getCity(), user.getzCode()));
     }
 
     public ApiResponse<UserEntity> deleteUser(UserEntity user) {
