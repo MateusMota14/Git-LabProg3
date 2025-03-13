@@ -59,5 +59,10 @@ public class UserController {
     public ApiResponse<UserEntity> deleteUser(@RequestBody UserEntity user) {
         return userService.deleteUser(user);
         }
+
+    @PostMapping ("/user/update")
+    public ApiResponse<UserEntity> updateUser(@RequestBody UserEntity user) {
+        return userService.updateUser(user);
+        }
     
 }
