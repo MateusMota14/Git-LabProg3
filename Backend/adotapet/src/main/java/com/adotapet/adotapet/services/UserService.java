@@ -3,7 +3,12 @@ package com.adotapet.adotapet.services;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.Base64;
 import java.util.Iterator;
 import java.util.Optional;
 import java.util.UUID;
@@ -134,6 +139,65 @@ public class UserService {
             return new ApiResponse<>("Login Sucessfull: " + user.getAuthToken(), user);
         } else {
             return new ApiResponse<>("User not found", null);
+        }
+    }
+
+    public ApiResponse<UserEntity> uploadPhoto(Integer userId, String base64Image) {
+        byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+        
+        // Define o nome do arquivo usando o ID do usuário
+        String imageFileName = userId + ".jpg";
+        Path destinationFile = Paths.get("./img/Users", imageFileName);
+
+        try {
+            // Salvar a imagem no servidor
+            Files.write(destinationFile, imageBytes);
+
+            // Atualizar o caminho da imagem no banco de dados
+            UserEntity user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                return new ApiResponse<>("User not found", null);
+            }
+            
+            user.setImg(destinationFile.toString());  // Salvar o caminho da imagem
+            userRepository.save(user);
+
+            return new ApiResponse<>("image send", null);
+        } catch (IOException e) {
+            return new ApiResponse<>("erros to save: " + e.getMessage(), null);
+        }
+    }
+
+    public ApiResponse<UserEntity> deletePhoto(Integer userId) {
+        try {
+            // Verifica se o usuário existe
+            UserEntity user = userRepository.findById(userId).orElse(null);
+            if (user == null) {
+                return new ApiResponse<>("User not found", null);
+            }
+    
+            // Obtém o caminho da foto armazenada
+            String imgPath = user.getImg();
+            if (imgPath == null || imgPath.isEmpty()) {
+                return new ApiResponse<>("No image to delete", null);
+            }
+    
+            Path photoPath = Paths.get(imgPath);
+    
+            // Verifica se a foto existe e a exclui
+            if (Files.exists(photoPath)) {
+                Files.delete(photoPath);
+            } else {
+                return new ApiResponse<>("Image file not found on server", null);
+            }
+    
+            // Remove a referência da foto no banco de dados
+            user.setImg(null);
+            userRepository.save(user);
+    
+            return new ApiResponse<>("Image deleted successfully", user);
+        } catch (IOException e) {
+            return new ApiResponse<>("Error deleting image: " + e.getMessage(), null);
         }
     }
 
