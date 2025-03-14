@@ -10,11 +10,14 @@ import com.adotapet.adotapet.repository.UserRepository;
 import com.adotapet.adotapet.services.UserService;
 
 import jakarta.annotation.PostConstruct;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam; //remover
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+
+import com.adotapet.adotapet.DTO.Login;
 
 
 
@@ -69,5 +72,10 @@ public class UserController {
     @PostMapping ("/user/changepassword")
     public ApiResponse<UserEntity> changePassword(@RequestBody ChangePassword change, @RequestParam Integer id) {
         return userService.changePassword(change, id);
-        }  
+        } 
+        
+    @PostMapping ("/login")
+    public ApiResponse<UserEntity> login(@RequestBody Login login) {
+        return userService.login(login);
+        }
 }

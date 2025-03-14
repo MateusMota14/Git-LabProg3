@@ -2,10 +2,15 @@ package com.adotapet.adotapet.services;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.time.LocalDateTime;
+import java.util.Iterator;
 import java.util.Optional;
+import java.util.UUID;
 
 import com.adotapet.adotapet.ApiResponse;
 import com.adotapet.adotapet.DTO.ChangePassword;
+import com.adotapet.adotapet.DTO.Login;
 import com.adotapet.adotapet.entities.UserEntity;
 import com.adotapet.adotapet.repository.UserRepository;
 
@@ -106,6 +111,30 @@ public class UserService {
     
     public Boolean checkPassword(ChangePassword change, UserEntity user) {
         return passwordEncoder.matches(change.getOldPassword(), user.getPassword());
+    }
+
+    public void generateToken(UserEntity user) {
+        user.setAuthToken(UUID.randomUUID().toString());
+        user.setAuthTokenExpiration(LocalDateTime.now().plusMinutes(30)); // Define expiração de 30 minutos
+    }
+
+    public ApiResponse<UserEntity> login(Login login) {
+        Iterable<UserEntity> userTest = userRepository.findByEmail(login.getEmail());
+        Iterator<UserEntity> iterator = userTest.iterator();
+
+        if (iterator.hasNext()) {
+            UserEntity user = iterator.next();
+
+            if (!passwordEncoder.matches(login.getPassword(), user.getPassword())) {
+                return new ApiResponse<>("Password incorrect", null);
+            }
+
+            generateToken(user);
+            userRepository.save(user);
+            return new ApiResponse<>("Login Sucessfull: " + user.getAuthToken(), user);
+        } else {
+            return new ApiResponse<>("User not found", null);
+        }
     }
 
 }
