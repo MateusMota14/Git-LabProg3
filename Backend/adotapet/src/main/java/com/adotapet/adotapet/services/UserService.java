@@ -1,29 +1,41 @@
 package com.adotapet.adotapet.services;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Base64;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.adotapet.adotapet.ApiResponse;
 import com.adotapet.adotapet.DTO.ChangePassword;
 import com.adotapet.adotapet.DTO.Login;
+import com.adotapet.adotapet.entities.DogEntity;
 import com.adotapet.adotapet.entities.UserEntity;
+import com.adotapet.adotapet.repository.DogRepository;
 import com.adotapet.adotapet.repository.UserRepository;
+
 
 @Service
 public class UserService {
 
-
+    @Autowired
     private UserRepository userRepository;
+
+
+    private DogRepository dogRepository;
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserService(UserRepository userRepository) {
@@ -200,5 +212,28 @@ public class UserService {
             return new ApiResponse<>("Error deleting image: " + e.getMessage(), null);
         }
     }
+
+
+
+    // public ApiResponse<List<Map<String, Object>>> getDogsByUser(Integer userId) {
+    //     Optional<UserEntity> userOptional = userRepository.findById(userId);
+    //     if (userOptional.isEmpty()) {
+    //         return new ApiResponse<>("User not found", null);
+    //     }
+
+    //     List<DogEntity> dogs = dogRepository.findByUserId(userId);
+
+    //     List<Map<String, Object>> dogList = new ArrayList<>();
+    //     for (DogEntity dog : dogs) {
+    //         Map<String, Object> dogMap = new HashMap<>();
+    //         dogMap.put("id", dog.getId());
+    //         dogMap.put("name", dog.getName());
+    //         dogList.add(dogMap);
+    //     }
+
+    //     return new ApiResponse<>("Dogs found", dogList);
+    // }
+        
+
 
 }

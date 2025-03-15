@@ -1,6 +1,8 @@
 package com.adotapet.adotapet.controller;
 
 import java.util.Map;
+import java.util.List;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
@@ -88,5 +90,10 @@ public class UserController {
     public ApiResponse<UserEntity> detetePhoto(@RequestBody UserEntity user) {
         return userService.deletePhoto(user.getId());
         }
+
+    // @GetMapping("/user/dogs")
+    // public ApiResponse<List<Map<String, Object>>> getDogs(@RequestParam Integer userId){
+    //     return userService.getDogsByUser(userId);
+    // }
 
 }
