@@ -4,36 +4,28 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Base64;
-import java.util.HashMap;
 import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
 import com.adotapet.adotapet.ApiResponse;
 import com.adotapet.adotapet.DTO.ChangePassword;
 import com.adotapet.adotapet.DTO.Login;
-import com.adotapet.adotapet.entities.DogEntity;
 import com.adotapet.adotapet.entities.UserEntity;
 import com.adotapet.adotapet.repository.DogRepository;
 import com.adotapet.adotapet.repository.UserRepository;
-
 
 @Service
 public class UserService {
 
     @Autowired
     private UserRepository userRepository;
-
 
     private DogRepository dogRepository;
     private BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
@@ -92,7 +84,9 @@ public class UserService {
     public ApiResponse<UserEntity> updateUser(UserEntity user) {
         Optional<UserEntity> userOptional = userRepository.findById(user.getId()); // Retorna um Optional
         if (userOptional.isPresent()) { // Verifica se o usuário existe
-            if (passwordEncoder.matches(user.getPassword(), userOptional.get().getPassword())) { //verificação se a senha fornecida confere
+            if (passwordEncoder.matches(user.getPassword(), userOptional.get().getPassword())) { // verificação se a
+                                                                                                 // senha fornecida
+                                                                                                 // confere
 
                 userOptional.get().setName(user.getName());
                 userOptional.get().setCountry(user.getCountry());
@@ -101,8 +95,7 @@ public class UserService {
                 userOptional.get().setzCode(user.getzCode());
                 userRepository.save(userOptional.get());
                 return new ApiResponse<>("User updated", userOptional.get());
-            }
-            else
+            } else
                 return new ApiResponse<>("invalid password", null);
         } else {
             return new ApiResponse<>("User not found", null);
@@ -110,22 +103,22 @@ public class UserService {
     }
 
     public ApiResponse<UserEntity> changePassword(ChangePassword change, Integer id) {
-    Optional<UserEntity> userOptional = userRepository.findById(id); // Retorna um Optional
-    if (userOptional.isPresent()) { // Verifica se o usuário existe
-        UserEntity user = userOptional.get(); // Acessa o usuário dentro do Optional
-        // Agora passando o objeto 'change' junto com 'user'
-        if (this.checkPassword(change, user)) { 
-            String hashedPassword = passwordEncoder.encode(change.getNewPassword());
-            user.setPassword(hashedPassword);
-            userRepository.save(user);
-            return new ApiResponse<>("Password changed", user);
+        Optional<UserEntity> userOptional = userRepository.findById(id); // Retorna um Optional
+        if (userOptional.isPresent()) { // Verifica se o usuário existe
+            UserEntity user = userOptional.get(); // Acessa o usuário dentro do Optional
+            // Agora passando o objeto 'change' junto com 'user'
+            if (this.checkPassword(change, user)) {
+                String hashedPassword = passwordEncoder.encode(change.getNewPassword());
+                user.setPassword(hashedPassword);
+                userRepository.save(user);
+                return new ApiResponse<>("Password changed", user);
+            }
+            return new ApiResponse<>("Invalid password", null);
+        } else {
+            return new ApiResponse<>("User not found", null);
         }
-        return new ApiResponse<>("Invalid password", null);
-    } else {
-        return new ApiResponse<>("User not found", null);
     }
-}
-    
+
     public Boolean checkPassword(ChangePassword change, UserEntity user) {
         return passwordEncoder.matches(change.getOldPassword(), user.getPassword());
     }
@@ -156,7 +149,7 @@ public class UserService {
 
     public ApiResponse<UserEntity> uploadPhoto(Integer userId, String base64Image) {
         byte[] imageBytes = Base64.getDecoder().decode(base64Image);
-        
+
         // Define o nome do arquivo usando o ID do usuário
         String imageFileName = userId + ".jpg";
         Path destinationFile = Paths.get("./img/Users", imageFileName);
@@ -170,8 +163,8 @@ public class UserService {
             if (user == null) {
                 return new ApiResponse<>("User not found", null);
             }
-            
-            user.setImg(destinationFile.toString());  // Salvar o caminho da imagem
+
+            user.setImg(destinationFile.toString()); // Salvar o caminho da imagem
             userRepository.save(user);
 
             return new ApiResponse<>("image send", null);
@@ -187,53 +180,29 @@ public class UserService {
             if (user == null) {
                 return new ApiResponse<>("User not found", null);
             }
-    
+
             // Obtém o caminho da foto armazenada
             String imgPath = user.getImg();
             if (imgPath == null || imgPath.isEmpty()) {
                 return new ApiResponse<>("No image to delete", null);
             }
-    
+
             Path photoPath = Paths.get(imgPath);
-    
+
             // Verifica se a foto existe e a exclui
             if (Files.exists(photoPath)) {
                 Files.delete(photoPath);
             } else {
                 return new ApiResponse<>("Image file not found on server", null);
             }
-    
+
             // Remove a referência da foto no banco de dados
             user.setImg(null);
             userRepository.save(user);
-    
+
             return new ApiResponse<>("Image deleted successfully", user);
         } catch (IOException e) {
             return new ApiResponse<>("Error deleting image: " + e.getMessage(), null);
         }
     }
-
-
-
-    // public ApiResponse<List<Map<String, Object>>> getDogsByUser(Integer userId) {
-    //     Optional<UserEntity> userOptional = userRepository.findById(userId);
-    //     if (userOptional.isEmpty()) {
-    //         return new ApiResponse<>("User not found", null);
-    //     }
-
-    //     List<DogEntity> dogs = dogRepository.findByUserId(userId);
-
-    //     List<Map<String, Object>> dogList = new ArrayList<>();
-    //     for (DogEntity dog : dogs) {
-    //         Map<String, Object> dogMap = new HashMap<>();
-    //         dogMap.put("id", dog.getId());
-    //         dogMap.put("name", dog.getName());
-    //         dogList.add(dogMap);
-    //     }
-
-    //     return new ApiResponse<>("Dogs found", dogList);
-    // }
-        
-
-
 }

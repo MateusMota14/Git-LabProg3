@@ -3,7 +3,6 @@ package com.adotapet.adotapet.controller;
 import java.util.Map;
 import java.util.List;
 
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -11,6 +10,7 @@ import com.adotapet.adotapet.ApiResponse;
 import com.adotapet.adotapet.DTO.ChangePassword;
 import com.adotapet.adotapet.entities.UserEntity;
 import com.adotapet.adotapet.repository.UserRepository;
+import com.adotapet.adotapet.services.DogService;
 import com.adotapet.adotapet.services.UserService;
 
 import jakarta.annotation.PostConstruct;
@@ -21,7 +21,6 @@ import org.springframework.web.bind.annotation.RequestParam; //remover
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
-
 import com.adotapet.adotapet.DTO.Login;
 
 @RestController
@@ -30,6 +29,9 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
     private UserService userService;
+
+    @Autowired
+    private DogService dogService;
 
     @PostConstruct
     public void init() {
@@ -89,11 +91,11 @@ public class UserController {
     @DeleteMapping("/user/delete-photo")
     public ApiResponse<UserEntity> detetePhoto(@RequestBody UserEntity user) {
         return userService.deletePhoto(user.getId());
-        }
+    }
 
-    // @GetMapping("/user/dogs")
-    // public ApiResponse<List<Map<String, Object>>> getDogs(@RequestParam Integer userId){
-    //     return userService.getDogsByUser(userId);
-    // }
+    @GetMapping("/user/dogs")
+    public ApiResponse<List<Map<String, Object>>> findDogsByUserId(@RequestParam Integer userId) {
+        return dogService.findDogsByUserId(userId);
+    }
 
 }
