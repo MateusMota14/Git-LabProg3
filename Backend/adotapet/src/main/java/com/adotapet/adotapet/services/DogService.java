@@ -3,7 +3,7 @@ package com.adotapet.adotapet.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
@@ -69,11 +69,12 @@ public class DogService {
         // Transforma a lista para retornar apenas os dados necessários
         List<Map<String, Object>> result = dogs.stream()
                 .map(dog -> {
-                    Map<String, Object> dogMap = new HashMap<>();
+                    Map<String, Object> dogMap = new LinkedHashMap<>(); //para aparecer na ordem solicitada
                     dogMap.put("id", dog.getId());
                     dogMap.put("name", dog.getName());
                     dogMap.put("breed", dog.getBreed());
                     dogMap.put("age", dog.getAge());
+                    dogMap.put("gender", dog.getGender());
                     return dogMap;
                 })
                 .collect(Collectors.toList());
