@@ -39,4 +39,9 @@ public class DogController {
         return dogService.deleteDog(dog);
     }
 
+    @PostMapping("/dog/update")
+    public ApiResponse<DogEntity> updateDog(@RequestBody DogEntity dog) {
+        return dogService.updateDog(dog);
+        }
+
 }

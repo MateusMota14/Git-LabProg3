@@ -69,7 +69,7 @@ public class DogService {
         // Transforma a lista para retornar apenas os dados necessários
         List<Map<String, Object>> result = dogs.stream()
                 .map(dog -> {
-                    Map<String, Object> dogMap = new LinkedHashMap<>(); //para aparecer na ordem solicitada
+                    Map<String, Object> dogMap = new LinkedHashMap<>(); // para aparecer na ordem solicitada
                     dogMap.put("id", dog.getId());
                     dogMap.put("name", dog.getName());
                     dogMap.put("breed", dog.getBreed());
@@ -80,6 +80,29 @@ public class DogService {
                 .collect(Collectors.toList());
 
         return new ApiResponse<>("Id Usuario: " + userId, result);
+    }
+
+    public ApiResponse<DogEntity> updateDog(DogEntity dog) {
+        Optional<DogEntity> dogOptional = dogRepository.findById(dog.getId());
+        Optional<UserEntity> userOptional = userRepository.findById(dog.getUser().getId());
+
+        if (dogOptional.isPresent()) {
+
+            if (userOptional.isPresent()) {
+                DogEntity updateDog = dogOptional.get();
+                updateDog.setName(dog.getName());
+                updateDog.setAge(dog.getAge());
+
+
+                dogRepository.save(updateDog);
+                return new ApiResponse<>("Dog updated", dog);
+
+            } else {
+                return new ApiResponse<>("User this dog not found", null);
+            }
+        } else {
+            return new ApiResponse<>("Dog not found", null);
+        }
     }
 
 }
