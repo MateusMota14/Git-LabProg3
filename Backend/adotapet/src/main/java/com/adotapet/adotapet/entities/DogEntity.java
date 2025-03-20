@@ -15,10 +15,9 @@ public class DogEntity {
     private String breed;
     private String age;
     private String size;
+    private String gender;
     private ArrayList<String> urlPhotos;
 
-
-    
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private UserEntity user;
@@ -26,12 +25,13 @@ public class DogEntity {
     public DogEntity() {
     }
 
-    public DogEntity(String name, String breed, String age, String size, UserEntity user) {
+    public DogEntity(String name, String breed, String age, String size, String gender, UserEntity user) {
         this.name = name;
         this.breed = breed;
         this.age = age;
         this.size = size;
         this.user = user;
+        this.gender = gender;
     }
 
     public Integer getId() {
@@ -40,6 +40,14 @@ public class DogEntity {
 
     public void setId(Integer id) {
         this.id = id;
+    }
+
+    public String getGender() {
+        return gender;
+    }
+
+    public void setGender(String gender) {
+        this.gender = gender;
     }
 
     public String getName() {
@@ -84,7 +92,7 @@ public class DogEntity {
 
     @Override
     public String toString() {
-        return "DogEntity [id=" + id + ", name=" + name + ", breed=" + breed + ", age=" + age + ", size=" + size
+        return "DogEntity [id=" + id + ", name=" + name + ", breed=" + breed + ", age=" + age + ", size=" + size + ",gender=" + gender
                 + ", user=" + user +"]";
     }
 }

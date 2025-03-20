@@ -4,6 +4,7 @@ import org.springframework.data.repository.CrudRepository;
 
 import org.springframework.stereotype.Repository;
 
+import com.adotapet.adotapet.entities.DogEntity;
 import com.adotapet.adotapet.entities.DogPhotoEntity;
 
 import java.util.List;
@@ -14,4 +15,5 @@ public interface DogPhotoRepository extends CrudRepository <DogPhotoEntity, Inte
 
     Optional<DogPhotoEntity> findById(Integer id);
     List<DogPhotoEntity> findByDogId(Integer dogId);
+    List<DogPhotoEntity> findByDog(DogEntity dog);
 }
