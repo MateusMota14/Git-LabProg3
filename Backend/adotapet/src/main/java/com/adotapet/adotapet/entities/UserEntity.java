@@ -1,6 +1,7 @@
 package com.adotapet.adotapet.entities;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -21,6 +22,7 @@ public class UserEntity {
     private String state;
     private String city;
     private String zCode;
+    private ArrayList<UserEntity> userMatch;
 
 
     private String img;
@@ -41,10 +43,17 @@ public class UserEntity {
     public UserEntity() {
     } // para o JPA
 
-    // public UserEntity(String email, String password) {
-    //     this.email = email;
-    //     this.password = password;
-    // }
+    public void addUserMatch(UserEntity user){
+        this.userMatch.add(user);
+    }
+
+    public ArrayList<UserEntity> getUserMach(){
+        return userMatch;
+    }
+
+    public void setUserMatch(ArrayList<UserEntity> userMatch) {
+        this.userMatch = userMatch;
+    }
 
     public String getName() {
         return name;

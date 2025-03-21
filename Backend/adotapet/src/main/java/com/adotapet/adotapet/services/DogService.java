@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Map;
+import java.util.List;
 
 import com.adotapet.adotapet.ApiResponse;
 import com.adotapet.adotapet.entities.DogEntity;
@@ -93,7 +94,6 @@ public class DogService {
                 updateDog.setName(dog.getName());
                 updateDog.setAge(dog.getAge());
 
-
                 dogRepository.save(updateDog);
                 return new ApiResponse<>("Dog updated", dog);
 
@@ -105,4 +105,28 @@ public class DogService {
         }
     }
 
+    public ApiResponse <List<UserEntity>> addUserLike(UserEntity userLike, Integer dogId){
+        Optional<DogEntity> dogOptional = dogRepository.findById(dogId);
+        Optional<UserEntity> userOptional = userRepository.findById(userLike.getId());
+
+        if (dogOptional.isPresent()) {
+            DogEntity updateDog = dogOptional.get();
+
+            if (userOptional.isPresent()) {
+
+                if(updateDog.getUserLike().stream().noneMatch(user -> user.getId().equals(userLike.getId()))){ //verificação se oi usuario já deu like
+
+                    updateDog.addUserLike(userLike);
+                    dogRepository.save(updateDog);
+                }
+                else{
+                    return new ApiResponse<>("UserLike already like", null);
+                }
+            } 
+            else {
+                return new ApiResponse<>("UserLike not found", null);
+            }
+        } 
+        return new ApiResponse<>("UserLike add", null);
+    }
 }

@@ -6,9 +6,14 @@ import org.springframework.web.bind.annotation.RestController;
 import com.adotapet.adotapet.ApiResponse;
 import com.adotapet.adotapet.entities.DogEntity;
 import com.adotapet.adotapet.repository.DogRepository;
+import com.adotapet.adotapet.entities.UserEntity;
+
+
+import java.util.List;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
@@ -42,6 +47,11 @@ public class DogController {
     @PostMapping("/dog/update")
     public ApiResponse<DogEntity> updateDog(@RequestBody DogEntity dog) {
         return dogService.updateDog(dog);
-        }
+    }
+
+    @PostMapping("/dog/userlike")
+    public ApiResponse <List<UserEntity>> addUserLike(@RequestBody UserEntity userLike, @RequestParam Integer dogId){
+        return dogService.addUserLike(userLike, dogId);
+    }
 
 }
