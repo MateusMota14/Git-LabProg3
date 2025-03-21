@@ -54,4 +54,9 @@ public class DogController {
         return dogService.addUserLike(userLike, dogId);
     }
 
+    @PostMapping("/dog/match")
+    public ApiResponse <List<UserEntity>> addUserMatch(@RequestBody UserEntity userLike,@RequestParam Integer dogId){
+        return dogService.addUserMatch(userLike, dogId);
+    }
+
 }

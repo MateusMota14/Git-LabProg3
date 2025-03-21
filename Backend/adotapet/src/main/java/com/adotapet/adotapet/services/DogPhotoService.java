@@ -74,6 +74,11 @@ public class DogPhotoService {
             //7. Atualizar o caminho da imagem no banco de dados
             dogPhotoEntity.setImgUrl(destinationFile.toAbsolutePath().toString());
             dogPhotoRepository.save(dogPhotoEntity);
+
+            DogEntity updateDog = dogOptional.get();
+            updateDog.addUrlPhoto(destinationFile.toString());
+
+            dogRepository.save(updateDog);
     
             return new ApiResponse<>("Foto enviada com sucesso", dogPhotoEntity);
         } catch (IOException e) {

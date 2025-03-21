@@ -148,7 +148,9 @@ public class UserService {
     }
 
     public ApiResponse<UserEntity> uploadPhoto(Integer userId, String base64Image) {
-        byte[] imageBytes = Base64.getDecoder().decode(base64Image);
+
+        String base64ImageNoPrefix = removerPrefixoBase64(base64Image);
+        byte[] imageBytes = Base64.getDecoder().decode(base64ImageNoPrefix);
 
         // Define o nome do arquivo usando o ID do usuário
         String imageFileName = userId + ".jpg";
@@ -204,5 +206,12 @@ public class UserService {
         } catch (IOException e) {
             return new ApiResponse<>("Error deleting image: " + e.getMessage(), null);
         }
+    }
+
+    public String removerPrefixoBase64(String base64ComPrefixo) {
+        if (base64ComPrefixo.contains(",")) {
+            return base64ComPrefixo.split(",")[1];
+        }
+        return base64ComPrefixo;
     }
 }

@@ -25,10 +25,10 @@ public class DogEntity {
     @Column(name = "url_photo")
     private List<String> urlPhotos = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY)
     private List<UserEntity> userLike = new ArrayList<>();
 
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @OneToMany(fetch = FetchType.LAZY)
     private List<UserEntity> userMatch = new ArrayList<>();
 
 
@@ -85,6 +85,24 @@ public class DogEntity {
 
     public void setUserLike(List<UserEntity> userLike) {
         this.userLike = userLike;
+    }
+    
+    public void removeUrlPhoto(String photo) {
+        if (urlPhotos != null) {
+            urlPhotos.remove(photo);
+        }
+    }
+    
+    public void removeUserMatch(UserEntity user) {
+        if (userMatch != null) {
+            userMatch.removeIf(u -> u.getId().equals(user.getId()));
+        }
+    }
+    
+    public void removeUserLike(UserEntity user) {
+        if (userLike != null) {
+            userLike.removeIf(u -> u.getId().equals(user.getId()));
+        }
     }
 
 

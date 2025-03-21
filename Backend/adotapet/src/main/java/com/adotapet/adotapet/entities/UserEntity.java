@@ -2,11 +2,16 @@ package com.adotapet.adotapet.entities;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+
+import jakarta.persistence.*;
 
 @Entity
 public class UserEntity {
@@ -22,7 +27,9 @@ public class UserEntity {
     private String state;
     private String city;
     private String zCode;
-    private ArrayList<UserEntity> userMatch;
+    
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<UserEntity> userMatch = new ArrayList<>();
 
 
     private String img;
@@ -47,12 +54,18 @@ public class UserEntity {
         this.userMatch.add(user);
     }
 
-    public ArrayList<UserEntity> getUserMach(){
+    public List<UserEntity> getUserMatch() { // Corrigido nome do método
         return userMatch;
     }
 
-    public void setUserMatch(ArrayList<UserEntity> userMatch) {
+    public void setUserMatch(List<UserEntity> userMatch) {
         this.userMatch = userMatch;
+    }
+
+    public void removeUserMatch(UserEntity user) {
+        if (userMatch != null) {
+            userMatch.removeIf(u -> u.getId().equals(user.getId()));
+        }
     }
 
     public String getName() {
