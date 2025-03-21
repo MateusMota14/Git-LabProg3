@@ -1,6 +1,9 @@
 package com.adotapet.adotapet.entities;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import com.adotapet.adotapet.entities.UserEntity;
 
 import jakarta.persistence.*;
 
@@ -16,7 +19,18 @@ public class DogEntity {
     private String age;
     private String size;
     private String gender;
-    private ArrayList<String> urlPhotos;
+
+    @ElementCollection
+    @CollectionTable(name = "dog_photos", joinColumns = @JoinColumn(name = "dog_id"))
+    @Column(name = "url_photo")
+    private List<String> urlPhotos = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<UserEntity> userLike = new ArrayList<>();
+
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<UserEntity> userMatch = new ArrayList<>();
+
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -32,7 +46,65 @@ public class DogEntity {
         this.size = size;
         this.user = user;
         this.gender = gender;
+        this.urlPhotos = new ArrayList<>();
+        this.userLike = new ArrayList<>();
+        this.userMatch = new ArrayList<>();
     }
+
+    public void addUrlPhoto(String photo){
+        this.urlPhotos.add(photo);
+    }
+
+    public void addUserLike(UserEntity user){
+        this.userLike.add(user);
+    }
+
+    public void addUserMatch(UserEntity user){
+        this.userMatch.add(user);
+    }
+
+    public List<String> getUrlPhotos() {
+        return urlPhotos;
+    }
+
+    public List<UserEntity> getUserLike() {
+        return userLike;
+    }
+
+    public List<UserEntity> getUserMatch() { // Corrigido nome do método
+        return userMatch;
+    }
+
+    public void setUrlPhotos(List<String> urlPhotos) {
+        this.urlPhotos = urlPhotos;
+    }
+
+    public void setUserMatch(List<UserEntity> userMatch) {
+        this.userMatch = userMatch;
+    }
+
+    public void setUserLike(List<UserEntity> userLike) {
+        this.userLike = userLike;
+    }
+    
+    public void removeUrlPhoto(String photo) {
+        if (urlPhotos != null) {
+            urlPhotos.remove(photo);
+        }
+    }
+    
+    public void removeUserMatch(UserEntity user) {
+        if (userMatch != null) {
+            userMatch.removeIf(u -> u.getId().equals(user.getId()));
+        }
+    }
+    
+    public void removeUserLike(UserEntity user) {
+        if (userLike != null) {
+            userLike.removeIf(u -> u.getId().equals(user.getId()));
+        }
+    }
+
 
     public Integer getId() {
         return id;

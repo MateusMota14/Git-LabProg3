@@ -16,4 +16,5 @@ public interface DogPhotoRepository extends CrudRepository <DogPhotoEntity, Inte
     Optional<DogPhotoEntity> findById(Integer id);
     List<DogPhotoEntity> findByDogId(Integer dogId);
     List<DogPhotoEntity> findByDog(DogEntity dog);
+    void deleteByDog(DogEntity dog);
 }
