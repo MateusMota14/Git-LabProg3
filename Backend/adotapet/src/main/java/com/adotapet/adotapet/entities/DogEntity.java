@@ -2,8 +2,11 @@ package com.adotapet.adotapet.entities;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import com.adotapet.adotapet.entities.UserEntity;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
 
@@ -29,8 +32,16 @@ public class DogEntity {
     private List<UserEntity> userLike = new ArrayList<>();
 
     @OneToMany(fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<UserEntity> userMatch = new ArrayList<>();
 
+    @Transient
+    @JsonProperty("userMatchIds")
+    public List<Integer> getUserMatchIds() {
+        return userMatch.stream()
+                .map(UserEntity::getId)
+                .collect(Collectors.toList());
+    }
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -51,15 +62,15 @@ public class DogEntity {
         this.userMatch = new ArrayList<>();
     }
 
-    public void addUrlPhoto(String photo){
+    public void addUrlPhoto(String photo) {
         this.urlPhotos.add(photo);
     }
 
-    public void addUserLike(UserEntity user){
+    public void addUserLike(UserEntity user) {
         this.userLike.add(user);
     }
 
-    public void addUserMatch(UserEntity user){
+    public void addUserMatch(UserEntity user) {
         this.userMatch.add(user);
     }
 
@@ -86,25 +97,24 @@ public class DogEntity {
     public void setUserLike(List<UserEntity> userLike) {
         this.userLike = userLike;
     }
-    
+
     public void removeUrlPhoto(String photo) {
         if (urlPhotos != null) {
             urlPhotos.remove(photo);
         }
     }
-    
+
     public void removeUserMatch(UserEntity user) {
         if (userMatch != null) {
             userMatch.removeIf(u -> u.getId().equals(user.getId()));
         }
     }
-    
+
     public void removeUserLike(UserEntity user) {
         if (userLike != null) {
             userLike.removeIf(u -> u.getId().equals(user.getId()));
         }
     }
-
 
     public Integer getId() {
         return id;
@@ -164,7 +174,8 @@ public class DogEntity {
 
     @Override
     public String toString() {
-        return "DogEntity [id=" + id + ", name=" + name + ", breed=" + breed + ", age=" + age + ", size=" + size + ",gender=" + gender
-                + ", user=" + user +"]";
+        return "DogEntity [id=" + id + ", name=" + name + ", breed=" + breed + ", age=" + age + ", size=" + size
+                + ",gender=" + gender
+                + ", user=" + user + "]";
     }
 }

@@ -3,13 +3,10 @@ package com.adotapet.adotapet.entities;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.FetchType;
-import jakarta.persistence.Id;
-import jakarta.persistence.OneToMany;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 import jakarta.persistence.*;
 
@@ -27,10 +24,18 @@ public class UserEntity {
     private String state;
     private String city;
     private String zCode;
-    
+
     @OneToMany(fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<UserEntity> userMatch = new ArrayList<>();
 
+    @Transient
+    @JsonProperty("userMatchIds")
+    public List<Integer> getUserMatchIds() {
+        return userMatch.stream()
+                .map(UserEntity::getId)
+                .collect(Collectors.toList());
+    }
 
     private String img;
     private String authToken;
@@ -50,7 +55,7 @@ public class UserEntity {
     public UserEntity() {
     } // para o JPA
 
-    public void addUserMatch(UserEntity user){
+    public void addUserMatch(UserEntity user) {
         this.userMatch.add(user);
     }
 
