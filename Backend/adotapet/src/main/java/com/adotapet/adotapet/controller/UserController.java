@@ -75,7 +75,7 @@ public class UserController {
         return userService.changePassword(change, id);
     }
 
-    @PostMapping("/login")
+    @PostMapping("/user/login")
     public ApiResponse<UserEntity> login(@RequestBody Login login) {
         return userService.login(login);
     }
