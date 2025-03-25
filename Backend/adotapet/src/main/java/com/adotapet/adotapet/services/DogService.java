@@ -157,31 +157,49 @@ public class DogService {
         return new ApiResponse<>("UserLike add", null);
     }
 
+    //corrigir, update.dog é quem vai iniciar o comando <<<<
     public ApiResponse<List<UserEntity>> addUserMatch(UserEntity userLike, Integer dogId) {
-        Optional<DogEntity> dogOptional = dogRepository.findById(dogId);
-        Optional<UserEntity> userOptional = userRepository.findById(userLike.getId());
-
-        if (dogOptional.isPresent()) {
-            DogEntity updateDog = dogOptional.get();
-            UserEntity updateUser = userOptional.get();
-
-            if (userOptional.isPresent()) {
-
-                if (updateDog.getUserLike().stream().anyMatch(user -> user.getId().equals(userLike.getId()))) {
-                    updateDog.addUserMatch(userLike);
-                    updateDog.removeUserLike(userLike);
-                    updateUser.addUserMatch(updateDog.getUser());
-                    // colocar o match no usuário
-                    dogRepository.save(updateDog);
-                    userRepository.save(updateUser);
-                } else {
-                    return new ApiResponse<>("UserLike don't like", null);
-                }
-            } else {
-                return new ApiResponse<>("UserLike not found", null);
-            }
-        }
-        return new ApiResponse<>("UserMatch add", null);
-
+    Optional<DogEntity> dogOptional = dogRepository.findById(dogId);
+    if (dogOptional.isEmpty()) {
+        return new ApiResponse<>("Dog not found", null);
     }
+
+    Optional<UserEntity> userOptional = userRepository.findById(userLike.getId());
+    if (userOptional.isEmpty()) {
+        return new ApiResponse<>("UserLike not found", null);
+    }
+
+    DogEntity updateDog = dogOptional.get();
+    UserEntity updateUser = userOptional.get();
+    UserEntity dogOwner = updateDog.getUser();
+
+    // Verifica se realmente deu like
+    boolean likedBefore = updateDog.getUserLike().stream()
+        .anyMatch(user -> user.getId().equals(updateUser.getId()));
+
+    if (!likedBefore) {
+        return new ApiResponse<>("UserLike don't like", null);
+    }
+
+    // Evita adicionar duplicados
+    if (updateDog.getUserMatch().stream().noneMatch(u -> u.getId().equals(updateUser.getId()))) {
+        updateDog.addUserMatch(updateUser);
+    }
+
+    updateDog.removeUserLike(updateUser);
+
+    if (updateUser.getUserMatch().stream().noneMatch(u -> u.getId().equals(dogOwner.getId()))) {
+        updateUser.addUserMatch(dogOwner);
+    }
+
+    if (dogOwner.getUserMatch().stream().noneMatch(u -> u.getId().equals(updateUser.getId()))) {
+        dogOwner.addUserMatch(updateUser);
+    }
+
+    dogRepository.save(updateDog);
+    userRepository.save(updateUser);
+    userRepository.save(dogOwner);
+
+    return new ApiResponse<>("UserMatch add", null);
+}
 }

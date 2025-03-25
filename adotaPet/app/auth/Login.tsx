@@ -29,7 +29,7 @@ const Login: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://192.168.15.132:8080/user/login", {
+      const response = await fetch("http://172.15.2.16:8080/user/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -39,11 +39,17 @@ const Login: React.FC = () => {
       });
 
       const data = await response.json();
-      if (response.ok) {
+      const message = data.message;
+
+      if (message?.startsWith("Login Sucessfull")) {
         Alert.alert("Sucesso", "Login realizado com sucesso!");
-        router.push("/profile"); //criar tela de perfil
+        router.push("/profile"); // ir para tela de perfil
+      } else if (message === "Password incorrect") {
+        Alert.alert("Erro", "Senha incorreta. Tente novamente.");
+      } else if (message === "User not found") {
+        Alert.alert("Erro", "Usuário não encontrado. Verifique o e-mail.");
       } else {
-        Alert.alert("Erro", data.message || "Email ou senha incorretos.");
+        Alert.alert("Erro", message || "Erro ao fazer login.");
       }
     } catch (error) {
       console.error(error);

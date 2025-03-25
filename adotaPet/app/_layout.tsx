@@ -33,7 +33,8 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="index" options={{ title: "Início" }} />
-          <Stack.Screen name="signup" options={{ title: "Cadastro" }} />
+          <Stack.Screen name="auth/SignupScreen" options={{ title: "Cadastro" }} />
+          <Stack.Screen name="auth/Login" options={{ title: "Login" }} />
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
