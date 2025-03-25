@@ -157,6 +157,7 @@ public class DogService {
         return new ApiResponse<>("UserLike add", null);
     }
 
+    //corrigir, update.dog é quem vai iniciar o comando <<<<
     public ApiResponse<List<UserEntity>> addUserMatch(UserEntity userLike, Integer dogId) {
         Optional<DogEntity> dogOptional = dogRepository.findById(dogId);
         Optional<UserEntity> userOptional = userRepository.findById(userLike.getId());
