@@ -59,4 +59,9 @@ public class DogController {
         return dogService.addUserMatch(userLike, dogId);
     }
 
+    @GetMapping("/dog/id")
+    public ApiResponse<DogEntity> findById(@RequestParam Integer id) {
+        return dogService.findById(id);
+    }
+
 }

@@ -2,6 +2,7 @@ package com.adotapet.adotapet.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -202,4 +203,13 @@ public class DogService {
 
     return new ApiResponse<>("UserMatch add", null);
 }
+
+public ApiResponse <DogEntity> findById(Integer id) {
+    Optional<DogEntity> dogOptional = dogRepository.findById(id); // Retorna um Optional
+    if (dogOptional.isPresent()) { // Verifica se o dog existe
+        return new ApiResponse<>("200", dogOptional.get());
+    } else {
+        return new ApiResponse<>("Dog not found", null);
+    }
+    }
 }
