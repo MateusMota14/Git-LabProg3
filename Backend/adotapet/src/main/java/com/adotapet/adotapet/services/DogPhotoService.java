@@ -59,7 +59,7 @@ public class DogPhotoService {
             byte[] imageBytes = Base64.getDecoder().decode(base64Image);
     
             //4. Define o diretório do cachorro usando seu ID
-            Path dogDirectory = Paths.get("./img/dogs/" + dogId);
+            Path dogDirectory = Paths.get("src/main/resources/static/dogs/" + dogId);
             if (!Files.exists(dogDirectory)) {
                 Files.createDirectories(dogDirectory); // Cria a pasta se não existir
             }
