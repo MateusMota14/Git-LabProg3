@@ -4,6 +4,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import java.util.Optional;
+
+import com.adotapet.adotapet.ApiResponse;
+import com.adotapet.adotapet.entities.DogEntity;
+import com.adotapet.adotapet.entities.UserEntity;
+import com.adotapet.adotapet.repository.DogRepository;
+import com.adotapet.adotapet.repository.UserRepository;
+
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
