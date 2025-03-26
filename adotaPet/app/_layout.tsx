@@ -33,7 +33,13 @@ export default function RootLayout() {
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
         <Stack>
           <Stack.Screen name="index" options={{ title: "Início" }} />
-          <Stack.Screen name="signup" options={{ title: "Cadastro" }} />
+          <Stack.Screen name="auth/SignupScreen" options={{ title: "Cadastro" }} />
+          <Stack.Screen name="auth/Login" options={{ title: "Login" }} />
+          <Stack.Screen name="screens/VisitanteProfileScreen" options={{ title: "Perfil de João" }} /> {/* import { useNavigation } from '@react-navigation/native';
+                                                                                                            const navigation = useNavigation();
+                                                                                                            useEffect(() => {
+                                                                                                              navigation.setOptions({ title: user.name });
+                                                                                                            }, [user]);*/}
         </Stack>
         <StatusBar style="auto" />
       </ThemeProvider>
