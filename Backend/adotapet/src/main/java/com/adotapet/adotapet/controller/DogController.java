@@ -5,23 +5,19 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.adotapet.adotapet.ApiResponse;
 import com.adotapet.adotapet.entities.DogEntity;
-import com.adotapet.adotapet.entities.UserEntity;
 import com.adotapet.adotapet.repository.DogRepository;
-import com.adotapet.adotapet.repository.UserRepository;
+import com.adotapet.adotapet.entities.UserEntity;
 
-import jakarta.annotation.PostConstruct;
+
+import java.util.List;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam; //remover
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 
 import com.adotapet.adotapet.services.DogService;
-
-
-
-
 
 @RestController
 public class DogController {
@@ -32,33 +28,35 @@ public class DogController {
     @Autowired
     private DogService dogService;
 
-    @Autowired
-    private UserRepository userRepository;
-    
-
     @GetMapping("/dog/all")
     public Iterable<DogEntity> getAllDogs() {
         return dogRepository.findAll();
     }
-    
-    // @GetMapping("/user/email")
-    // public ApiResponse<Iterable<UserEntity>> getUserByEmail(@RequestParam String email) {
-    //     return userService.findByEmail(email);
-    // }
 
-    // @GetMapping("/user/id")
-    // public ApiResponse<UserEntity> getUserById(@RequestParam Integer id) {
-    //     return userService.findById(id);
-    // }
-    
     @PostMapping("/dog/create")
     public ApiResponse<DogEntity> createUser(@RequestBody DogEntity dog) {
-                
+
         return dogService.createDog(dog, dog.getUser().getId());
     }
 
     @DeleteMapping("/dog/delete")
     public ApiResponse<DogEntity> deleteDog(@RequestBody DogEntity dog) {
         return dogService.deleteDog(dog);
-        }
+    }
+
+    @PostMapping("/dog/update")
+    public ApiResponse<DogEntity> updateDog(@RequestBody DogEntity dog) {
+        return dogService.updateDog(dog);
+    }
+
+    @PostMapping("/dog/userlike")
+    public ApiResponse <List<UserEntity>> addUserLike(@RequestBody UserEntity userLike, @RequestParam Integer dogId){
+        return dogService.addUserLike(userLike, dogId);
+    }
+
+    @PostMapping("/dog/match")
+    public ApiResponse <List<UserEntity>> addUserMatch(@RequestBody UserEntity userLike,@RequestParam Integer dogId){
+        return dogService.addUserMatch(userLike, dogId);
+    }
+
 }

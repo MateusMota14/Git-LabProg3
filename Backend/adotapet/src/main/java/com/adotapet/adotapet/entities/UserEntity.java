@@ -1,11 +1,17 @@
 package com.adotapet.adotapet.entities;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
+
+import jakarta.persistence.*;
 
 @Entity
 public class UserEntity {
@@ -21,15 +27,17 @@ public class UserEntity {
     private String state;
     private String city;
     private String zCode;
+    
+    @OneToMany(fetch = FetchType.LAZY)
+    private List<UserEntity> userMatch = new ArrayList<>();
 
-    private boolean isAdopter;
 
     private String img;
     private String authToken;
     private LocalDateTime authTokenExpiration;
 
     public UserEntity(String name, String email, String password, String country, String state, String city,
-            String zCode, boolean isAdopter) {
+            String zCode) {
         this.name = name;
         this.email = email;
         this.password = password;
@@ -37,16 +45,28 @@ public class UserEntity {
         this.state = state;
         this.city = city;
         this.zCode = zCode;
-        this.isAdopter = isAdopter;
     }
 
     public UserEntity() {
     } // para o JPA
 
-    // public UserEntity(String email, String password) {
-    //     this.email = email;
-    //     this.password = password;
-    // }
+    public void addUserMatch(UserEntity user){
+        this.userMatch.add(user);
+    }
+
+    public List<UserEntity> getUserMatch() { // Corrigido nome do método
+        return userMatch;
+    }
+
+    public void setUserMatch(List<UserEntity> userMatch) {
+        this.userMatch = userMatch;
+    }
+
+    public void removeUserMatch(UserEntity user) {
+        if (userMatch != null) {
+            userMatch.removeIf(u -> u.getId().equals(user.getId()));
+        }
+    }
 
     public String getName() {
         return name;
@@ -141,13 +161,5 @@ public class UserEntity {
         return "UserEntity [id: " + id + ", name: " + name + ", email: " + email + ", country: " + country + ", state: "
                 + state + ", city: " + city + ", zCode: " + zCode + ", authToken" + authToken
                 + ", authTokenExpiration: " + authTokenExpiration + "]";
-    }
-
-    public boolean getIsAdopter() {
-        return isAdopter;
-    }
-
-    public void setIsAdopter(boolean isAdopter) {
-        this.isAdopter = isAdopter;
     }
 }
