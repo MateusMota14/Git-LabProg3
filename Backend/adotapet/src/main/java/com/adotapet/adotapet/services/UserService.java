@@ -3,6 +3,8 @@ package com.adotapet.adotapet.services;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -154,7 +156,7 @@ public class UserService {
 
         // Define o nome do arquivo usando o ID do usuário
         String imageFileName = userId + ".jpg";
-        Path destinationFile = Paths.get("./img/Users", imageFileName);
+        Path destinationFile = Paths.get("src/main/resources/static/Users/", imageFileName);
 
         try {
             // Salvar a imagem no servidor
@@ -214,4 +216,27 @@ public class UserService {
         }
         return base64ComPrefixo;
     }
+
+    public ApiResponse<String> getImage(Integer id) {
+        Optional<UserEntity> userOpt = userRepository.findById(id);
+        if (userOpt.isEmpty()) {
+            return new ApiResponse<>("User not found", null);
+        }
+    
+        String imagePath = userOpt.get().getImg(); // exemplo: ./img/Users/153.jpg
+    
+        if (imagePath == null || imagePath.isBlank()) {
+            return new ApiResponse<>("No image path registered", null);
+        }
+    
+        Path fullPath = Paths.get(imagePath);
+    
+        if (!Files.exists(fullPath)) {
+            return new ApiResponse<>("Image file not found on server", null);
+        }
+    
+        String filename = fullPath.getFileName().toString(); // ex: 153.jpg
+        return new ApiResponse<>("OK", "Users/" + filename);
+    }
+    
 }
