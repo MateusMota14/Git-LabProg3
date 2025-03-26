@@ -1,4 +1,4 @@
-import React from 'react'; 
+import React from 'react';  
 import { View, Text, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
 import AdotaPetBackground from '../assets/components/AdotaPetBackground';
@@ -9,10 +9,10 @@ export default function HomeScreen() {
 
   // Lista de nomes dos botões com ícones correspondentes (Ionicons e FontAwesome)
   const buttonData = [
-    { label: "Quero Adotar", icon: "paw", iconPack: 'Ionicons' },  // Ícone de patas com Ionicons
-    { label: "Pets Curtidos", icon: "heart", iconPack: 'Ionicons' },  // Ícone de coração com FontAwesome
-    { label: "Meus pets para adoção", icon: "dog", iconPack: 'FontAwesome5' },  // Ícone de adicionar pessoa com Ionicons
-    { label: "Cadastrar pet para adoção", icon: "plus-circle", iconPack: 'FontAwesome' },  // Ícone de adicionar círculo com FontAwesome
+    { label: "Quero Adotar", icon: "paw", iconPack: 'Ionicons', name: 'VisitanteProfileScreen' },  // Nome da tela de redirecionamento
+    { label: "Pets Curtidos", icon: "heart", iconPack: 'Ionicons', name: 'likedPets' },  // Nome da tela de redirecionamento
+    { label: "Meus pets para adoção", icon: "dog", iconPack: 'FontAwesome5', name: 'VisitanteProfileScreen' },  // Nome da tela de redirecionamento
+    { label: "Cadastrar pet para adoção", icon: "plus-circle", iconPack: 'FontAwesome5', name: 'registerPet' },  // Nome da tela de redirecionamento
   ];
   
   return (
@@ -34,7 +34,7 @@ export default function HomeScreen() {
             <TouchableOpacity
               key={index}
               style={styles.button}
-              onPress={() => console.log(`Botão ${item.label} pressionado`)}
+              onPress={() => router.push(`/screens/${item.name}`)}  // Navega para a tela com base no nome
             >
               {item.iconPack === 'Ionicons' ? (
                 <Ionicons name={item.icon} size={40} color="#222222" />
@@ -61,7 +61,6 @@ export default function HomeScreen() {
     </SafeAreaView>
   );
 }
-
 
 const styles = StyleSheet.create({
   safeArea: {
