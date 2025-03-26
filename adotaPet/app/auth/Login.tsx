@@ -43,7 +43,7 @@ const Login: React.FC = () => {
 
       if (message?.startsWith("Login Sucessfull")) {
         Alert.alert("Sucesso", "Login realizado com sucesso!");
-        router.push("/screens/VisitanteProfileScreen"); // ir para tela de perfil MUDAR
+        router.push("/home"); // ir para tela de perfil MUDAR
       } else if (message === "Password incorrect") {
         Alert.alert("Erro", "Senha incorreta. Tente novamente.");
       } else if (message === "User not found") {
