@@ -73,16 +73,6 @@ public class UserService {
                 user.getCountry(), user.getState(), user.getCity(), user.getzCode()));
     }
 
-    public ApiResponse<UserEntity> deleteUser(UserEntity user) {
-        Optional<UserEntity> userOptional = userRepository.findById(user.getId()); // Retorna um Optional
-        if (userOptional.isPresent()) { // Verifica se o usuário existe
-            userRepository.delete(user);
-            return new ApiResponse<>("User deleted", null);
-        } else {
-            return new ApiResponse<>("User not found", null);
-        }
-    }
-
     public ApiResponse<UserEntity> updateUser(UserEntity user) {
         Optional<UserEntity> userOptional = userRepository.findById(user.getId()); // Retorna um Optional
         if (userOptional.isPresent()) { // Verifica se o usuário existe
@@ -217,6 +207,7 @@ public class UserService {
         return base64ComPrefixo;
     }
 
+
     public ApiResponse<UserEntity> deleteUser(UserEntity user) {
         Optional<UserEntity> userOptional = userRepository.findById(user.getId()); // Retorna um Optional
         if (userOptional.isPresent()) { // Verifica se o usuário existe
@@ -226,6 +217,7 @@ public class UserService {
             return new ApiResponse<>("User not found", null);
         }
     }
+
     public ApiResponse<String> getImage(Integer id) {
         Optional<UserEntity> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
