@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -8,36 +8,112 @@ import {
   Dimensions,
   ScrollView,
 } from "react-native";
+import { useLocalSearchParams } from "expo-router";
 import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
 
 const windowWidth = Dimensions.get("window").width;
 
+interface Dog {
+  id: number;
+  name: string;
+  gender: string;
+  age: string;
+  img: any;
+}
+
+interface UserProfile {
+  name: string;
+  city: string;
+  state: string;
+  country: string;
+}
+
 const VisitanteProfileScreen: React.FC = () => {
-  const mockDogs = [
-    { id: 1, name: "Caramelo", gender: "Macho", age: "3 anos", img: require("../../assets/images/dog_default.jpg") },
-    { id: 2, name: "Luna", gender: "Fêmea", age: "2 anos", img: require("../../assets/images/dog_default.jpg") },
-    { id: 3, name: "Thor", gender: "Macho", age: "4 anos", img: require("../../assets/images/dog_default.jpg") },
-    { id: 4, name: "Mel", gender: "Fêmea", age: "1 ano", img: require("../../assets/images/dog_default.jpg") },
-    { id: 5, name: "Rex", gender: "Macho", age: "5 anos", img: require("../../assets/images/dog_default.jpg") },
-    { id: 6, name: "Nina", gender: "Fêmea", age: "3 anos", img: require("../../assets/images/dog_default.jpg") },
-    { id: 7, name: "Toby", gender: "Macho", age: "2 anos", img: require("../../assets/images/dog_default.jpg") },
-    { id: 8, name: "Bela", gender: "Fêmea", age: "6 meses", img: require("../../assets/images/dog_default.jpg") },
-    { id: 9, name: "Bob", gender: "Macho", age: "7 anos", img: require("../../assets/images/dog_default.jpg") },
-    { id: 10, name: "Lola", gender: "Fêmea", age: "2 anos", img: require("../../assets/images/dog_default.jpg") },
-  ];
+  const { userIdVisitado } = useLocalSearchParams<{ userIdVisitado: string }>();
+  const [user, setUser] = useState<UserProfile | null>(null);
+  const [userImgUrl, setUserImgUrl] = useState<string | null>(null);
+  const [imgError, setImgError] = useState(false);
+  const [dogs, setDogs] = useState<Dog[]>([]);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const id = userIdVisitado || "152";
+
+        const userRes = await fetch(`http://172.15.2.16:8080/user/id?id=${id}`);
+        const userData = await userRes.json();
+        setUser(userData.data);
+
+        const imgRes = await fetch(`http://172.15.2.16:8080/user/img/${id}`);
+        const imgData = await imgRes.json();
+        if (imgData.message === "OK" && imgData.data) {
+          setUserImgUrl(`http://172.15.2.16:8080/${imgData.data}`);
+        }
+
+        // Busca dogs do usuário
+        const dogRes = await fetch(`http://172.15.2.16:8080/user/dogs?userId=${id}`);
+        const dogData = await dogRes.json();
+
+        const dogList = await Promise.all(
+          dogData.data.map(async (dog: any) => {
+            try {
+              const dogImgRes = await fetch(`http://172.15.2.16:8080/dog/img/${dog.id}`);
+              const dogImgData = await dogImgRes.json();
+
+              return {
+                id: dog.id,
+                name: dog.name,
+                gender: dog.gender,
+                age: dog.age + " anos",
+                img:
+                  dogImgData.message === "OK" && dogImgData.data
+                    ? { uri: `http://172.15.2.16:8080/${dogImgData.data}` }
+                    : require("../../assets/images/dog_default.jpg"),
+              };
+            } catch (err) {
+              return {
+                id: dog.id,
+                name: dog.name,
+                gender: dog.gender,
+                age: dog.age + " anos",
+                img: require("../../assets/images/dog_default.jpg"),
+              };
+            }
+          })
+        );
+
+        setDogs(dogList);
+      } catch (error) {
+        console.error("Erro ao buscar dados:", error);
+        setUserImgUrl(null);
+      }
+    };
+
+    fetchData();
+  }, [userIdVisitado]);
+
+  const getProfileImage = () => {
+    if (userImgUrl && !imgError) {
+      return { uri: userImgUrl };
+    }
+    return require("../../assets/images/user_default.png");
+  };
 
   return (
     <AdotaPetBackground>
       <ScrollView contentContainerStyle={styles.container}>
         <Image
-          source={require("../../assets/images/user_default.png")}
+          source={getProfileImage()}
           style={styles.profileImage}
+          onError={() => setImgError(true)}
         />
-        <Text style={styles.name}>Nome do Usuário</Text>
-        <Text style={styles.location}>Cidade - Estado, País</Text>
+        <Text style={styles.name}>{user?.name || "Nome do Usuário"}</Text>
+        <Text style={styles.location}>
+          {user ? `${user.city} - ${user.state}, ${user.country}` : "Cidade - Estado, País"}
+        </Text>
 
         <FlatList
-          data={mockDogs}
+          data={dogs}
           numColumns={2}
           keyExtractor={(item) => item.id.toString()}
           renderItem={({ item }) => (
