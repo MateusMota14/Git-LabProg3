@@ -14,6 +14,7 @@ import {
 import { useRouter } from "expo-router";
 import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
 import { globalStyles } from "../../assets/constants/styles";
+import { Ip } from "@/assets/constants/config";
 
 interface SignupForm {
   name: string;
@@ -113,7 +114,7 @@ const SignupScreen: React.FC = () => {
     }
 
     try {
-      const response = await fetch("http://192.168.15.132:8080/user/create", {
+      const response = await fetch(`http://${Ip}:8080/user/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(form),

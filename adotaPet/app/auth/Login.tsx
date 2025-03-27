@@ -10,6 +10,7 @@ import {
 import { useRouter } from 'expo-router';
 import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
 import { globalStyles } from "../../assets/constants/styles";
+import { Ip } from "@/assets/constants/config";
 
 interface LoginForm {
   email: string;
@@ -29,7 +30,7 @@ const Login: React.FC = () => {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch("http://172.15.2.16:8080/user/login", {
+      const response = await fetch(`http://${Ip}/user/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({

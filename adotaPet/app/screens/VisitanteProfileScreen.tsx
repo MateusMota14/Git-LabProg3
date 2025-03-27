@@ -10,6 +10,7 @@ import {
 } from "react-native";
 import { useLocalSearchParams } from "expo-router";
 import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
+import { Ip } from "@/assets/constants/config";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -38,26 +39,26 @@ const VisitanteProfileScreen: React.FC = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const id = userIdVisitado || "152";
+        const id = userIdVisitado || "153";
 
-        const userRes = await fetch(`http://172.15.2.16:8080/user/id?id=${id}`);
+        const userRes = await fetch(`http://${Ip}:8080/user/id?id=${id}`);
         const userData = await userRes.json();
         setUser(userData.data);
 
-        const imgRes = await fetch(`http://172.15.2.16:8080/user/img/${id}`);
+        const imgRes = await fetch(`http://${Ip}:8080/user/img/${id}`);
         const imgData = await imgRes.json();
         if (imgData.message === "OK" && imgData.data) {
-          setUserImgUrl(`http://172.15.2.16:8080/${imgData.data}`);
+          setUserImgUrl(`http://${Ip}:8080/${imgData.data}`);
         }
 
         // Busca dogs do usuário
-        const dogRes = await fetch(`http://172.15.2.16:8080/user/dogs?userId=${id}`);
+        const dogRes = await fetch(`http://${Ip}:8080/user/dogs?userId=${id}`);
         const dogData = await dogRes.json();
 
         const dogList = await Promise.all(
           dogData.data.map(async (dog: any) => {
             try {
-              const dogImgRes = await fetch(`http://172.15.2.16:8080/dog/img/${dog.id}`);
+              const dogImgRes = await fetch(`http://${Ip}:8080/dog/img/${dog.id}`);
               const dogImgData = await dogImgRes.json();
 
               return {
@@ -67,7 +68,7 @@ const VisitanteProfileScreen: React.FC = () => {
                 age: dog.age + " anos",
                 img:
                   dogImgData.message === "OK" && dogImgData.data
-                    ? { uri: `http://172.15.2.16:8080/${dogImgData.data}` }
+                    ? { uri: `http://${Ip}:8080/${dogImgData.data}` }
                     : require("../../assets/images/dog_default.jpg"),
               };
             } catch (err) {
