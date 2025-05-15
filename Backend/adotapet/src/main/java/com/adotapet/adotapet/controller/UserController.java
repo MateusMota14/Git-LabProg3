@@ -20,6 +20,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam; //remover
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.adotapet.adotapet.DTO.Login;
 
@@ -75,7 +76,7 @@ public class UserController {
         return userService.changePassword(change, id);
     }
 
-    @PostMapping("/user/login")
+    @PostMapping("user/login")
     public ApiResponse<UserEntity> login(@RequestBody Login login) {
         return userService.login(login);
     }
@@ -96,6 +97,11 @@ public class UserController {
     @GetMapping("/user/dogs")
     public ApiResponse<List<Map<String, Object>>> findDogsByUserId(@RequestParam Integer userId) {
         return dogService.findDogsByUserId(userId);
+    }
+
+    @GetMapping("/user/img/{id}")
+    public ApiResponse<String> getImage(@PathVariable Integer id  ){
+        return userService.getImage(id);
     }
 
 }

@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 import com.adotapet.adotapet.services.DogService;
 
@@ -57,6 +58,16 @@ public class DogController {
     @PostMapping("/dog/match")
     public ApiResponse <List<UserEntity>> addUserMatch(@RequestBody UserEntity userLike,@RequestParam Integer dogId){
         return dogService.addUserMatch(userLike, dogId);
+    }
+
+    @GetMapping("/dog/id")
+    public ApiResponse<DogEntity> findById(@RequestParam Integer id) {
+        return dogService.findById(id);
+    }
+
+    @GetMapping("/dog/img/{id}")
+    public ApiResponse<String> getDogImage(@PathVariable Integer id  ){
+        return dogService.getDogImage(id);
     }
 
 }
