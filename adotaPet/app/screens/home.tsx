@@ -1,7 +1,7 @@
 import React from 'react';  
 import { View, Text, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
-import AdotaPetBackground from '../assets/components/AdotaPetBackground';
+import AdotaPetBackground from '../../assets/components/AdotaPetBackground';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
 export default function HomeScreen() {
@@ -12,7 +12,7 @@ export default function HomeScreen() {
     { label: "Quero Adotar", icon: "paw", iconPack: 'Ionicons', name: 'VisitanteProfileScreen' },  // Nome da tela de redirecionamento
     { label: "Pets Curtidos", icon: "heart", iconPack: 'Ionicons', name: 'likedPets' },  // Nome da tela de redirecionamento
     { label: "Meus pets para adoção", icon: "dog", iconPack: 'FontAwesome5', name: 'VisitanteProfileScreen' },  // Nome da tela de redirecionamento
-    { label: "Cadastrar pet para adoção", icon: "plus-circle", iconPack: 'FontAwesome5', name: 'registerPet' },  // Nome da tela de redirecionamento
+    { label: "Cadastrar pet para adoção", icon: "plus-circle", iconPack: 'FontAwesome5', name: 'cadastroDePet' },  // Nome da tela de redirecionamento
   ];
   
   return (
@@ -22,7 +22,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <Text style={styles.headerText}>Olá, Alfredo</Text>
           <Image
-            source={require('../assets/images/Alfredo.png')}
+            source={require('../../assets/images/Alfredo.png')}
             style={styles.avatar}
             resizeMode="cover"
           />
