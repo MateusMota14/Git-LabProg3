@@ -88,6 +88,7 @@ public class DogPhotoService {
         }
     }
 
+        //atualizar dog, que a url foi deletada
     public ApiResponse<DogPhotoEntity> deleteDogPhoto(DogPhotoEntity dogPhoto) {
     Optional<DogPhotoEntity> dogPhotoOptional = dogPhotoRepository.findById(dogPhoto.getId());
     
@@ -142,6 +143,8 @@ public class DogPhotoService {
 
     return new ApiResponse<>("Dog photos found", result);
 }
+
+
 
 
 

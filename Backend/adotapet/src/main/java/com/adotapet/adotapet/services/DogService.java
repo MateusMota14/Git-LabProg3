@@ -131,6 +131,7 @@ public class DogService {
                 DogEntity updateDog = dogOptional.get();
                 updateDog.setName(dog.getName());
                 updateDog.setAge(dog.getAge());
+                updateDog.setUrlPhotos(dog.getUrlPhotos());
 
                 dogRepository.save(updateDog);
                 return new ApiResponse<>("Dog updated", dog);
@@ -220,4 +221,32 @@ public ApiResponse <DogEntity> findById(Integer id) {
         return new ApiResponse<>("Dog not found", null);
     }
     }
+
+    public ApiResponse<String> getDogImage(Integer id) {
+        Optional<DogEntity> dogOpt = dogRepository.findById(id);
+        if (dogOpt.isEmpty()) {
+            return new ApiResponse<>("Dog not found", null);
+        }
+    
+        List<String> photos = dogOpt.get().getUrlPhotos();
+    
+        if (photos == null || photos.isEmpty()) {
+            return new ApiResponse<>("No photos registered for this dog", null);
+        }
+    
+        String imagePath = photos.get(0); // pega a primeira imagem
+    
+        Path fullPath = Paths.get(imagePath);
+    
+        if (!Files.exists(fullPath)) {
+            return new ApiResponse<>("Image file not found on server", null);
+        }
+    
+        // Extraímos o nome do arquivo para montar o caminho relativo
+        String filename = fullPath.getFileName().toString();
+    
+        // Monta o caminho do tipo Dogs/{id}/{foto.jpg}
+        return new ApiResponse<>("OK", "Dogs/" + id + "/" + filename);
+    }
+    
 }
