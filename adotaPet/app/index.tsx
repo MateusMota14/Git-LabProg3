@@ -7,6 +7,17 @@ import { globalStyles } from '../assets/constants/styles';
 export default function HomeScreen() {
   const router = useRouter();
 
+<<<<<<< HEAD
+=======
+  // Lista de nomes dos botões com ícones correspondentes (Ionicons e FontAwesome)
+  const buttonData = [
+    { label: "Quero Adotar", icon: "paw", iconPack: 'Ionicons', name: 'VisitanteProfileScreen' },  // Nome da tela de redirecionamento
+    { label: "Pets Curtidos", icon: "heart", iconPack: 'Ionicons', name: 'likedPets' },  // Nome da tela de redirecionamento
+    { label: "Meus pets para adoção", icon: "dog", iconPack: 'FontAwesome5', name: 'VisitanteProfileScreen' },  // Nome da tela de redirecionamento
+    { label: "Cadastrar pet para adoção", icon: "plus-circle", iconPack: 'FontAwesome5', name: 'cadastroDePet' },  // Nome da tela de redirecionamento
+  ];
+  
+>>>>>>> boots
   return (
     <AdotaPetBackground>
       <View style={styles.topSection}>
