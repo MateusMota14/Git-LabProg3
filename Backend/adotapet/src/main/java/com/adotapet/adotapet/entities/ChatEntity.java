@@ -8,32 +8,45 @@ public class ChatEntity {
     @Id
     private String id;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private UserEntity userOwner;
 
-    @ManyToOne
+    @ManyToOne(optional = false)
     private UserEntity userAdopt;
 
-    private Boolean isDeleteByAdopter;
-    private Boolean isDeleteByOwner;
+    private Boolean isDeletedByAdopter = false;
+    private Boolean isDeletedByOwner = false;
 
-    public ChatEntity() {}
+    public ChatEntity() {
+    }
 
-    public ChatEntity(UserEntity userOwner, UserEntity userAdopt){
+    public ChatEntity(UserEntity userOwner, UserEntity userAdopt) {
         this.userOwner = userOwner;
         this.userAdopt = userAdopt;
-        setId(userOwner, userAdopt);
+        generateId();
     }
 
-    public void setId(UserEntity userOwner, UserEntity userAdopt){
+    /**
+     * Gera o ID como "menorID_maiorID" antes de persistir ou atualizar.
+     */
+    @PrePersist
+    @PreUpdate
+    private void generateId() {
         if (userOwner != null && userAdopt != null) {
-            this.id = String.valueOf(userOwner.getId()) + String.valueOf(userAdopt.getId());
+            int ownerId = userOwner.getId();
+            int adoptId = userAdopt.getId();
+            int minId = Math.min(ownerId, adoptId);
+            int maxId = Math.max(ownerId, adoptId);
+            this.id = minId + "_" + maxId;
         }
-        throw new RuntimeException("UserOwner or UserAdopt is null");
     }
 
-    public String getId(){
+    public String getId() {
         return id;
+    }
+
+    public void setId(String id) {
+        this.id = id;
     }
 
     public UserEntity getUserOwner() {
@@ -42,7 +55,6 @@ public class ChatEntity {
 
     public void setUserOwner(UserEntity userOwner) {
         this.userOwner = userOwner;
-        setId(this.userOwner, this.userAdopt);
     }
 
     public UserEntity getUserAdopt() {
@@ -51,23 +63,21 @@ public class ChatEntity {
 
     public void setUserAdopt(UserEntity userAdopt) {
         this.userAdopt = userAdopt;
-        setId(this.userOwner, this.userAdopt);
     }
+
     public Boolean getIsDeletedByAdopter() {
-        return isDeleteByAdopter;
+        return isDeletedByAdopter;
     }
-    
-    
-    public void setIsDeletedByAdopter(Boolean isDeleteByAdopter) {
-        this.isDeleteByAdopter = isDeleteByAdopter;
+
+    public void setIsDeletedByAdopter(Boolean isDeletedByAdopter) {
+        this.isDeletedByAdopter = isDeletedByAdopter;
     }
 
     public Boolean getIsDeletedByOwner() {
-        return isDeleteByOwner;
+        return isDeletedByOwner;
     }
 
-    public void setIsDeletedByOwner(Boolean isDeleteByOwner) {
-        this.isDeleteByOwner = isDeleteByOwner;
+    public void setIsDeletedByOwner(Boolean isDeletedByOwner) {
+        this.isDeletedByOwner = isDeletedByOwner;
     }
 }
-
