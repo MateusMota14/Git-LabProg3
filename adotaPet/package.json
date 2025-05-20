@@ -23,7 +23,9 @@
     "expo-constants": "~17.0.7",
     "expo-font": "~13.0.4",
     "expo-haptics": "~14.0.1",
+    "expo-image-picker": "~16.0.6",
     "expo-linking": "~7.0.5",
+    "expo-radio-button": "^1.0.8",
     "expo-router": "~4.0.17",
     "expo-splash-screen": "~0.29.22",
     "expo-status-bar": "~2.0.1",
@@ -40,8 +42,7 @@
     "react-native-web": "~0.19.13",
     "react-native-webview": "13.12.5",
     "react-router-dom": "^7.3.0",
-    "styled-components": "^6.1.15",
-    "expo-image-picker": "~16.0.6"
+    "styled-components": "^6.1.15"
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
