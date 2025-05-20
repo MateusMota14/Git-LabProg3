@@ -1,8 +1,8 @@
 import React from 'react';
 import { View, Text, TouchableOpacity, StyleSheet, Image } from 'react-native';
 import { useRouter } from 'expo-router';
-import AdotaPetBackground from '../assets/components/AdotaPetBackground';
-import { globalStyles } from '../assets/constants/styles';
+import AdotaPetBackground from '../../assets/components/AdotaPetBackground';
+import { globalStyles } from '../../assets/constants/styles';
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -11,7 +11,7 @@ export default function HomeScreen() {
     <AdotaPetBackground>
       <View style={styles.topSection}>
         <Image
-          source={require('../assets/images/icon.png')}
+          source={require('../../assets/images/icon.png')}
           style={styles.logo}
           resizeMode="contain"
         />

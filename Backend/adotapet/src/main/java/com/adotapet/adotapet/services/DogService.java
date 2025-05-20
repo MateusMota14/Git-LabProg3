@@ -46,6 +46,9 @@ public class DogService {
     @Autowired
     private DogPhotoService dogPhotoService;
 
+    @Autowired
+    private ChatService chatService;
+
     public DogService(DogRepository dogRepository, UserRepository userRepository) {
         this.dogRepository = dogRepository;
         this.userRepository = userRepository;
@@ -167,7 +170,7 @@ public class DogService {
         return new ApiResponse<>("UserLike add", null);
     }
 
-    //corrigir, update.dog é quem vai iniciar o comando <<<<
+    //corrigir, update.dog é quem vai iniciar o comando ??<<<<
     public ApiResponse<List<UserEntity>> addUserMatch(UserEntity userLike, Integer dogId) {
     Optional<DogEntity> dogOptional = dogRepository.findById(dogId);
     if (dogOptional.isEmpty()) {
@@ -209,6 +212,8 @@ public class DogService {
     dogRepository.save(updateDog);
     userRepository.save(updateUser);
     userRepository.save(dogOwner);
+
+    chatService.createChat(dogOwner, updateUser);
 
     return new ApiResponse<>("UserMatch add", null);
 }

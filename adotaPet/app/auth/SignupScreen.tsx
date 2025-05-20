@@ -16,7 +16,7 @@ import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
 import { globalStyles } from "../../assets/constants/styles";
 import { Ip } from "@/assets/constants/config";
 
-interface SignupForm {
+interface FormData {
   name: string;
   email: string;
   password: string;
@@ -24,12 +24,12 @@ interface SignupForm {
   country: string;
   state: string;
   city: string;
-  zCode: string;
+  zipCode: string;
 }
 
 const SignupScreen: React.FC = () => {
   const router = useRouter();
-  const [form, setForm] = useState<SignupForm>({
+  const [formData, setFormData] = useState<FormData>({
     name: "",
     email: "",
     password: "",
@@ -37,19 +37,19 @@ const SignupScreen: React.FC = () => {
     country: "",
     state: "",
     city: "",
-    zCode: "",
+    zipCode: "",
   });
 
-  const [errors, setErrors] = useState<Partial<Record<keyof SignupForm, boolean>>>({});
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, boolean>>>({});
 
-  const handleChange = (field: keyof SignupForm, value: string) => {
-    setForm((prev) => ({ ...prev, [field]: value }));
+  const handleChange = (field: keyof FormData, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
 
     if (errors[field]) {
       setErrors((prev) => ({ ...prev, [field]: false }));
     }
 
-    if (field === "zCode" && value.replace(/\D/g, "").length === 8) {
+    if (field === "zipCode" && value.replace(/\D/g, "").length === 8) {
       fetchAddressFromCEP(value);
     }
   };
@@ -59,7 +59,7 @@ const SignupScreen: React.FC = () => {
 
     if (!/^\d{8}$/.test(sanitizedCep)) {
       Alert.alert("CEP inválido", "Informe um CEP brasileiro com 8 números.");
-      setErrors((prev) => ({ ...prev, zCode: true }));
+      setErrors((prev) => ({ ...prev, zipCode: true }));
       return;
     }
 
@@ -69,11 +69,11 @@ const SignupScreen: React.FC = () => {
 
       if (data.erro) {
         Alert.alert("CEP inválido", "Não foi possível encontrar esse CEP.");
-        setErrors((prev) => ({ ...prev, zCode: true }));
+        setErrors((prev) => ({ ...prev, zipCode: true }));
         return;
       }
 
-      setForm((prev) => ({
+      setFormData((prev) => ({
         ...prev,
         country: "Brasil",
         state: data.uf,
@@ -86,25 +86,25 @@ const SignupScreen: React.FC = () => {
   };
 
   const handleSignup = async () => {
-    const newErrors: Partial<Record<keyof SignupForm, boolean>> = {};
+    const newErrors: Partial<Record<keyof FormData, boolean>> = {};
 
     // valida campos vazios
-    (Object.keys(form) as (keyof SignupForm)[]).forEach((field) => {
-      if (!form[field].trim()) {
+    (Object.keys(formData) as (keyof FormData)[]).forEach((field) => {
+      if (!formData[field].trim()) {
         newErrors[field] = true;
       }
     });
 
     // valida senha
-    if (form.password !== form.confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       newErrors.password = true;
       newErrors.confirmPassword = true;
       Alert.alert("Erro", "As senhas não coincidem.");
     }
 
     // valida formato do CEP
-    if (!/^\d{8}$/.test(form.zCode.replace(/\D/g, ""))) {
-      newErrors.zCode = true;
+    if (!/^\d{8}$/.test(formData.zipCode.replace(/\D/g, ""))) {
+      newErrors.zipCode = true;
       Alert.alert("Erro", "Informe um CEP brasileiro válido (8 dígitos).");
     }
 
@@ -117,7 +117,7 @@ const SignupScreen: React.FC = () => {
       const response = await fetch(`http://${Ip}:8080/user/create`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(form),
+        body: JSON.stringify(formData),
       });
 
       const data = await response.json();
@@ -160,17 +160,17 @@ const SignupScreen: React.FC = () => {
               field: "confirmPassword",
               secureTextEntry: true,
             },
-            { placeholder: "CEP", field: "zCode", keyboardType: "numeric" },
+            { placeholder: "CEP", field: "zipCode", keyboardType: "numeric" },
           ].map(({ placeholder, field, ...rest }) => (
             <TextInput
               key={field}
               placeholder={placeholder}
               placeholderTextColor="#555"
-              value={form[field as keyof SignupForm]}
-              onChangeText={(value) => handleChange(field as keyof SignupForm, value)}
+              value={formData[field as keyof FormData]}
+              onChangeText={(value) => handleChange(field as keyof FormData, value)}
               style={[
                 styles.input,
-                errors[field as keyof SignupForm] && styles.inputError,
+                errors[field as keyof FormData] && styles.inputError,
               ]}
               {...(rest as TextInputProps)}
             />
@@ -179,21 +179,21 @@ const SignupScreen: React.FC = () => {
           <TextInput
             placeholder="País"
             placeholderTextColor="#555"
-            value={form.country}
+            value={formData.country}
             onChangeText={(value) => handleChange("country", value)}
             style={[styles.input, errors.country && styles.inputError]}
           />
           <TextInput
             placeholder="Estado"
             placeholderTextColor="#555"
-            value={form.state}
+            value={formData.state}
             onChangeText={(value) => handleChange("state", value)}
             style={[styles.input, errors.state && styles.inputError]}
           />
           <TextInput
             placeholder="Cidade"
             placeholderTextColor="#555"
-            value={form.city}
+            value={formData.city}
             onChangeText={(value) => handleChange("city", value)}
             style={[styles.input, errors.city && styles.inputError]}
           />

@@ -24,9 +24,9 @@ public class MessageEntity {
     private Integer userReceiveId;
     private LocalDateTime dateTime;
     
-    MessageEntity(){};
+    public MessageEntity(){};
 
-    MessageEntity(UserEntity useSend, UserEntity userReveive, String text) {
+    public MessageEntity(UserEntity useSend, UserEntity userReveive, String text) {
         this.userSendId = useSend.getId();
         this.userReceiveId = userReveive.getId();
         this.text = text;

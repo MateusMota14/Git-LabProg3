@@ -1,7 +1,7 @@
 import React from 'react';  
 import { View, Text, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
 import { useRouter } from 'expo-router';
-import AdotaPetBackground from '../assets/components/AdotaPetBackground';
+import AdotaPetBackground from '../../assets/components/AdotaPetBackground';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
 export default function HomeScreen() {
@@ -12,7 +12,7 @@ export default function HomeScreen() {
     { label: "Quero Adotar", icon: "paw", iconPack: 'Ionicons', name: 'VisitanteProfileScreen' },  // Nome da tela de redirecionamento
     { label: "Pets Curtidos", icon: "heart", iconPack: 'Ionicons', name: 'likedPets' },  // Nome da tela de redirecionamento
     { label: "Meus pets para adoção", icon: "dog", iconPack: 'FontAwesome5', name: 'VisitanteProfileScreen' },  // Nome da tela de redirecionamento
-    { label: "Cadastrar pet para adoção", icon: "plus-circle", iconPack: 'FontAwesome5', name: 'registerPet' },  // Nome da tela de redirecionamento
+    { label: "Cadastrar pet para adoção", icon: "plus-circle", iconPack: 'FontAwesome5', name: 'cadastroDePet' },  // Nome da tela de redirecionamento
   ];
   
   return (
@@ -22,7 +22,7 @@ export default function HomeScreen() {
         <View style={styles.header}>
           <Text style={styles.headerText}>Olá, Alfredo</Text>
           <Image
-            source={require('../assets/images/Alfredo.png')}
+            source={require('../../assets/images/Alfredo.png')}
             style={styles.avatar}
             resizeMode="cover"
           />
@@ -48,11 +48,11 @@ export default function HomeScreen() {
 
         {/* Menu Inferior */}
         <View style={styles.bottomNavigation}>
-          <TouchableOpacity onPress={() => router.push('/home')} style={styles.navButton}>
+          <TouchableOpacity onPress={() => router.push('/screens/home')} style={styles.navButton}>
             <Ionicons name="home" size={20} color="#FFD54F" />
             <Text style={styles.navButtonText}>Home</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/chat')} style={styles.navButton}>
+          <TouchableOpacity onPress={() => router.push('/screens/chatListScreen')} style={styles.navButton}>
             <Ionicons name="chatbubble" size={20} color="#FFD54F" />
             <Text style={styles.navButtonText}>Chat</Text>
           </TouchableOpacity>
