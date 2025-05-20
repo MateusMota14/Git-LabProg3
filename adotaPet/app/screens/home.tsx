@@ -48,11 +48,11 @@ export default function HomeScreen() {
 
         {/* Menu Inferior */}
         <View style={styles.bottomNavigation}>
-          <TouchableOpacity onPress={() => router.push('/home')} style={styles.navButton}>
+          <TouchableOpacity onPress={() => router.push('/screens/home')} style={styles.navButton}>
             <Ionicons name="home" size={20} color="#FFD54F" />
             <Text style={styles.navButtonText}>Home</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/chat')} style={styles.navButton}>
+          <TouchableOpacity onPress={() => router.push('/screens/chatListScreen')} style={styles.navButton}>
             <Ionicons name="chatbubble" size={20} color="#FFD54F" />
             <Text style={styles.navButtonText}>Chat</Text>
           </TouchableOpacity>
