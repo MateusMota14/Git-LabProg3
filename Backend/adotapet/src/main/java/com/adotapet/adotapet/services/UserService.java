@@ -13,6 +13,7 @@ import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.Base64;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -238,6 +239,14 @@ public class UserService {
     
         String filename = fullPath.getFileName().toString(); // ex: 153.jpg
         return new ApiResponse<>("OK", "Users/" + filename);
+    }
+
+    public ApiResponse<List<UserEntity>> findByCity(String city) {
+        List<UserEntity> users = userRepository.findByCityIgnoreCase(city);
+        if (users.isEmpty()) {
+            return new ApiResponse<>("No users found in this city", null);
+        }
+        return new ApiResponse<>("200", users);
     }
     
 }

@@ -70,4 +70,9 @@ public class DogController {
         return dogService.getDogImage(id);
     }
 
+    @GetMapping("/dog/city/{city}")
+    public ApiResponse<List<DogEntity>> getDogsByOwnerCity(@PathVariable String city) {
+        return dogService.findDogsByOwnerCity(city);
+    }
+
 }

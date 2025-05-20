@@ -104,4 +104,8 @@ public class UserController {
         return userService.getImage(id);
     }
 
+    @GetMapping("/user/city/{city}")
+    public ApiResponse<List<UserEntity>> getUsersByCity(@PathVariable String city) {
+        return userService.findByCity(city);
+    }
 }

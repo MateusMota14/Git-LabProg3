@@ -13,5 +13,5 @@ public interface UserRepository extends CrudRepository<UserEntity, Integer> {
 
     Iterable<UserEntity> findByEmail(String email);
     UserEntity findByEmailAndPassword(String email, String password);
-    List<UserEntity> findByCity(String city); //list?
+    List<UserEntity> findByCityIgnoreCase(String city); //list?
 }

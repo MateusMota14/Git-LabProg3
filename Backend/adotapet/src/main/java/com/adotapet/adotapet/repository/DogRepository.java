@@ -15,4 +15,5 @@ public interface DogRepository extends CrudRepository<DogEntity, Integer> {
 
     Optional<DogEntity> findById(Integer id);
     List<DogEntity> findByUserId(Integer id);
+    List<DogEntity> findByUser_CityIgnoreCase(String city);
 }
