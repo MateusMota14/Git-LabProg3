@@ -10,8 +10,8 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
-import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
-import { globalStyles } from "../../assets/constants/styles";
+import AdotaPetBackground from "../../../assets/components/AdotaPetBackground";
+import { globalStyles } from "../../../assets/constants/styles";
 import { Ip } from "@/assets/constants/config";
 
 interface User {
@@ -78,7 +78,7 @@ const ChatListScreen: React.FC = () => {
         new Date().toISOString()
       );
       setUnread((u) => ({ ...u, [chatId]: false }));
-      router.push(`/screens/${chatId}`);
+      router.push(`/screens/chat/${chatId}`);
     },
     [router]
   );
@@ -144,7 +144,7 @@ const ChatListScreen: React.FC = () => {
                     source={
                       other.img
                         ? { uri: other.img }
-                        : require("../../assets/images/user_default.png")
+                        : require("../../../assets/images/user_default.png")
                     }
                     style={styles.avatar}
                   />

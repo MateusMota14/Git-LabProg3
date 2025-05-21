@@ -99,7 +99,7 @@ export default function CityDogsScreen() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.dogCard}
-              onPress={() => router.push(`/dog/${item.id}`)}
+              onPress={() => router.push(`/screens/dogs/${item.id}`)}
             >
               <Image source={item.img} style={styles.dogImage} />
               <View style={styles.dogInfo}>

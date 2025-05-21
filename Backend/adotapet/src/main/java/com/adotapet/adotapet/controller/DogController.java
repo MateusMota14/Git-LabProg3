@@ -50,9 +50,9 @@ public class DogController {
         return dogService.updateDog(dog);
     }
 
-    @PostMapping("/dog/userlike")
-    public ApiResponse <List<UserEntity>> addUserLike(@RequestBody UserEntity userLike, @RequestParam Integer dogId){
-        return dogService.addUserLike(userLike, dogId);
+    @PostMapping("/dog/userlike/{userLikeId}/{dogId}")
+    public ApiResponse <List<UserEntity>> addUserLike(@PathVariable Integer userLikeId, @PathVariable Integer dogId){
+        return dogService.addUserLike(userLikeId, dogId);
     }
 
     @PostMapping("/dog/match")

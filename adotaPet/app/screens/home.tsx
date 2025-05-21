@@ -52,7 +52,7 @@ export default function HomeScreen() {
             <Ionicons name="home" size={20} color="#FFD54F" />
             <Text style={styles.navButtonText}>Home</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/screens/chatListScreen')} style={styles.navButton}>
+          <TouchableOpacity onPress={() => router.push('/screens/chat/chatListScreen')} style={styles.navButton}>
             <Ionicons name="chatbubble" size={20} color="#FFD54F" />
             <Text style={styles.navButtonText}>Chat</Text>
           </TouchableOpacity>

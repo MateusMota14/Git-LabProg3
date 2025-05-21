@@ -13,8 +13,8 @@ import {
 } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRoute, useNavigation } from "@react-navigation/native";
-import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
-import { globalStyles } from "../../assets/constants/styles";
+import AdotaPetBackground from "../../../assets/components/AdotaPetBackground";
+import { globalStyles } from "../../../assets/constants/styles";
 import { Ip } from "@/assets/constants/config";
 
 interface User { id: number; name: string; img: string | null; }

@@ -1,8 +1,11 @@
 package com.adotapet.adotapet.services;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Optional;
 
@@ -147,28 +150,34 @@ public class DogService {
         }
     }
 
-    public ApiResponse<List<UserEntity>> addUserLike(UserEntity userLike, Integer dogId) {
-        Optional<DogEntity> dogOptional = dogRepository.findById(dogId);
-        Optional<UserEntity> userOptional = userRepository.findById(userLike.getId());
+    public ApiResponse<List<UserEntity>> addUserLike(Integer userLikeId, Integer dogId) {
+        // lança 404 se não encontrar
+        DogEntity dog = dogRepository.findById(dogId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "Dog not found"));
 
-        if (dogOptional.isPresent()) {
-            DogEntity updateDog = dogOptional.get();
+        UserEntity user = userRepository.findById(userLikeId)
+            .orElseThrow(() -> new ResponseStatusException(
+                HttpStatus.NOT_FOUND, "User not found"));
 
-            if (userOptional.isPresent()) {
-
-                if (updateDog.getUserLike().stream().noneMatch(user -> user.getId().equals(userLike.getId()))) { 
-
-                    updateDog.addUserLike(userLike);
-                    dogRepository.save(updateDog);
-                } else {
-                    return new ApiResponse<>("UserLike already like", null);
-                }
-            } else {
-                return new ApiResponse<>("UserLike not found", null);
-            }
+        // se já curtiu, retorna sem inserir
+        boolean already = dog.getUserLike().stream()
+                             .anyMatch(u -> u.getId().equals(user.getId()));
+        if (already) {
+            return new ApiResponse<>("UserLike already like", dog.getUserLike());
         }
-        return new ApiResponse<>("UserLike add", null);
+
+        // adiciona e tenta salvar; silencia duplicate-key
+        dog.getUserLike().add(user);
+        try {
+            dogRepository.save(dog);
+        } catch (DataIntegrityViolationException ex) {
+            // ignorar: caiu na UNIQUE do join‑table
+        }
+
+        return new ApiResponse<>("UserLike add", dog.getUserLike());
     }
+
 
     //corrigir, update.dog é quem vai iniciar o comando ??<<<<
     public ApiResponse<List<UserEntity>> addUserMatch(UserEntity userLike, Integer dogId) {
