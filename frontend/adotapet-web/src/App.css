@@ -3,7 +3,7 @@ body {
   margin: 0;
   font-family: 'Segoe UI', Arial, sans-serif;
   /* Correct: use root-relative path for public assets */
-  background-image: url('/assets/images/pata.png');
+  background-image: url('pata.png');
   background-repeat: repeat;
   background-size: 45px 45px;
 }
