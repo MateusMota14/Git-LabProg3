@@ -4,6 +4,7 @@ import Inicio from './pages/Inicio';
 import Home from './pages/Home';
 import CadastroDePet from './pages/CadastroDePet';
 import './App.css';
+import logo from './icon_3x.png';
 
 function IndexPage() {
   const navigate = useNavigate();
@@ -12,7 +13,7 @@ function IndexPage() {
     <div className="App">
       <div style={{ paddingTop: 60, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
         <img
-          src={require('./logo.svg').default}
+          src={logo}
           alt="Logo"
           style={{ width: 140, height: 140, marginBottom: 20 }}
         />
