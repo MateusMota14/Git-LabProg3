@@ -7,8 +7,6 @@ import { globalStyles } from '../assets/constants/styles';
 export default function DogProfile() {
   const router = useRouter();
 
-<<<<<<< HEAD
-=======
   // Lista de nomes dos botões com ícones correspondentes (Ionicons e FontAwesome)
   const buttonData = [
     { label: "Quero Adotar", icon: "paw", iconPack: 'Ionicons', name: 'VisitanteProfileScreen' },  // Nome da tela de redirecionamento
@@ -17,7 +15,6 @@ export default function DogProfile() {
     { label: "Cadastrar pet para adoção", icon: "plus-circle", iconPack: 'FontAwesome5', name: 'cadastroDePet' },  // Nome da tela de redirecionamento
   ];
   
->>>>>>> boots
   return (
     <AdotaPetBackground>
       <ScrollView contentContainerStyle={styles.container}>
