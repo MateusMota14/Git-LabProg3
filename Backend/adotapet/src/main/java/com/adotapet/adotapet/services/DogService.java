@@ -253,5 +253,13 @@ public ApiResponse <DogEntity> findById(Integer id) {
         // Monta o caminho do tipo Dogs/{id}/{foto.jpg}
         return new ApiResponse<>("OK", "Dogs/" + id + "/" + filename);
     }
+
+    public ApiResponse<List<DogEntity>> findDogsByOwnerCity(String city) {
+        List<DogEntity> dogs = dogRepository.findByUser_CityIgnoreCase(city);
+        if (dogs.isEmpty()) {
+            return new ApiResponse<>("No dogs found for users in this city", null);
+        }
+        return new ApiResponse<>("200", dogs);
+    }
     
 }

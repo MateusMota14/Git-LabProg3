@@ -45,6 +45,7 @@ const Login: React.FC = () => {
       if (message?.startsWith("Login Sucessfull") && data.data?.id) {
         // guarda o ID do usuário para uso em outras telas
         await AsyncStorage.setItem("userId", String(data.data.id));
+        await AsyncStorage.setItem("city", String(data.data.city));
 
         Alert.alert("Sucesso", "Login realizado com sucesso!");
         router.push("/screens/home");
