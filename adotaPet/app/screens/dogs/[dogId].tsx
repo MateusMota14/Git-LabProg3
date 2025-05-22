@@ -19,7 +19,7 @@ import AdotaPetBackground from '../../../assets/components/AdotaPetBackground';
 import { Ip } from '@/assets/constants/config';
 
 const { width: windowWidth } = Dimensions.get('window');
-const imageHeight = windowWidth; // square
+const imageHeight = windowWidth; // quadrado
 
 interface DogDetail {
   id: number;
@@ -29,7 +29,8 @@ interface DogDetail {
   size: string;
   gender: string;
   urlPhotos: string[];
-  userLike: { id: number }[]; // quem já curtiu
+  // pode vir [{ id: 1 }] ou [1]
+  userLike: Array<{ id: number | string } | number>;
 }
 
 export default function DogProfileScreen() {
@@ -46,29 +47,34 @@ export default function DogProfileScreen() {
   useEffect(() => {
     async function loadDog() {
       try {
-        // 1) busca detalhes do dog, incluindo lista de likes
         const res = await fetch(`http://${Ip}:8080/dog/id?id=${dogId}`);
         const json = await res.json();
         const data: DogDetail = json.data;
         setDog(data);
 
-        // 2) processa fotos
-        const uris = data.urlPhotos?.length
-          ? data.urlPhotos.map(path => {
-            const idx = path.indexOf('/static/');
-            if (idx >= 0) {
-              const rel = path.substring(idx + '/static/'.length);
-              return `http://${Ip}/${rel}`;
-            }
-            return `http://${Ip}/${path}`;
-          })
-          : [];
+        // monta URLs de foto
+        const uris = data.urlPhotos?.map(path => {
+          const idx = path.indexOf('/static/');
+          if (idx >= 0) {
+            const rel = path.substring(idx + '/static/'.length);
+            return `http://${Ip}/${rel}`;
+          }
+          return `http://${Ip}/${path}`;
+        }) ?? [];
         setPhotos(uris);
 
-        // 3) verifica se usuário já curtiu
+        // recupera userId
         const me = await AsyncStorage.getItem('userId');
-        if (me && data.userLike.some(u => u.id === +me)) {
-          setLiked(true);
+        const uid = me ? Number(me) : null;
+
+        if (uid !== null) {
+          // extrai todos os IDs numericamente
+          const likedIds = data.userLike.map(u =>
+            typeof u === 'number' ? u : Number(u.id)
+          );
+          if (likedIds.includes(uid)) {
+            setLiked(true);
+          }
         }
       } catch (err) {
         console.error('Erro ao carregar detalhes do cão:', err);
@@ -79,20 +85,16 @@ export default function DogProfileScreen() {
     loadDog();
   }, [dogId]);
 
-
   const handleLike = async () => {
-    // Se já está curtido ou já estamos enviando, sai
     if (liked || isLiking) return;
 
-    // Marca como “estou enviando” imediatamente
     setIsLiking(true);
-
     const me = await AsyncStorage.getItem('userId');
-    if (!me) {
+    const uid = me ? Number(me) : null;
+    if (uid === null) {
       setIsLiking(false);
       return;
     }
-    const uid = +me;
 
     try {
       const res = await fetch(
@@ -100,9 +102,7 @@ export default function DogProfileScreen() {
         { method: 'POST' }
       );
       const body = await res.json();
-
       if (res.ok) {
-        // só marca liked se deu OK no servidor
         setLiked(true);
       } else {
         console.warn('Erro no like:', body);
@@ -114,7 +114,6 @@ export default function DogProfileScreen() {
     }
   };
 
-
   if (loading || !dog) {
     return (
       <SafeAreaView style={styles.loaderContainer}>
@@ -123,7 +122,6 @@ export default function DogProfileScreen() {
     );
   }
 
-  // fallback para imagem default
   const displayPhotos = photos.length
     ? photos
     : [require('../../../assets/images/dog_default.jpg')];
@@ -131,7 +129,7 @@ export default function DogProfileScreen() {
   return (
     <AdotaPetBackground>
       <SafeAreaView style={styles.container}>
-        {/* Header amarelo */}
+        {/* Header */}
         <View style={styles.header}>
           <TouchableOpacity onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={24} color="black" />
@@ -140,7 +138,7 @@ export default function DogProfileScreen() {
           <View style={{ width: 24 }} />
         </View>
 
-        {/* Carousel de fotos */}
+        {/* Carousel */}
         <FlatList
           data={displayPhotos}
           horizontal
@@ -156,7 +154,7 @@ export default function DogProfileScreen() {
           )}
         />
 
-        {/* Info overlay */}
+        {/* Info */}
         <View style={[styles.infoContainer, { top: imageHeight * 1.2 }]}>
           <View style={styles.infoHeader}>
             <Text style={styles.name}>{dog.name}</Text>
@@ -192,7 +190,8 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent'
   },
   header: {
-    height: 50,
+    height:
+      50 + (Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',

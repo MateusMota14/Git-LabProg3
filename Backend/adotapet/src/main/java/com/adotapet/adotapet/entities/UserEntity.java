@@ -1,15 +1,18 @@
 package com.adotapet.adotapet.entities;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 import jakarta.persistence.*;
 
+/**
+ * Entidade User armazenando apenas coleções de IDs para matches com dogs.
+ */
+@JsonIgnoreProperties({"hibernateLazyInitializer","handler"})
 @Entity
 public class UserEntity {
 
@@ -25,58 +28,45 @@ public class UserEntity {
     private String city;
     private String zCode;
 
-    @OneToMany(fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<UserEntity> userMatch = new ArrayList<>();
-
-    @Transient
-    @JsonProperty("userMatchIds")
-    public List<Integer> getUserMatchIds() {
-        return userMatch.stream()
-                .map(UserEntity::getId)
-                .collect(Collectors.toList());
-    }
-
     private String img;
     private String authToken;
     private LocalDateTime authTokenExpiration;
 
-    public UserEntity(String name, String email, String password, String country, String state, String city,
-            String zCode) {
-        this.name = name;
-        this.email = email;
+    /**
+     * IDs de dogs que deram match com este usuário
+     */
+    @ElementCollection
+    @CollectionTable(
+        name = "dog_entity_user_match",
+        joinColumns = @JoinColumn(name = "user_match_id")
+    )
+    @Column(name = "dog_entity_id")
+    private Set<Integer> userMatch = new HashSet<>();
+
+    public UserEntity() {}
+
+    public UserEntity(String name, String email, String password,
+                      String country, String state, String city, String zCode) {
+        this.name     = name;
+        this.email    = email;
         this.password = password;
-        this.country = country;
-        this.state = state;
-        this.city = city;
-        this.zCode = zCode;
+        this.country  = country;
+        this.state    = state;
+        this.city     = city;
+        this.zCode    = zCode;
     }
 
-    public UserEntity() {
-    } // para o JPA
-
-    public void addUserMatch(UserEntity user) {
-        this.userMatch.add(user);
+    // — Getters e setters básicos —
+    public Integer getId() {
+        return id;
     }
-
-    public List<UserEntity> getUserMatch() { // Corrigido nome do método
-        return userMatch;
-    }
-
-    public void setUserMatch(List<UserEntity> userMatch) {
-        this.userMatch = userMatch;
-    }
-
-    public void removeUserMatch(UserEntity user) {
-        if (userMatch != null) {
-            userMatch.removeIf(u -> u.getId().equals(user.getId()));
-        }
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getName() {
         return name;
     }
-
     public void setName(String name) {
         this.name = name;
     }
@@ -84,7 +74,6 @@ public class UserEntity {
     public String getEmail() {
         return email;
     }
-
     public void setEmail(String email) {
         this.email = email;
     }
@@ -92,23 +81,13 @@ public class UserEntity {
     public String getPassword() {
         return password;
     }
-
     public void setPassword(String password) {
         this.password = password;
-    }
-
-    public Integer getId() {
-        return id;
-    }
-
-    public void setId(Integer id) {
-        this.id = id;
     }
 
     public String getCountry() {
         return country;
     }
-
     public void setCountry(String country) {
         this.country = country;
     }
@@ -116,7 +95,6 @@ public class UserEntity {
     public String getState() {
         return state;
     }
-
     public void setState(String state) {
         this.state = state;
     }
@@ -124,23 +102,20 @@ public class UserEntity {
     public String getCity() {
         return city;
     }
-
     public void setCity(String city) {
         this.city = city;
     }
 
-    public String getzCode() {
+    public String getZCode() {
         return zCode;
     }
-
-    public void setzCode(String zCode) {
+    public void setZCode(String zCode) {
         this.zCode = zCode;
     }
 
     public String getImg() {
         return img;
     }
-
     public void setImg(String img) {
         this.img = img;
     }
@@ -148,7 +123,6 @@ public class UserEntity {
     public String getAuthToken() {
         return authToken;
     }
-
     public void setAuthToken(String authToken) {
         this.authToken = authToken;
     }
@@ -156,15 +130,39 @@ public class UserEntity {
     public LocalDateTime getAuthTokenExpiration() {
         return authTokenExpiration;
     }
-
     public void setAuthTokenExpiration(LocalDateTime authTokenExpiration) {
         this.authTokenExpiration = authTokenExpiration;
     }
 
+    // — Métodos de gerenciamento de matches (IDs de dogs) —
+    public Set<Integer> getUserMatch() {
+        return userMatch;
+    }
+    public void setUserMatch(Set<Integer> userMatch) {
+        this.userMatch = userMatch;
+    }
+    public void addUserMatch(Integer dogId) {
+        this.userMatch.add(dogId);
+    }
+    public void removeUserMatch(Integer dogId) {
+        this.userMatch.remove(dogId);
+    }
+
+    // — equals/hashCode baseado apenas em id —
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserEntity)) return false;
+        UserEntity that = (UserEntity) o;
+        return Objects.equals(id, that.id);
+    }
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(id);
+    }
+
     @Override
     public String toString() {
-        return "UserEntity [id: " + id + ", name: " + name + ", email: " + email + ", country: " + country + ", state: "
-                + state + ", city: " + city + ", zCode: " + zCode + ", authToken" + authToken
-                + ", authTokenExpiration: " + authTokenExpiration + "]";
+        return "UserEntity [id=" + id + ", name=" + name + "]";
     }
 }

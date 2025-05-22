@@ -8,8 +8,8 @@ import com.adotapet.adotapet.entities.DogEntity;
 import com.adotapet.adotapet.repository.DogRepository;
 import com.adotapet.adotapet.entities.UserEntity;
 
-
 import java.util.List;
+import java.util.Set;
 
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -51,13 +51,17 @@ public class DogController {
     }
 
     @PostMapping("/dog/userlike/{userLikeId}/{dogId}")
-    public ApiResponse <List<UserEntity>> addUserLike(@PathVariable Integer userLikeId, @PathVariable Integer dogId){
-        return dogService.addUserLike(userLikeId, dogId);
+    public ApiResponse<Set<Integer>> addUserLike(
+         @PathVariable Integer userLikeId,
+         @PathVariable Integer dogId) {
+            return dogService.addUserLike(userLikeId, dogId);
     }
 
-    @PostMapping("/dog/match")
-    public ApiResponse <List<UserEntity>> addUserMatch(@RequestBody UserEntity userLike,@RequestParam Integer dogId){
-        return dogService.addUserMatch(userLike, dogId);
+    @PostMapping("/dog/usermatch/{userMatchId}/{dogId}")
+    public ApiResponse<Set<Integer>> addUserMatch(
+         @PathVariable Integer userMatchId,
+         @PathVariable Integer dogId) {
+            return dogService.addUserMatch(userMatchId, dogId);
     }
 
     @GetMapping("/dog/id")
@@ -66,7 +70,7 @@ public class DogController {
     }
 
     @GetMapping("/dog/img/{id}")
-    public ApiResponse<String> getDogImage(@PathVariable Integer id  ){
+    public ApiResponse<String> getDogImage(@PathVariable Integer id) {
         return dogService.getDogImage(id);
     }
 
