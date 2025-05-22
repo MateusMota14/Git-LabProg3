@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 import java.util.List;
 import java.util.Map;
 import java.util.List;
+import java.util.Set;
 
 import com.adotapet.adotapet.ApiResponse;
 import com.adotapet.adotapet.entities.DogEntity;
@@ -150,82 +151,39 @@ public class DogService {
         }
     }
 
-    public ApiResponse<List<UserEntity>> addUserLike(Integer userLikeId, Integer dogId) {
-        // lança 404 se não encontrar
+    @Transactional
+    public ApiResponse<Set<Integer>> addUserLike(Integer userId, Integer dogId) {
+        userRepository.findById(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
         DogEntity dog = dogRepository.findById(dogId)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "Dog not found"));
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dog not found"));
 
-        UserEntity user = userRepository.findById(userLikeId)
-            .orElseThrow(() -> new ResponseStatusException(
-                HttpStatus.NOT_FOUND, "User not found"));
-
-        // se já curtiu, retorna sem inserir
-        boolean already = dog.getUserLike().stream()
-                             .anyMatch(u -> u.getId().equals(user.getId()));
-        if (already) {
-            return new ApiResponse<>("UserLike already like", dog.getUserLike());
-        }
-
-        // adiciona e tenta salvar; silencia duplicate-key
-        dog.getUserLike().add(user);
-        try {
+        if (!dog.getUserLike().contains(userId)) {
+            dog.addUserLike(userId);
             dogRepository.save(dog);
-        } catch (DataIntegrityViolationException ex) {
-            // ignorar: caiu na UNIQUE do join‑table
         }
-
         return new ApiResponse<>("UserLike add", dog.getUserLike());
     }
 
+    @Transactional
+    public ApiResponse<Set<Integer>> addUserMatch(Integer userId, Integer dogId) {
+        UserEntity user = userRepository.findById(userId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "User not found"));
+        DogEntity dog = dogRepository.findById(dogId)
+            .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Dog not found"));
 
-    //corrigir, update.dog é quem vai iniciar o comando ??<<<<
-    public ApiResponse<List<UserEntity>> addUserMatch(UserEntity userLike, Integer dogId) {
-    Optional<DogEntity> dogOptional = dogRepository.findById(dogId);
-    if (dogOptional.isEmpty()) {
-        return new ApiResponse<>("Dog not found", null);
+        if (!dog.getUserLike().contains(userId)) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot match: user has not liked this dog");
+        }
+        dog.removeUserLike(userId);
+        dog.addUserMatch(userId);
+        dogRepository.save(dog);
+
+        user.addUserMatch(dogId);
+        userRepository.save(user);
+
+        return new ApiResponse<>("UserMatch add", dog.getUserMatch());
     }
-
-    Optional<UserEntity> userOptional = userRepository.findById(userLike.getId());
-    if (userOptional.isEmpty()) {
-        return new ApiResponse<>("UserLike not found", null);
-    }
-
-    DogEntity updateDog = dogOptional.get();
-    UserEntity updateUser = userOptional.get();
-    UserEntity dogOwner = updateDog.getUser();
-
-    // Verifica se realmente deu like
-    boolean likedBefore = updateDog.getUserLike().stream()
-        .anyMatch(user -> user.getId().equals(updateUser.getId()));
-
-    if (!likedBefore) {
-        return new ApiResponse<>("UserLike don't like", null);
-    }
-
-    // Evita adicionar duplicados
-    if (updateDog.getUserMatch().stream().noneMatch(u -> u.getId().equals(updateUser.getId()))) {
-        updateDog.addUserMatch(updateUser);
-    }
-
-    updateDog.removeUserLike(updateUser);
-
-    if (updateUser.getUserMatch().stream().noneMatch(u -> u.getId().equals(dogOwner.getId()))) {
-        updateUser.addUserMatch(dogOwner);
-    }
-
-    if (dogOwner.getUserMatch().stream().noneMatch(u -> u.getId().equals(updateUser.getId()))) {
-        dogOwner.addUserMatch(updateUser);
-    }
-
-    dogRepository.save(updateDog);
-    userRepository.save(updateUser);
-    userRepository.save(dogOwner);
-
-    chatService.createChat(dogOwner, updateUser);
-
-    return new ApiResponse<>("UserMatch add", null);
-}
 
 public ApiResponse <DogEntity> findById(Integer id) {
     Optional<DogEntity> dogOptional = dogRepository.findById(id); // Retorna um Optional

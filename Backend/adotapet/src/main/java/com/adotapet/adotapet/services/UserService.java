@@ -68,10 +68,10 @@ public class UserService {
 
         String hashedPassword = passwordEncoder.encode(user.getPassword());
         userRepository.save(new UserEntity(user.getName(), user.getEmail(), hashedPassword, user.getCountry(),
-                user.getState(), user.getCity(), user.getzCode()));
+                user.getState(), user.getCity(), user.getZCode()));
 
         return new ApiResponse<>("User created", new UserEntity(user.getName(), user.getEmail(), hashedPassword,
-                user.getCountry(), user.getState(), user.getCity(), user.getzCode()));
+                user.getCountry(), user.getState(), user.getCity(), user.getZCode()));
     }
 
     public ApiResponse<UserEntity> updateUser(UserEntity user) {
@@ -85,7 +85,7 @@ public class UserService {
                 userOptional.get().setCountry(user.getCountry());
                 userOptional.get().setState(user.getState());
                 userOptional.get().setCity(user.getCity());
-                userOptional.get().setzCode(user.getzCode());
+                userOptional.get().setZCode(user.getZCode());
                 userRepository.save(userOptional.get());
                 return new ApiResponse<>("User updated", userOptional.get());
             } else
