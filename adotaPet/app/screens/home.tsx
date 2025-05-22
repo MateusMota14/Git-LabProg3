@@ -1,52 +1,100 @@
-import React from 'react';  
-import { View, Text, TouchableOpacity, StyleSheet, Image, SafeAreaView } from 'react-native';
+import React, { useEffect, useState } from 'react';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  SafeAreaView,
+  ActivityIndicator,
+  Platform,
+  StatusBar
+} from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 import AdotaPetBackground from '../../assets/components/AdotaPetBackground';
 import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { Ip } from '@/assets/constants/config';
 
 export default function HomeScreen() {
   const router = useRouter();
+  const [userName, setUserName] = useState<string>('');        // nunca undefined
+  const [avatar, setAvatar]   = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
-  // Lista de nomes dos botões com ícones correspondentes (Ionicons e FontAwesome)
+  useEffect(() => {
+    const loadUser = async () => {
+      try {
+        const userId = await AsyncStorage.getItem('userId');
+        if (!userId) throw new Error('Usuário não logado');
+
+        // Buscar dados do usuário
+        const res = await fetch(`http://${Ip}:8080/user/id?id=${userId}`);
+        const json = await res.json();            // { message: "...", data: { ... } }
+        const user = json.data;
+        if (!user) throw new Error('Resposta sem dados de usuário');
+
+        setUserName(user.name);
+
+        // Buscar foto do usuário
+        const imgRes = await fetch(`http://${Ip}:8080/user/img/${userId}`);
+        const imgJson = await imgRes.json();      // { message: "OK", data: "static/Users/1.jpg" }
+        if (imgJson.data) {
+          setAvatar({ uri: `http://${Ip}:8080/${imgJson.data}` });
+        } else {
+          setAvatar(require('../../assets/images/user_default.png'));
+        }
+      } catch (err) {
+        console.error('Erro ao carregar usuário:', err);
+        setUserName('Visitante');
+        setAvatar(require('../../assets/images/user_default.png'));
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadUser();
+  }, []);
+
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loaderContainer}>
+        <ActivityIndicator size="large" color="#FFD54F" />
+      </SafeAreaView>
+    );
+  }
+
   const buttonData = [
-    { label: "Quero Adotar", icon: "paw", iconPack: 'Ionicons', name: 'dogsAdoption' },  // Nome da tela de redirecionamento
-    { label: "Pets Curtidos", icon: "heart", iconPack: 'Ionicons', name: 'likedPets' },  // Nome da tela de redirecionamento
-    { label: "Meus pets para adoção", icon: "dog", iconPack: 'FontAwesome5', name: 'VisitanteProfileScreen' },  // Nome da tela de redirecionamento
-    { label: "Cadastrar pet para adoção", icon: "plus-circle", iconPack: 'FontAwesome5', name: 'cadastroDePet' },  // Nome da tela de redirecionamento
+    { label: "Quero Adotar", icon: "paw",      pack: 'Ionicons',      name: 'dogsAdoption' },
+    { label: "Pets Curtidos", icon: "heart",    pack: 'Ionicons',      name: 'likedPets'    },
+    { label: "Meus pets",     icon: "dog",      pack: 'FontAwesome5',  name: 'VisitanteProfileScreen' },
+    { label: "Cadastrar pet", icon: "plus-circle", pack: 'FontAwesome5', name: 'cadastroDePet' },
   ];
-  
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <AdotaPetBackground>
-        
         <View style={styles.header}>
-          <Text style={styles.headerText}>Olá, Alfredo</Text>
-          <Image
-            source={require('../../assets/images/Alfredo.png')}
-            style={styles.avatar}
-            resizeMode="cover"
-          />
+          <Text style={styles.headerText}>Olá, {userName}</Text>
+          {avatar && <Image source={avatar} style={styles.avatar} />}
         </View>
 
-        {/* Botões com ícones e texto */}
         <View style={styles.buttonContainer}>
-          {buttonData.map((item, index) => (
+          {buttonData.map((item, i) => (
             <TouchableOpacity
-              key={index}
+              key={i}
               style={styles.button}
-              onPress={() => router.push(`/screens/${item.name}`)}  // Navega para a tela com base no nome
+              onPress={() => router.push(`/screens/${item.name}`)}
             >
-              {item.iconPack === 'Ionicons' ? (
-                <Ionicons name={item.icon} size={40} color="#222222" />
-              ) : (
-                <FontAwesome5 name={item.icon} size={40} color="#222222" />
-              )}
+              {item.pack === 'Ionicons'
+                ? <Ionicons name={item.icon as any} size={40} color="#222" />
+                : <FontAwesome5 name={item.icon as any} size={40} color="#222" />
+              }
               <Text style={styles.buttonText}>{item.label}</Text>
             </TouchableOpacity>
           ))}
         </View>
 
-        {/* Menu Inferior */}
         <View style={styles.bottomNavigation}>
           <TouchableOpacity onPress={() => router.push('/screens/home')} style={styles.navButton}>
             <Ionicons name="home" size={20} color="#FFD54F" />
@@ -63,76 +111,28 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-  },
+  loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  safeArea: { flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
   header: {
-    height: 175,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    paddingHorizontal: 20,
-    alignItems: 'center',
-    width: '100%',
-    backgroundColor: '#FFD54F',
+    height: 175, flexDirection: 'row', justifyContent: 'space-between',
+    paddingHorizontal: 20, alignItems: 'center', backgroundColor: '#FFD54F',
   },
-  headerText: {
-    fontSize: 18,
-    fontWeight: 'bold',
-    color: 'black',
-  },
-  avatar: {
-    width: 120,
-    height: 120,
-    borderRadius: 60,
-  },
+  headerText: { fontSize: 18, fontWeight: 'bold', color: 'black' },
+  avatar: { width: 120, height: 120, borderRadius: 60 },
   buttonContainer: {
-    flexDirection: 'row',  // Coloca os botões lado a lado
-    flexWrap: 'wrap',  // Permite que quebrem a linha caso não caibam
-    justifyContent: 'center',  // Centraliza os botões
-    gap: 10, // Espaçamento entre os botões
-    marginTop: 60,  // Adiciona um espaço entre o conteúdo
-    paddingBottom: 20,  // Padding para que o conteúdo não fique colado na parte inferior
+    flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center',
+    marginTop: 60, paddingBottom: 20,
   },
   button: {
-    height: 160,
-    width: 160,
-    backgroundColor: '#FFD54F',
-    paddingVertical: 12,
-    paddingHorizontal: 20,
-    borderRadius: 60,
-    margin: 5,
-    justifyContent: 'center',  // Centraliza o conteúdo do botão
-    alignItems: 'center',  // Centraliza o conteúdo no botão
-    flexDirection: 'column',  // Coloca o ícone acima do texto
+    height: 160, width: 160, backgroundColor: '#FFD54F',
+    borderRadius: 60, margin: 5, justifyContent: 'center', alignItems: 'center'
   },
-  buttonText: {
-    color: '#222222',
-    fontSize: 16,
-    fontWeight: 'bold',
-    textAlign: 'center',  // Garante que o texto dentro do botão esteja centralizado
-    marginTop: 8,  // Espaço entre o ícone e o texto
-  },
+  buttonText: { color: '#222', fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginTop: 8 },
   bottomNavigation: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    padding: 10,
-    backgroundColor: 'black',
-    borderTopWidth: 1,
-    borderColor: '#ddd',
-    position: 'absolute', // Fixa o menu na parte inferior da tela
-    bottom: 0, // Garante que ele ficará no final da tela
-    width: '100%',
+    flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center',
+    padding: 10, backgroundColor: 'black', borderTopWidth: 1, borderColor: '#ddd',
+    position: 'absolute', bottom: 0, width: '100%',
   },
-  navButton: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    padding: 10,
-  },
-  navButtonText: {
-    fontSize: 16,
-    fontWeight: 'bold',
-    color: '#FFD54F',
-    marginLeft: 5,
-  },
+  navButton: { flexDirection: 'row', alignItems: 'center', padding: 10 },
+  navButtonText: { fontSize: 16, fontWeight: 'bold', color: '#FFD54F', marginLeft: 5 },
 });
