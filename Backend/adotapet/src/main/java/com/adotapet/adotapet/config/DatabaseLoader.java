@@ -13,9 +13,9 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.io.InputStream;
-import java.util.ArrayList;
 import java.util.List;
 
 @Configuration
@@ -24,13 +24,13 @@ public class DatabaseLoader {
     @Bean
     public ApplicationRunner initDatabase(
             UserRepository userRepository,
-            DogRepository dogRepository
+            DogRepository dogRepository,
+            PasswordEncoder passwordEncoder   // ⬅️ injete aqui
     ) {
         return args -> {
             ObjectMapper mapper = new ObjectMapper()
                 .registerModule(new JavaTimeModule())
                 .disable(SerializationFeature.WRITE_DATES_AS_TIMESTAMPS)
-                // caso use “zcode” no JSON ou qualquer outra propriedade case‑insensitive
                 .configure(MapperFeature.ACCEPT_CASE_INSENSITIVE_PROPERTIES, true);
 
             // 1) popula usuários se estiver vazio
@@ -41,6 +41,13 @@ public class DatabaseLoader {
                         is,
                         new TypeReference<List<UserEntity>>() {}
                     );
+
+                    // codifica a senha de cada usuário
+                    users.forEach(u -> {
+                        String raw = u.getPassword();
+                        u.setPassword(passwordEncoder.encode(raw));
+                    });
+
                     userRepository.saveAll(users);
                     System.out.println(">>> Usuários carregados: " + users.size());
                 }
@@ -50,19 +57,16 @@ public class DatabaseLoader {
             if (dogRepository.count() == 0) {
                 ClassPathResource dogsRes = new ClassPathResource("dogs.json");
                 try (InputStream is = dogsRes.getInputStream()) {
-                    // lê lista de DTOs genéricos (que cascateiam para DogEntity)
                     List<DogEntity> dogs = mapper.readValue(
                         is,
                         new TypeReference<List<DogEntity>>() {}
                     );
 
-                    // vincula cada DogEntity ao seu UserEntity e associações
                     for (DogEntity dog : dogs) {
-                        // usuário “dono” do dog
                         Integer ownerId = dog.getUser().getId();
                         UserEntity owner = userRepository.findById(ownerId)
-                                .orElseThrow(() -> new IllegalStateException(
-                                    "Usuário não encontrado: " + ownerId));
+                            .orElseThrow(() -> new IllegalStateException(
+                                "Usuário não encontrado: " + ownerId));
                         dog.setUser(owner);
                     }
 
