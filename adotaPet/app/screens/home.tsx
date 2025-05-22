@@ -18,8 +18,8 @@ import { Ip } from '@/assets/constants/config';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [userName, setUserName] = useState<string>('');        // nunca undefined
-  const [avatar, setAvatar]   = useState<any>(null);
+  const [userName, setUserName] = useState<string>('');
+  const [avatar, setAvatar] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -28,17 +28,15 @@ export default function HomeScreen() {
         const userId = await AsyncStorage.getItem('userId');
         if (!userId) throw new Error('Usuário não logado');
 
-        // Buscar dados do usuário
         const res = await fetch(`http://${Ip}:8080/user/id?id=${userId}`);
-        const json = await res.json();            // { message: "...", data: { ... } }
+        const json = await res.json();
         const user = json.data;
         if (!user) throw new Error('Resposta sem dados de usuário');
 
         setUserName(user.name);
 
-        // Buscar foto do usuário
         const imgRes = await fetch(`http://${Ip}:8080/user/img/${userId}`);
-        const imgJson = await imgRes.json();      // { message: "OK", data: "static/Users/1.jpg" }
+        const imgJson = await imgRes.json();
         if (imgJson.data) {
           setAvatar({ uri: `http://${Ip}:8080/${imgJson.data}` });
         } else {
@@ -65,9 +63,9 @@ export default function HomeScreen() {
   }
 
   const buttonData = [
-    { label: "Quero Adotar", icon: "paw",      pack: 'Ionicons',      name: 'dogsAdoption' },
-    { label: "Pets Curtidos", icon: "heart",    pack: 'Ionicons',      name: 'likedPets'    },
-    { label: "Meus pets",     icon: "dog",      pack: 'FontAwesome5',  name: 'meusPets' },
+    { label: "Quero Adotar", icon: "paw", pack: 'Ionicons', name: 'dogsAdoption' },
+    { label: "Pets Curtidos", icon: "heart", pack: 'Ionicons', name: 'likedPets' },
+    { label: "Meus pets", icon: "dog", pack: 'FontAwesome5', name: 'meusPets' },
     { label: "Cadastrar pet", icon: "plus-circle", pack: 'FontAwesome5', name: 'cadastroDePet' },
   ];
 
@@ -76,7 +74,11 @@ export default function HomeScreen() {
       <AdotaPetBackground>
         <View style={styles.header}>
           <Text style={styles.headerText}>Olá, {userName}</Text>
-          {avatar && <Image source={avatar} style={styles.avatar} />}
+          {avatar && (
+            <TouchableOpacity onPress={() => router.push('/screens/profile')}>
+              <Image source={avatar} style={styles.avatar} />
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={styles.buttonContainer}>
@@ -113,26 +115,13 @@ export default function HomeScreen() {
 const styles = StyleSheet.create({
   loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
   safeArea: { flex: 1, paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0 },
-  header: {
-    height: 175, flexDirection: 'row', justifyContent: 'space-between',
-    paddingHorizontal: 20, alignItems: 'center', backgroundColor: '#FFD54F',
-  },
+  header: { height: 175, flexDirection: 'row', justifyContent: 'space-between', paddingHorizontal: 20, alignItems: 'center', backgroundColor: '#FFD54F' },
   headerText: { fontSize: 18, fontWeight: 'bold', color: 'black' },
   avatar: { width: 120, height: 120, borderRadius: 60 },
-  buttonContainer: {
-    flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center',
-    marginTop: 60, paddingBottom: 20,
-  },
-  button: {
-    height: 160, width: 160, backgroundColor: '#FFD54F',
-    borderRadius: 60, margin: 5, justifyContent: 'center', alignItems: 'center'
-  },
+  buttonContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 60, paddingBottom: 20 },
+  button: { height: 160, width: 160, backgroundColor: '#FFD54F', borderRadius: 60, margin: 5, justifyContent: 'center', alignItems: 'center' },
   buttonText: { color: '#222', fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginTop: 8 },
-  bottomNavigation: {
-    flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center',
-    padding: 10, backgroundColor: 'black', borderTopWidth: 1, borderColor: '#ddd',
-    position: 'absolute', bottom: 0, width: '100%',
-  },
+  bottomNavigation: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 10, backgroundColor: 'black', borderTopWidth: 1, borderColor: '#ddd', position: 'absolute', bottom: 0, width: '100%' },
   navButton: { flexDirection: 'row', alignItems: 'center', padding: 10 },
   navButtonText: { fontSize: 16, fontWeight: 'bold', color: '#FFD54F', marginLeft: 5 },
 });
