@@ -102,11 +102,14 @@ export default function CityDogsScreen() {
               onPress={() => router.push(`/screens/dogs/${item.id}`)}
             >
               <Image source={item.img} style={styles.dogImage} />
-              <View style={styles.dogInfo}>
-                <Text style={styles.dogName}>{item.name}</Text>
-                <Text style={styles.dogGender}>{item.gender}</Text>
-                <Text style={styles.dogAge}>{item.age}</Text>
-              </View>
+                <View style={styles.dogInfo}>
+                  <Text style={styles.dogName}>{item.name}</Text>
+                  <View style={styles.separator} />
+                  <View style={styles.detailsRow}>
+                    <Text style={styles.dogGender}>{item.gender}</Text>
+                    <Text style={styles.dogAge}>{item.age}</Text>
+                  </View>
+                </View>
             </TouchableOpacity>
           )}
         />
@@ -116,7 +119,7 @@ export default function CityDogsScreen() {
             <Ionicons name="home" size={20} color="#FFD54F" />
             <Text style={styles.navButtonText}>Home</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/screens/chatListScreen')} style={styles.navButton}>
+          <TouchableOpacity onPress={() => router.push('/screens/chat/chatListScreen')} style={styles.navButton}>
             <Ionicons name="chatbubble" size={20} color="#FFD54F" />
             <Text style={styles.navButtonText}>Chat</Text>
           </TouchableOpacity>
@@ -152,37 +155,54 @@ const styles = StyleSheet.create({
   },
   dogList: {
     paddingHorizontal: CARD_MARGIN,
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingTop: 15
   },
   dogCard: {
-    width: CARD_WIDTH,
-    margin: CARD_MARGIN,
+    width: (windowWidth - 60) / 2,
+    minHeight: 100,
+    marginBottom: 15,
+    marginHorizontal: 5,
     borderRadius: 10,
-    overflow: 'hidden',
-    backgroundColor: '#FFD54F',
-    elevation: 2
+    overflow: "hidden",
+    backgroundColor: "#FFD54F",
+    elevation: 2,
   },
   dogImage: {
-    width: '100%',
-    height: 120
+    width: "100%",
+    height: 200,
+    borderTopLeftRadius: 10,
+    borderTopRightRadius: 10,
   },
   dogInfo: {
     padding: 10,
-    alignItems: 'center'
+    alignItems: "center",
+    width: "100%",
   },
   dogName: {
     fontSize: 16,
-    fontWeight: 'bold',
-    color: '#333'
+    fontWeight: "bold",
+    color: "#333",
+  },
+  separator: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "#fff",
+    marginVertical: 6,
+  },
+  detailsRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    width: "100%",
+    paddingHorizontal: 10,
   },
   dogGender: {
     fontSize: 14,
-    color: '#777'
+    color: "#777",
   },
   dogAge: {
     fontSize: 14,
-    color: '#555',
-    marginTop: 2
+    color: "#555",
   },
   bottomNavigation: {
     flexDirection: 'row',

@@ -67,7 +67,7 @@ export default function HomeScreen() {
   const buttonData = [
     { label: "Quero Adotar", icon: "paw",      pack: 'Ionicons',      name: 'dogsAdoption' },
     { label: "Pets Curtidos", icon: "heart",    pack: 'Ionicons',      name: 'likedPets'    },
-    { label: "Meus pets",     icon: "dog",      pack: 'FontAwesome5',  name: 'VisitanteProfileScreen' },
+    { label: "Meus pets",     icon: "dog",      pack: 'FontAwesome5',  name: 'meusPets' },
     { label: "Cadastrar pet", icon: "plus-circle", pack: 'FontAwesome5', name: 'cadastroDePet' },
   ];
 
