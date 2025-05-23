@@ -76,9 +76,14 @@ public class UserController {
         return userService.changePassword(change, id);
     }
 
-    @PostMapping("user/login")
+    @PostMapping("/user/login")
     public ApiResponse<UserEntity> login(@RequestBody Login login) {
         return userService.login(login);
+    }
+
+    @PostMapping("/user/logout/{id}")
+    public ApiResponse<UserEntity> login(@PathVariable Integer id) {
+        return userService.logOut(id);
     }
 
     @PostMapping("/user/upload-photo")

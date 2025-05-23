@@ -248,5 +248,28 @@ public class UserService {
         }
         return new ApiResponse<>("200", users);
     }
+
+    public ApiResponse<UserEntity> logOut(Integer id) {
+        Optional<UserEntity> userOptional = userRepository.findById(id);
+        if (!userOptional.isPresent()) {
+            return new ApiResponse<>("User not found", null);
+        }
+
+        UserEntity user = userOptional.get();
+        String token = user.getAuthToken();
+        LocalDateTime expiration = user.getAuthTokenExpiration();
+
+        // Verifica se há token e se não expirou
+        if (token == null || expiration == null || expiration.isBefore(LocalDateTime.now())) {
+            return new ApiResponse<>("Invalid or expired auth token", null);
+        }
+
+        // Token válido: realiza logout
+        user.setAuthToken(null);
+        user.setAuthTokenExpiration(null);
+        userRepository.save(user);
+
+        return new ApiResponse<>("User logged out", user);
+    }
     
 }

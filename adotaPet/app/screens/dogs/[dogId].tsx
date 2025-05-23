@@ -10,7 +10,8 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Platform,
-  StatusBar
+  StatusBar,
+  ImageStyle
 } from 'react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
@@ -19,7 +20,23 @@ import AdotaPetBackground from '../../../assets/components/AdotaPetBackground';
 import { Ip } from '@/assets/constants/config';
 
 const { width: windowWidth } = Dimensions.get('window');
-const imageHeight = windowWidth; // quadrado
+const imageHeight = windowWidth; // manter quadrado
+
+// Componente que tenta carregar da URI e faz fallback na default
+const FallbackImage: React.FC<{ uri: string; style?: ImageStyle }> = ({ uri, style }) => {
+  const [errored, setErrored] = useState(false);
+  return (
+    <Image
+      source={
+        errored
+          ? require('../../../assets/images/dog_default.jpg')
+          : { uri }
+      }
+      style={style}
+      onError={() => setErrored(true)}
+    />
+  );
+};
 
 interface DogDetail {
   id: number;
@@ -29,7 +46,6 @@ interface DogDetail {
   size: string;
   gender: string;
   urlPhotos: string[];
-  // pode vir [{ id: 1 }] ou [1]
   userLike: Array<{ id: number | string } | number>;
 }
 
@@ -40,44 +56,44 @@ export default function DogProfileScreen() {
   const [dog, setDog] = useState<DogDetail | null>(null);
   const [photos, setPhotos] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
-
   const [liked, setLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
 
   useEffect(() => {
     async function loadDog() {
       try {
-        const res = await fetch(`http://${Ip}:8080/dog/id?id=${dogId}`);
-        const json = await res.json();
-        const data: DogDetail = json.data;
+        // 1) detalhe do dog
+        const detailRes = await fetch(`http://${Ip}:8080/dog/id?id=${dogId}`);
+        const detailJson = await detailRes.json();
+        const data: DogDetail = detailJson.data;
         setDog(data);
 
-        // monta URLs de foto
-        const uris = data.urlPhotos?.map(path => {
-          const idx = path.indexOf('/static/');
+        // 2) todas as fotos via seu endpoint
+        const photosRes = await fetch(
+          `http://${Ip}:8080/dog/all-photos?dogId=${dogId}`
+        );
+        const photosJson = await photosRes.json();
+        const uris: string[] = (photosJson.data as Array<any>).map(entry => {
+          let p = (entry.imgUrl as string).replace(/\\/g, '/');
+          const idx = p.indexOf('/static/');
           if (idx >= 0) {
-            const rel = path.substring(idx + '/static/'.length);
-            return `http://${Ip}/${rel}`;
+            p = p.substring(idx + '/static/'.length);
           }
-          return `http://${Ip}/${path}`;
-        }) ?? [];
+          return `http://${Ip}:8080/${p}`;
+        });
         setPhotos(uris);
 
-        // recupera userId
+        // 3) checa like atual
         const me = await AsyncStorage.getItem('userId');
         const uid = me ? Number(me) : null;
-
         if (uid !== null) {
-          // extrai todos os IDs numericamente
           const likedIds = data.userLike.map(u =>
-            typeof u === 'number' ? u : Number(u.id)
+            typeof u === 'number' ? u : Number((u as any).id)
           );
-          if (likedIds.includes(uid)) {
-            setLiked(true);
-          }
+          if (likedIds.includes(uid)) setLiked(true);
         }
       } catch (err) {
-        console.error('Erro ao carregar detalhes do cão:', err);
+        console.error('Erro ao carregar detalhes do cão ou fotos:', err);
       } finally {
         setLoading(false);
       }
@@ -87,26 +103,19 @@ export default function DogProfileScreen() {
 
   const handleLike = async () => {
     if (liked || isLiking) return;
-
     setIsLiking(true);
     const me = await AsyncStorage.getItem('userId');
     const uid = me ? Number(me) : null;
-    if (uid === null) {
+    if (!uid) {
       setIsLiking(false);
       return;
     }
-
     try {
       const res = await fetch(
         `http://${Ip}:8080/dog/userlike/${uid}/${dogId}`,
         { method: 'POST' }
       );
-      const body = await res.json();
-      if (res.ok) {
-        setLiked(true);
-      } else {
-        console.warn('Erro no like:', body);
-      }
+      if (res.ok) setLiked(true);
     } catch (err) {
       console.error('Falha de rede ao dar like:', err);
     } finally {
@@ -122,9 +131,7 @@ export default function DogProfileScreen() {
     );
   }
 
-  const displayPhotos = photos.length
-    ? photos
-    : [require('../../../assets/images/dog_default.jpg')];
+  const displayPhotos = photos.length > 0 ? photos : ['DEFAULT'];
 
   return (
     <AdotaPetBackground>
@@ -138,7 +145,7 @@ export default function DogProfileScreen() {
           <View style={{ width: 24 }} />
         </View>
 
-        {/* Carousel */}
+        {/* Carrossel de fotos */}
         <FlatList
           data={displayPhotos}
           horizontal
@@ -146,22 +153,23 @@ export default function DogProfileScreen() {
           showsHorizontalScrollIndicator={false}
           style={styles.flatList}
           keyExtractor={(_, idx) => idx.toString()}
-          renderItem={({ item }) => (
-            <Image
-              source={typeof item === 'string' ? { uri: item } : item}
-              style={styles.image}
-            />
-          )}
+          renderItem={({ item }) =>
+            item === 'DEFAULT' ? (
+              <Image
+                source={require('../../../assets/images/dog_default.jpg')}
+                style={styles.image}
+              />
+            ) : (
+              <FallbackImage uri={item} style={styles.image} />
+            )
+          }
         />
 
-        {/* Info */}
-        <View style={[styles.infoContainer, { top: imageHeight * 1.2 }]}>
+        {/* Informações */}
+        <View style={[styles.infoContainer, { top: imageHeight * 1.1 }]}>
           <View style={styles.infoHeader}>
             <Text style={styles.name}>{dog.name}</Text>
-            <TouchableOpacity
-              onPress={handleLike}
-              disabled={liked || isLiking}
-            >
+            <TouchableOpacity onPress={handleLike} disabled={liked || isLiking}>
               <Ionicons
                 name="heart"
                 size={28}
@@ -190,8 +198,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'transparent'
   },
   header: {
-    height:
-      50 + (Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0),
+    height: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0),
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -214,6 +221,7 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     position: 'absolute',
+    marginTop: 20,
     left: 20,
     right: 20,
     backgroundColor: 'transparent'

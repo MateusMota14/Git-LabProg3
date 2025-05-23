@@ -22,10 +22,11 @@ interface UserProfile {
   country: string;
 }
 
-export default function profile() {
+export default function ProfileScreen() {
   const [user, setUser] = useState<UserProfile | null>(null);
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [logoutLoading, setLogoutLoading] = useState(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -51,6 +52,35 @@ export default function profile() {
     };
     loadProfile();
   }, []);
+
+  const handleLogout = async () => {
+    setLogoutLoading(true);
+    try {
+      const userId = await AsyncStorage.getItem("userId");
+      if (!userId) throw new Error("Usuário não logado");
+
+      const res = await fetch(
+        `http://${Ip}:8080/user/logout/${userId}`,
+        { method: "POST" }
+      );
+      const json = await res.json();
+
+      if (json.data) {
+        // limpa credenciais locais
+        await AsyncStorage.removeItem("userId");
+        await AsyncStorage.removeItem("authToken");
+        // redireciona para tela inicial (ajuste conforme sua rota)
+        router.replace("/");
+      } else {
+        alert(json.message || "Falha no logout");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Erro ao fazer logout");
+    } finally {
+      setLogoutLoading(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -78,6 +108,18 @@ export default function profile() {
           >
             <Text style={styles.updateButtonText}>Atualizar Perfil</Text>
           </TouchableOpacity>
+
+          <TouchableOpacity
+            style={[styles.logoutButton, logoutLoading && styles.buttonDisabled]}
+            onPress={handleLogout}
+            disabled={logoutLoading}
+          >
+            {logoutLoading ? (
+              <ActivityIndicator color="#FFF" />
+            ) : (
+              <Text style={styles.logoutButtonText}>Logout</Text>
+            )}
+          </TouchableOpacity>
         </ScrollView>
       </AdotaPetBackground>
     </SafeAreaView>
@@ -95,6 +137,18 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     paddingHorizontal: 24,
     borderRadius: 8,
+    marginBottom: 12,
   },
   updateButtonText: { fontSize: 16, fontWeight: "bold", color: "#333" },
+  logoutButton: {
+    backgroundColor: "#E53935",
+    paddingVertical: 12,
+    paddingHorizontal: 24,
+    borderRadius: 8,
+    marginTop: 8,
+  },
+  logoutButtonText: { fontSize: 16, fontWeight: "bold", color: "#FFF" },
+  buttonDisabled: {
+    opacity: 0.6,
+  },
 });

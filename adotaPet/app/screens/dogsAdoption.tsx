@@ -10,7 +10,9 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Platform,
-  StatusBar
+  StatusBar,
+  ImageProps,
+  ImageStyle
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -27,8 +29,29 @@ interface Dog {
   name: string;
   gender: string;
   age: string;
-  img: any;
 }
+
+interface DogImageProps {
+  uri: string;
+  style?: ImageStyle;
+}
+
+/** Componente que tenta baixar a imagem e, se der erro, cai no default */
+const DogImage: React.FC<DogImageProps> = ({ uri, style }) => {
+  const [errored, setErrored] = useState(false);
+
+  return (
+    <Image
+      source={
+        errored
+          ? require('../../assets/images/dog_default.jpg')
+          : { uri }
+      }
+      style={style}
+      onError={() => setErrored(true)}
+    />
+  );
+};
 
 export default function CityDogsScreen() {
   const [dogs, setDogs] = useState<Dog[]>([]);
@@ -41,31 +64,25 @@ export default function CityDogsScreen() {
         const city = await AsyncStorage.getItem('city');
         if (!city) throw new Error('City not found in storage');
 
+        const userIdStr = await AsyncStorage.getItem('userId');
+        const currentUserId = userIdStr ? Number(userIdStr) : null;
+
         const res = await fetch(`http://${Ip}:8080/dog/city/${encodeURIComponent(city)}`);
         const json = await res.json();
-        const dogsArray = Array.isArray(json.data) ? json.data : [];
-        const list: Dog[] = await Promise.all(
-          dogsArray.map(async (dog: any) => {
-            let uriSource;
-            try {
-              const imgRes = await fetch(`http://${Ip}:8080/dog/img/${dog.id}`);
-              const imgJson = await imgRes.json();
-              uriSource = imgJson.message === 'OK' && imgJson.data
-                ? { uri: `http://${Ip}:8080/${imgJson.data}` }
-                : require('../../assets/images/dog_default.jpg');
-            } catch {
-              uriSource = require('../../assets/images/dog_default.jpg');
-            }
-            return {
-              id: dog.id,
-              name: dog.name,
-              gender: dog.gender,
-              age: `${dog.age} anos`,
-              img: uriSource
-            };
-          })
+        const allDogs: any[] = Array.isArray(json.data) ? json.data : [];
+
+        const filtered = currentUserId
+          ? allDogs.filter(d => d.user?.id !== currentUserId)
+          : allDogs;
+
+        setDogs(
+          filtered.map(dog => ({
+            id: dog.id,
+            name: dog.name,
+            gender: dog.gender,
+            age: `${dog.age} anos`,
+          }))
         );
-        setDogs(list);
       } catch (error) {
         console.error('Erro ao buscar cães por cidade:', error);
         setDogs([]);
@@ -73,6 +90,7 @@ export default function CityDogsScreen() {
         setLoading(false);
       }
     };
+
     fetchDogsByCity();
   }, []);
 
@@ -101,15 +119,19 @@ export default function CityDogsScreen() {
               style={styles.dogCard}
               onPress={() => router.push(`/screens/dogs/${item.id}`)}
             >
-              <Image source={item.img} style={styles.dogImage} />
-                <View style={styles.dogInfo}>
-                  <Text style={styles.dogName}>{item.name}</Text>
-                  <View style={styles.separator} />
-                  <View style={styles.detailsRow}>
-                    <Text style={styles.dogGender}>{item.gender}</Text>
-                    <Text style={styles.dogAge}>{item.age}</Text>
-                  </View>
+              {/* aqui usamos o DogImage, que faz fallback */}
+              <DogImage
+                uri={`http://${Ip}:8080/dog/img/${item.id}`}
+                style={styles.dogImage}
+              />
+              <View style={styles.dogInfo}>
+                <Text style={styles.dogName}>{item.name}</Text>
+                <View style={styles.separator} />
+                <View style={styles.detailsRow}>
+                  <Text style={styles.dogGender}>{item.gender}</Text>
+                  <Text style={styles.dogAge}>{item.age}</Text>
                 </View>
+              </View>
             </TouchableOpacity>
           )}
         />
@@ -145,7 +167,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
     backgroundColor: '#FFD54F'
   },
   title: {
@@ -159,51 +180,41 @@ const styles = StyleSheet.create({
     paddingTop: 15
   },
   dogCard: {
-    width: (windowWidth - 60) / 2,
-    minHeight: 100,
+    width: CARD_WIDTH,
     marginBottom: 15,
-    marginHorizontal: 5,
+    marginHorizontal: CARD_MARGIN / 2,
     borderRadius: 10,
-    overflow: "hidden",
-    backgroundColor: "#FFD54F",
-    elevation: 2,
+    overflow: 'hidden',
+    backgroundColor: '#FFD54F',
+    elevation: 2
   },
   dogImage: {
-    width: "100%",
-    height: 200,
-    borderTopLeftRadius: 10,
-    borderTopRightRadius: 10,
+    width: '100%',
+    height: 200
   },
   dogInfo: {
     padding: 10,
-    alignItems: "center",
-    width: "100%",
+    alignItems: 'center'
   },
   dogName: {
     fontSize: 16,
-    fontWeight: "bold",
-    color: "#333",
+    fontWeight: 'bold',
+    color: '#333'
   },
   separator: {
-    width: "100%",
+    width: '100%',
     height: 1,
-    backgroundColor: "#fff",
-    marginVertical: 6,
+    backgroundColor: '#fff',
+    marginVertical: 6
   },
   detailsRow: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    width: "100%",
-    paddingHorizontal: 10,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 10
   },
-  dogGender: {
-    fontSize: 14,
-    color: "#777",
-  },
-  dogAge: {
-    fontSize: 14,
-    color: "#555",
-  },
+  dogGender: { fontSize: 14, color: '#777' },
+  dogAge: { fontSize: 14, color: '#555' },
   bottomNavigation: {
     flexDirection: 'row',
     justifyContent: 'space-around',
