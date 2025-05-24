@@ -98,15 +98,15 @@ export default function HomeScreen() {
         </View>
 
         <View style={styles.bottomNavigation}>
-          <TouchableOpacity onPress={() => router.push('/screens/home')} style={styles.navButton}>
-            <Ionicons name="home" size={20} color="#FFD54F" />
-            <Text style={styles.navButtonText}>Home</Text>
-          </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/screens/chat/chatListScreen')} style={styles.navButton}>
-            <Ionicons name="chatbubble" size={20} color="#FFD54F" />
-            <Text style={styles.navButtonText}>Chat</Text>
-          </TouchableOpacity>
-        </View>
+                  <TouchableOpacity onPress={() => router.push('/screens/home')} style={styles.navButton}>
+                    <Ionicons name="home" size={20} color="#FFD54F" />
+                    <Text style={styles.navButtonText}>Home</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => router.push('/screens/chat/chatListScreen')} style={styles.navButton}>
+                    <Ionicons name="chatbubble" size={20} color="#FFD54F" />
+                    <Text style={styles.navButtonText}>Chat</Text>
+                  </TouchableOpacity>
+                </View>
       </AdotaPetBackground>
     </SafeAreaView>
   );
@@ -121,7 +121,27 @@ const styles = StyleSheet.create({
   buttonContainer: { flexDirection: 'row', flexWrap: 'wrap', justifyContent: 'center', marginTop: 60, paddingBottom: 20 },
   button: { height: 160, width: 160, backgroundColor: '#FFD54F', borderRadius: 60, margin: 5, justifyContent: 'center', alignItems: 'center' },
   buttonText: { color: '#222', fontSize: 16, fontWeight: 'bold', textAlign: 'center', marginTop: 8 },
-  bottomNavigation: { flexDirection: 'row', justifyContent: 'space-around', alignItems: 'center', padding: 10, backgroundColor: 'black', borderTopWidth: 1, borderColor: '#ddd', position: 'absolute', bottom: 0, width: '100%' },
-  navButton: { flexDirection: 'row', alignItems: 'center', padding: 10 },
-  navButtonText: { fontSize: 16, fontWeight: 'bold', color: '#FFD54F', marginLeft: 5 },
+  bottomNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: 'black',
+    borderTopWidth: 1,
+    borderColor: '#ddd',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%'
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10
+  },
+  navButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFD54F',
+    marginLeft: 5
+  }
 });

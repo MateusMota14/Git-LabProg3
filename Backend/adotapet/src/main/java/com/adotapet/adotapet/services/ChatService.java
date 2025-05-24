@@ -164,13 +164,4 @@ public class ChatService {
         return new ApiResponse<>("Chat not found", null);
     }
 
-    // public ApiResponse<MessageEntity> readMessages(ChatEntity chat){
-    // Optional<ChatEntity> chatOptional = chatRepository.findById(chat.getId());
-    // if(chatOptional.isPresent()){
-    // ChatEntity chatEntity = chatOptional.get();
-    // String messageId = chatEntity.getUserOwner().getId() +
-    // chatEntity.getUserAdopter().getId();
-    // (...)
-    // }
-
 }
