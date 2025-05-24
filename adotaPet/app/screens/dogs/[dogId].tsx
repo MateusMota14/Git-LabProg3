@@ -19,7 +19,7 @@ import { Ionicons } from '@expo/vector-icons';
 import AdotaPetBackground from '../../../assets/components/AdotaPetBackground';
 import { Ip } from '@/assets/constants/config';
 
-const { width: windowWidth } = Dimensions.get('window');
+const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
 const imageHeight = windowWidth; // manter quadrado
 
 // Componente que tenta carregar da URI e faz fallback na default
@@ -138,9 +138,6 @@ export default function DogProfileScreen() {
       <SafeAreaView style={styles.container}>
         {/* Header */}
         <View style={styles.header}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Ionicons name="arrow-back" size={24} color="black" />
-          </TouchableOpacity>
           <Text style={styles.headerTitle}>{dog.name}</Text>
           <View style={{ width: 24 }} />
         </View>
@@ -201,7 +198,7 @@ const styles = StyleSheet.create({
     height: 50 + (Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0),
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
     paddingHorizontal: 20,
     backgroundColor: '#FFD54F',
     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0
@@ -221,7 +218,7 @@ const styles = StyleSheet.create({
   },
   infoContainer: {
     position: 'absolute',
-    marginTop: 20,
+    marginTop: imageHeight-270,
     left: 20,
     right: 20,
     backgroundColor: 'transparent'

@@ -211,7 +211,8 @@ const styles = StyleSheet.create({
   container: {
     alignItems: "center",
     justifyContent: "center",
-    padding: 20,
+    padding: 40,
+    paddingTop: 100
   },
   input: {
     width: "100%",

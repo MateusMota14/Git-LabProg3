@@ -170,6 +170,7 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
     padding: 20,
+    paddingTop: 150
   },
   input: {
     width: "100%",

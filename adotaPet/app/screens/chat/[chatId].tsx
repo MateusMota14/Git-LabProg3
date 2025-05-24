@@ -208,6 +208,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     borderBottomLeftRadius: 16,
     borderBottomRightRadius: 16,
+    marginTop: 90
   },
   headerTitle: {
     ...globalStyles.title,
@@ -240,6 +241,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: "#FFD54F",
     backgroundColor: "#FFF",
+    marginBottom: 20
   },
   input: {
     flex: 1,
