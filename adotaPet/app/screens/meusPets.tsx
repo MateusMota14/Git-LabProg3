@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
 import { Ip } from "../../assets/constants/config";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -169,6 +170,16 @@ export default function VisitanteProfileScreen() {
             )}
           />
         </ScrollView>
+        <View style={styles.bottomNavigation}>
+          <TouchableOpacity onPress={() => router.push('/screens/home')} style={styles.navButton}>
+            <Ionicons name="home" size={20} color="#FFD54F" />
+            <Text style={styles.navButtonText}>Home</Text>
+          </TouchableOpacity>
+          <TouchableOpacity onPress={() => router.push('/screens/chat/chatListScreen')} style={styles.navButton}>
+            <Ionicons name="chatbubble" size={20} color="#FFD54F" />
+            <Text style={styles.navButtonText}>Chat</Text>
+          </TouchableOpacity>
+        </View>
       </AdotaPetBackground>
     </SafeAreaView>
   );
@@ -210,4 +221,27 @@ const styles = StyleSheet.create({
   dogGender: { fontSize: 14, color: "#777" },
   dogAge: { fontSize: 14, color: "#555" },
   emptyText: { fontSize: 16, color: "#555", marginTop: 20 },
+  bottomNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: 'black',
+    borderTopWidth: 1,
+    borderColor: '#ddd',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%'
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10
+  },
+  navButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFD54F',
+    marginLeft: 5
+  }
 });

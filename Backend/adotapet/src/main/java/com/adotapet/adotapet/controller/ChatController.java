@@ -23,13 +23,13 @@ public class ChatController {
      * Cria um novo chat entre dois usuários (criado automaticamente, não é
      * necessário esse endpoint)
      */
-    // @PostMapping
-    // public ApiResponse<ChatEntity> createChat(@RequestBody ChatEntity chatEntity)
-    // {
-    // UserEntity owner = chatEntity.getUserOwner();
-    // UserEntity adopter = chatEntity.getUserAdopt();
-    // return chatService.createChat(owner, adopter);
-    // }
+    @PostMapping
+    public ApiResponse<ChatEntity> createChat(@RequestBody ChatEntity chatEntity)
+    {
+    UserEntity owner = chatEntity.getUserOwner();
+    UserEntity adopter = chatEntity.getUserAdopt();
+    return chatService.createChat(owner, adopter);
+    }
 
     /**
      * Retorna os detalhes de um chat pelo ID
