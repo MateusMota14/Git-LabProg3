@@ -72,7 +72,12 @@ export default function CityDogsScreen() {
         const allDogs: any[] = Array.isArray(json.data) ? json.data : [];
 
         const filtered = currentUserId
-          ? allDogs.filter(d => d.user?.id !== currentUserId)
+          ? allDogs.filter(d =>
+            // não é dono do dog...
+            d.user?.id !== currentUserId &&
+            // ...e não está na lista de quem já curtiu
+            !(Array.isArray(d.userLike) && d.userLike.includes(currentUserId))
+          )
           : allDogs;
 
         setDogs(
@@ -93,6 +98,7 @@ export default function CityDogsScreen() {
 
     fetchDogsByCity();
   }, []);
+
 
   if (loading) {
     return (

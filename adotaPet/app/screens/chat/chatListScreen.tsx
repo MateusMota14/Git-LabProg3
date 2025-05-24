@@ -17,7 +17,7 @@ import { Ip } from "@/assets/constants/config";
 interface User {
   id: number;
   name: string;
-  img: string | null;
+  img: string | null;    // caminho salvo no backend, ex: "images/user123.jpg"
 }
 
 interface Chat {
@@ -52,9 +52,7 @@ const ChatListScreen: React.FC = () => {
         "1970-01-01T00:00:00.000Z";
       const lastRead = new Date(lastReadStr);
 
-      const resp = await fetch(
-        `http://${Ip}:8080/chat/${chatId}/messages`
-      );
+      const resp = await fetch(`http://${Ip}:8080/chat/${chatId}/messages`);
       const json = await resp.json();
       const msgs = json.data || [];
       if (msgs.length > 0) {
@@ -70,7 +68,6 @@ const ChatListScreen: React.FC = () => {
     [userId]
   );
 
-  // marca como lido e navega
   const handleChatPress = useCallback(
     async (chatId: string) => {
       await AsyncStorage.setItem(
@@ -83,7 +80,6 @@ const ChatListScreen: React.FC = () => {
     [router]
   );
 
-  // montagem inicial: carrega userId e chats
   useEffect(() => {
     (async () => {
       const stored = await AsyncStorage.getItem("userId");
@@ -96,7 +92,6 @@ const ChatListScreen: React.FC = () => {
     })();
   }, [fetchChats]);
 
-  // polling de chats a cada POLL_INTERVAL
   useEffect(() => {
     if (userId != null) {
       const iv = setInterval(() => fetchChats(userId), POLL_INTERVAL);
@@ -104,7 +99,6 @@ const ChatListScreen: React.FC = () => {
     }
   }, [userId, fetchChats]);
 
-  // sempre que mudar chats ou userId, recalcula unread
   useEffect(() => {
     if (userId != null) {
       chats.forEach((c) => checkUnread(c.id));
@@ -133,6 +127,22 @@ const ChatListScreen: React.FC = () => {
               chat.userOwner.id === userId
                 ? chat.userAdopt
                 : chat.userOwner;
+
+            // normaliza o caminho vindo do backend
+            const normalized = other.img
+              ? other.img
+                  .replace(/\\/g, "/")
+                  .replace(/^src\/main\/resources\/static\//, "")
+                  .replace(/^static\//, "")
+              : "";
+            const avatarUri =
+              normalized.length > 0
+                ? `http://${Ip}:8080/${normalized}`
+                : undefined;
+
+            // DEBUG: verifique no seu console se a URL está correta
+            console.log("Chat avatarUri:", avatarUri);
+
             return (
               <TouchableOpacity
                 key={chat.id}
@@ -142,11 +152,12 @@ const ChatListScreen: React.FC = () => {
                 <View style={styles.avatarContainer}>
                   <Image
                     source={
-                      other.img
-                        ? { uri: other.img }
+                      avatarUri
+                        ? { uri: avatarUri }
                         : require("../../../assets/images/user_default.png")
                     }
                     style={styles.avatar}
+                    resizeMode="cover"
                   />
                   {unread[chat.id] && <View style={styles.unreadDot} />}
                 </View>
@@ -165,7 +176,7 @@ const ChatListScreen: React.FC = () => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, width: "100%" },
+  container: { flex: 1, width: "100%", paddingTop: 90 },
   loader: { flex: 1, justifyContent: "center", alignItems: "center" },
   header: {
     height: 60,
@@ -189,7 +200,12 @@ const styles = StyleSheet.create({
     borderBottomColor: "#FFD54F",
   },
   avatarContainer: { position: "relative" },
-  avatar: { width: 50, height: 50, borderRadius: 25, backgroundColor: "#EEE" },
+  avatar: {
+    width: 50,
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: "#EEE",
+  },
   unreadDot: {
     position: "absolute",
     top: 0,
