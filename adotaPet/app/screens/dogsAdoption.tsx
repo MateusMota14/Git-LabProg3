@@ -10,7 +10,9 @@ import {
   SafeAreaView,
   TouchableOpacity,
   Platform,
-  StatusBar
+  StatusBar,
+  ImageProps,
+  ImageStyle
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
@@ -27,8 +29,29 @@ interface Dog {
   name: string;
   gender: string;
   age: string;
-  img: any;
 }
+
+interface DogImageProps {
+  uri: string;
+  style?: ImageStyle;
+}
+
+/** Componente que tenta baixar a imagem e, se der erro, cai no default */
+const DogImage: React.FC<DogImageProps> = ({ uri, style }) => {
+  const [errored, setErrored] = useState(false);
+
+  return (
+    <Image
+      source={
+        errored
+          ? require('../../assets/images/dog_default.jpg')
+          : { uri }
+      }
+      style={style}
+      onError={() => setErrored(true)}
+    />
+  );
+};
 
 export default function CityDogsScreen() {
   const [dogs, setDogs] = useState<Dog[]>([]);
@@ -41,31 +64,25 @@ export default function CityDogsScreen() {
         const city = await AsyncStorage.getItem('city');
         if (!city) throw new Error('City not found in storage');
 
+        const userIdStr = await AsyncStorage.getItem('userId');
+        const currentUserId = userIdStr ? Number(userIdStr) : null;
+
         const res = await fetch(`http://${Ip}:8080/dog/city/${encodeURIComponent(city)}`);
         const json = await res.json();
-        const dogsArray = Array.isArray(json.data) ? json.data : [];
-        const list: Dog[] = await Promise.all(
-          dogsArray.map(async (dog: any) => {
-            let uriSource;
-            try {
-              const imgRes = await fetch(`http://${Ip}:8080/dog/img/${dog.id}`);
-              const imgJson = await imgRes.json();
-              uriSource = imgJson.message === 'OK' && imgJson.data
-                ? { uri: `http://${Ip}:8080/${imgJson.data}` }
-                : require('../../assets/images/dog_default.jpg');
-            } catch {
-              uriSource = require('../../assets/images/dog_default.jpg');
-            }
-            return {
-              id: dog.id,
-              name: dog.name,
-              gender: dog.gender,
-              age: `${dog.age} anos`,
-              img: uriSource
-            };
-          })
+        const allDogs: any[] = Array.isArray(json.data) ? json.data : [];
+
+        const filtered = currentUserId
+          ? allDogs.filter(d => d.user?.id !== currentUserId)
+          : allDogs;
+
+        setDogs(
+          filtered.map(dog => ({
+            id: dog.id,
+            name: dog.name,
+            gender: dog.gender,
+            age: `${dog.age} anos`,
+          }))
         );
-        setDogs(list);
       } catch (error) {
         console.error('Erro ao buscar cães por cidade:', error);
         setDogs([]);
@@ -73,6 +90,7 @@ export default function CityDogsScreen() {
         setLoading(false);
       }
     };
+
     fetchDogsByCity();
   }, []);
 
@@ -99,13 +117,20 @@ export default function CityDogsScreen() {
           renderItem={({ item }) => (
             <TouchableOpacity
               style={styles.dogCard}
-              onPress={() => router.push(`/dog/${item.id}`)}
+              onPress={() => router.push(`/screens/dogs/${item.id}`)}
             >
-              <Image source={item.img} style={styles.dogImage} />
+              {/* aqui usamos o DogImage, que faz fallback */}
+              <DogImage
+                uri={`http://${Ip}:8080/dog/img/${item.id}`}
+                style={styles.dogImage}
+              />
               <View style={styles.dogInfo}>
                 <Text style={styles.dogName}>{item.name}</Text>
-                <Text style={styles.dogGender}>{item.gender}</Text>
-                <Text style={styles.dogAge}>{item.age}</Text>
+                <View style={styles.separator} />
+                <View style={styles.detailsRow}>
+                  <Text style={styles.dogGender}>{item.gender}</Text>
+                  <Text style={styles.dogAge}>{item.age}</Text>
+                </View>
               </View>
             </TouchableOpacity>
           )}
@@ -116,7 +141,7 @@ export default function CityDogsScreen() {
             <Ionicons name="home" size={20} color="#FFD54F" />
             <Text style={styles.navButtonText}>Home</Text>
           </TouchableOpacity>
-          <TouchableOpacity onPress={() => router.push('/screens/chatListScreen')} style={styles.navButton}>
+          <TouchableOpacity onPress={() => router.push('/screens/chat/chatListScreen')} style={styles.navButton}>
             <Ionicons name="chatbubble" size={20} color="#FFD54F" />
             <Text style={styles.navButtonText}>Chat</Text>
           </TouchableOpacity>
@@ -142,7 +167,6 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    paddingHorizontal: 20,
     backgroundColor: '#FFD54F'
   },
   title: {
@@ -152,11 +176,13 @@ const styles = StyleSheet.create({
   },
   dogList: {
     paddingHorizontal: CARD_MARGIN,
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingTop: 15
   },
   dogCard: {
     width: CARD_WIDTH,
-    margin: CARD_MARGIN,
+    marginBottom: 15,
+    marginHorizontal: CARD_MARGIN / 2,
     borderRadius: 10,
     overflow: 'hidden',
     backgroundColor: '#FFD54F',
@@ -164,7 +190,7 @@ const styles = StyleSheet.create({
   },
   dogImage: {
     width: '100%',
-    height: 120
+    height: 200
   },
   dogInfo: {
     padding: 10,
@@ -175,15 +201,20 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     color: '#333'
   },
-  dogGender: {
-    fontSize: 14,
-    color: '#777'
+  separator: {
+    width: '100%',
+    height: 1,
+    backgroundColor: '#fff',
+    marginVertical: 6
   },
-  dogAge: {
-    fontSize: 14,
-    color: '#555',
-    marginTop: 2
+  detailsRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
+    paddingHorizontal: 10
   },
+  dogGender: { fontSize: 14, color: '#777' },
+  dogAge: { fontSize: 14, color: '#555' },
   bottomNavigation: {
     flexDirection: 'row',
     justifyContent: 'space-around',

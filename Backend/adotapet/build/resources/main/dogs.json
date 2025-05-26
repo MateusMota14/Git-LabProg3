@@ -1,0 +1,312 @@
+[
+  {
+    "id": 1,
+    "name": "Thor",
+    "breed": "pastor alemão",
+    "age": "7",
+    "size": "grande",
+    "gender": "macho",
+    "urlPhotos": [
+      "src\\main\\resources\\static\\dogs\\1\\1.jpg",
+      "src\\main\\resources\\static\\dogs\\1\\2.jpg"
+    ],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 1
+    }
+  },
+  {
+    "id": 2,
+    "name": "Luna",
+    "breed": "vira-lata",
+    "age": "3",
+    "size": "médio",
+    "gender": "fêmea",
+    "urlPhotos": [],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 1
+    }
+  },
+  {
+    "id": 3,
+    "name": "Bella",
+    "breed": "labrador",
+    "age": "5",
+    "size": "grande",
+    "gender": "fêmea",
+    "urlPhotos": [
+      "src\\main\\resources\\static\\dogs\\3\\3.jpg",
+      "src\\main\\resources\\static\\dogs\\3\\4.jpg"
+    ],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 2
+    }
+  },
+  {
+    "id": 4,
+    "name": "Max",
+    "breed": "poodle",
+    "age": "2",
+    "size": "médio",
+    "gender": "macho",
+    "urlPhotos": [],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 2
+    }
+  },
+  {
+    "id": 5,
+    "name": "Charlie",
+    "breed": "beagle",
+    "age": "4",
+    "size": "médio",
+    "gender": "macho",
+    "urlPhotos": [
+      "src\\main\\resources\\static\\dogs\\5\\5.jpg",
+      "src\\main\\resources\\static\\dogs\\5\\6.jpg"
+    ],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 3
+    }
+  },
+  {
+    "id": 6,
+    "name": "Lola",
+    "breed": "buldogue francês",
+    "age": "1",
+    "size": "pequeno",
+    "gender": "fêmea",
+    "urlPhotos": [],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 3
+    }
+  },
+  {
+    "id": 7,
+    "name": "Toby",
+    "breed": "rottweiler",
+    "age": "6",
+    "size": "grande",
+    "gender": "macho",
+    "urlPhotos": [
+      "src\\main\\resources\\static\\dogs\\7\\7.jpg",
+      "src\\main\\resources\\static\\dogs\\7\\8.jpg"
+    ],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 4
+    }
+  },
+  {
+    "id": 8,
+    "name": "Nina",
+    "breed": "dachshund",
+    "age": "3",
+    "size": "pequeno",
+    "gender": "fêmea",
+    "urlPhotos": [],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 4
+    }
+  },
+  {
+    "id": 9,
+    "name": "Fred",
+    "breed": "golden retriever",
+    "age": "8",
+    "size": "grande",
+    "gender": "macho",
+    "urlPhotos": [
+      "src\\main\\resources\\static\\dogs\\9\\9.jpg",
+      "src\\main\\resources\\static\\dogs\\9\\10.jpg"
+    ],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 5
+    }
+  },
+  {
+    "id": 10,
+    "name": "Maya",
+    "breed": "husky siberiano",
+    "age": "2",
+    "size": "médio",
+    "gender": "fêmea",
+    "urlPhotos": [],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 5
+    }
+  },
+  {
+    "id": 11,
+    "name": "Rex",
+    "breed": "boxer",
+    "age": "5",
+    "size": "grande",
+    "gender": "macho",
+    "urlPhotos": [
+      "src\\main\\resources\\static\\dogs\\11\\11.jpg",
+      "src\\main\\resources\\static\\dogs\\11\\12.jpg"
+    ],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 6
+    }
+  },
+  {
+    "id": 12,
+    "name": "Kiki",
+    "breed": "shih tzu",
+    "age": "4",
+    "size": "pequeno",
+    "gender": "fêmea",
+    "urlPhotos": [],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 6
+    }
+  },
+  {
+    "id": 13,
+    "name": "Rocky",
+    "breed": "border collie",
+    "age": "3",
+    "size": "médio",
+    "gender": "macho",
+    "urlPhotos": [
+      "src\\main\\resources\\static\\dogs\\13\\13.jpg",
+      "src\\main\\resources\\static\\dogs\\13\\14.jpg"
+    ],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 7
+    }
+  },
+  {
+    "id": 14,
+    "name": "Mel",
+    "breed": "pinscher",
+    "age": "2",
+    "size": "pequeno",
+    "gender": "fêmea",
+    "urlPhotos": [],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 7
+    }
+  },
+  {
+    "id": 15,
+    "name": "Apollo",
+    "breed": "basset hound",
+    "age": "7",
+    "size": "médio",
+    "gender": "macho",
+    "urlPhotos": [
+      "src\\main\\resources\\static\\dogs\\15\\15.jpg",
+      "src\\main\\resources\\static\\dogs\\15\\16.jpg"
+    ],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 8
+    }
+  },
+  {
+    "id": 16,
+    "name": "Zoey",
+    "breed": "bulldog inglês",
+    "age": "6",
+    "size": "médio",
+    "gender": "fêmea",
+    "urlPhotos": [],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 8
+    }
+  },
+  {
+    "id": 17,
+    "name": "Simba",
+    "breed": "pastor australiano",
+    "age": "1",
+    "size": "médio",
+    "gender": "macho",
+    "urlPhotos": [
+      "src\\main\\resources\\static\\dogs\\17\\17.jpg",
+      "src\\main\\resources\\static\\dogs\\17\\18.jpg"
+    ],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 9
+    }
+  },
+  {
+    "id": 18,
+    "name": "Molly",
+    "breed": "maltês",
+    "age": "3",
+    "size": "pequeno",
+    "gender": "fêmea",
+    "urlPhotos": [],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 9
+    }
+  },
+  {
+    "id": 19,
+    "name": "Duke",
+    "breed": "schnauzer",
+    "age": "9",
+    "size": "médio",
+    "gender": "macho",
+    "urlPhotos": [
+      "src\\main\\resources\\static\\dogs\\19\\19.jpg",
+      "src\\main\\resources\\static\\dogs\\19\\20.jpg"
+    ],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 10
+    }
+  },
+  {
+    "id": 20,
+    "name": "Princesa",
+    "breed": "chow chow",
+    "age": "4",
+    "size": "grande",
+    "gender": "fêmea",
+    "urlPhotos": [],
+    "userLike": [],
+    "userMatch": [],
+    "user": {
+      "id": 10
+    }
+  }
+]
