@@ -1,0 +1,14 @@
+.adotapet-background {
+  position: relative;
+  width: 100%;
+  min-height: 100vh;
+  background-color: #ffffff;
+
+  /* repete o ícone de pata em 45x45px */
+  background-image: url('/assets/images/pata.png');
+  background-repeat: repeat;
+  background-size: 45px 45px;
+  
+  /* garante que conteúdo filho fique acima do background */
+  overflow: hidden;
+}
