@@ -47,4 +47,6 @@ public class DogPhotoController {
         return dogPhotoService.findAllByDogId(dogId);
     }
 
+    
+
 }

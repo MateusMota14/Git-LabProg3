@@ -7,6 +7,7 @@ import {
   TouchableOpacity,
   Alert
 } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from 'expo-router';
 import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
 import { globalStyles } from "../../assets/constants/styles";
@@ -38,17 +39,20 @@ const Login: React.FC = () => {
           password: login.password,
         }),
       });
-
       const data = await response.json();
       const message = data.message;
 
-      if (message?.startsWith("Login Sucessfull")) {
+      if (message?.startsWith("Login Sucessfull") && data.data?.id) {
+        // guarda o ID do usuário para uso em outras telas
+        await AsyncStorage.setItem("userId", String(data.data.id));
+        await AsyncStorage.setItem("city", String(data.data.city));
+
         Alert.alert("Sucesso", "Login realizado com sucesso!");
-        router.push("/home"); // ir para tela de perfil MUDAR
+        router.push("/screens/home");
       } else if (message === "Password incorrect") {
         Alert.alert("Erro", "Senha incorreta. Tente novamente.");
       } else if (message === "User not found") {
-        Alert.alert("Erro", "Usuário não encontrado. Verifique o e-mail.");
+        Alert.alert("Erro", "Usuário não encontrado. Verifique o e‑mail.");
       } else {
         Alert.alert("Erro", message || "Erro ao fazer login.");
       }
@@ -65,7 +69,7 @@ const Login: React.FC = () => {
 
         <TextInput
           style={styles.input}
-          placeholder="E-mail"
+          placeholder="E‑mail"
           keyboardType="email-address"
           autoCapitalize="none"
           value={login.email}
@@ -85,7 +89,9 @@ const Login: React.FC = () => {
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => router.push("/auth/SignupScreen")}>
-          <Text style={styles.linkText}>Não tem uma conta? Crie uma aqui</Text>
+          <Text style={styles.linkText}>
+            Não tem uma conta? Crie uma aqui
+          </Text>
         </TouchableOpacity>
       </View>
     </AdotaPetBackground>
@@ -111,7 +117,7 @@ const styles = StyleSheet.create({
     backgroundColor: "#FFF",
   },
   linkText: {
-    color: "black", // tom de link da paleta
+    color: "black",
     fontSize: 16,
     marginTop: 10,
   },
