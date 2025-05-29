@@ -131,6 +131,6 @@ const styles = {
     marginTop: '24px',
     display: 'block',
     width: '100%',
-    textAlign: 'center' as 'center', // Cast explícito para corrigir o erro
+    textAlign: 'center' as 'center', 
   },
 };

@@ -3,6 +3,9 @@ import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-route
 import DogsAdoption from './pages/DogsAdoption';
 import EditProfile from './pages/EditProfile';
 import LikedPets from './pages/LikedPets';
+import MyPets from './pages/MyPets';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import Inicio from './pages/Inicio';
 import Home from './pages/Home';
 import CadastroDePet from './pages/CadastroDePet';
@@ -67,6 +70,24 @@ function IndexPage() {
         >
           Pets curtidos
         </button>
+        <button
+          className="App-button"
+          onClick={() => navigate('/my-pets')}
+        >
+          Meus pets
+        </button>
+        <button
+          className="App-button"
+          onClick={() => navigate('/profile')}
+        >
+          Perfil
+        </button>
+        <button
+          className="App-button"
+          onClick={() => navigate('/settings')}
+        >
+          Configurações
+        </button>
       </div>
     </div>
   );
@@ -83,7 +104,9 @@ function App() {
         <Route path="/dogs-adoption" element={<DogsAdoption />} />
         <Route path="/edit-profile" element={<EditProfile />} />
         <Route path="/liked-pets" element={<LikedPets />} />
-        {/* Add more routes for other screens as needed */}
+        <Route path="/my-pets" element={<MyPets />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
   );
