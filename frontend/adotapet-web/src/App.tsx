@@ -1,6 +1,8 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
 import DogsAdoption from './pages/DogsAdoption';
+import EditProfile from './pages/EditProfile';
+import LikedPets from './pages/LikedPets';
 import Inicio from './pages/Inicio';
 import Home from './pages/Home';
 import CadastroDePet from './pages/CadastroDePet';
@@ -53,6 +55,18 @@ function IndexPage() {
         >
           Adotar Pet
         </button>
+        <button
+          className="App-button"
+          onClick={() => navigate('/edit-profile')}
+        >
+          Editar Perfil
+        </button>
+        <button
+          className="App-button"
+          onClick={() => navigate('/liked-pets')}
+        >
+          Pets curtidos
+        </button>
       </div>
     </div>
   );
@@ -66,7 +80,9 @@ function App() {
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/home" element={<Home />} />
         <Route path="/cadastro-de-pet" element={<CadastroDePet />} />
-        <Route path="/cadastro-de-pet" element={<DogsAdoption />} />
+        <Route path="/dogs-adoption" element={<DogsAdoption />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/liked-pets" element={<LikedPets />} />
         {/* Add more routes for other screens as needed */}
       </Routes>
     </Router>
