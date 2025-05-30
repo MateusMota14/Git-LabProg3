@@ -14,7 +14,7 @@ export default function Inicio() {
       <h1 style={{ fontSize: 24, fontWeight: 'bold', marginBottom: 20, color: '#222' }}>
         Bem-vindo ao AdotaPet!
       </h1>
-      <button className="App-button" onClick={() => navigate('/signup')}>
+      <button className="App-button" onClick={() => navigate('/sign-up')}>
         Criar Conta
       </button>
       <button className="App-button" onClick={() => navigate('/login')}>

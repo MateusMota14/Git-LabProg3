@@ -1,5 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import Login from './pages/auth/Login';
+import SignUp from './pages/auth/SignUp';
 import DogsAdoption from './pages/DogsAdoption';
 import EditProfile from './pages/EditProfile';
 import LikedPets from './pages/LikedPets';
@@ -30,7 +32,7 @@ function IndexPage() {
         </h1>
         <button
           className="App-button"
-          onClick={() => navigate('/signup')}
+          onClick={() => navigate('/sign-up')}
         >
           Criar Conta
         </button>
@@ -98,6 +100,8 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<IndexPage />} />
+        <Route path="/sign-up" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/home" element={<Home />} />
         <Route path="/cadastro-de-pet" element={<CadastroDePet />} />
