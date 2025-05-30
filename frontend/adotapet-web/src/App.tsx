@@ -52,13 +52,13 @@ function IndexPage() {
           className="App-button"
           onClick={() => navigate('/cadastro-de-pet')}
         >
-          Cadastrar Pet
+          Cadastrar Pet Para Adoção
         </button>
         <button
           className="App-button"
           onClick={() => navigate('/dogs-adoption')}
         >
-          Adotar Pet
+          Quero Adotar
         </button>
         <button
           className="App-button"
@@ -76,7 +76,7 @@ function IndexPage() {
           className="App-button"
           onClick={() => navigate('/my-pets')}
         >
-          Meus pets
+          Meus pets para adoção
         </button>
         <button
           className="App-button"

@@ -14,8 +14,8 @@ import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
 const SettingsScreen = () => {
   const [editing, setEditing] = useState(false);
   const [user, setUser] = useState({
-    name: 'Luan Passos',
-    email: 'luan@example.com',
+    name: 'Alfredo',
+    email: 'alfredo@example.com',
     country: 'Brasil',
     state: 'RJ',
     city: 'Rio de Janeiro',

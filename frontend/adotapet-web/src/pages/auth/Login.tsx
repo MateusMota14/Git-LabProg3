@@ -78,7 +78,7 @@ export default function Login() {
         Não tem uma conta?{' '}
         <span
           style={styles.link}
-          onClick={() => navigate('/auth/SignUp')}
+          onClick={() => navigate('/sign-up')}
         >
           Crie uma aqui
         </span>
