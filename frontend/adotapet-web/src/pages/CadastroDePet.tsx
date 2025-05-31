@@ -32,22 +32,48 @@ export default function CadastroDePet() {
     }
   };
 
-  const validateForm = () => {
-    const newErrors: Partial<Record<keyof FormData, boolean>> = {};
-    (Object.keys(formData) as (keyof FormData)[]).forEach((field) => {
-      const value = formData[field];
-      if (typeof value === 'string') {
-        if (!value.trim()) newErrors[field] = true;
-      } else if (Array.isArray(value)) {
-        if (value.length === 0) newErrors[field] = true;
-      }
-    });
-    setErrors(newErrors);
-    if (Object.keys(newErrors).length === 0) {
-      alert('Pet cadastrado com sucesso!');
-      // Aqui você pode enviar os dados para o backend
+  const validateForm = async () => {
+  const newErrors: Partial<Record<keyof FormData, boolean>> = {};
+  (Object.keys(formData) as (keyof FormData)[]).forEach((field) => {
+    const value = formData[field];
+    if (typeof value === 'string') {
+      if (!value.trim()) newErrors[field] = true;
+    } else if (Array.isArray(value)) {
+      if (value.length === 0) newErrors[field] = true;
     }
-  };
+  });
+  setErrors(newErrors);
+  if (Object.keys(newErrors).length === 0) {
+    // Monta o formData para envio de imagens
+    const data = new FormData();
+    data.append('petName', formData.petName);
+    data.append('petAge', formData.petAge);
+    data.append('petBreed', formData.petBreed);
+    data.append('petDescription', formData.petDescription);
+    // Adiciona as imagens
+    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
+    if (fileInput && fileInput.files) {
+      Array.from(fileInput.files).forEach((file) => {
+        data.append('petImages', file);
+      });
+    }
+
+    try {
+      const response = await fetch('/api/pets', {
+        method: 'POST',
+        body: data,
+      });
+      if (response.ok) {
+        alert('Pet cadastrado com sucesso!');
+        // Limpe o formulário ou redirecione se quiser
+      } else {
+        alert('Erro ao cadastrar pet');
+      }
+    } catch (err) {
+      alert('Erro de conexão com o servidor');
+    }
+  }
+};
 
   return (
     <div style={{ padding: 40, maxWidth: 500, margin: '0 auto' }}>
