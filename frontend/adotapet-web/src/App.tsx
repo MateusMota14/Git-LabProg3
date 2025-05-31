@@ -1,5 +1,13 @@
 import React from 'react';
 import { BrowserRouter as Router, Routes, Route, useNavigate } from 'react-router-dom';
+import Login from './pages/auth/Login';
+import SignUp from './pages/auth/SignUp';
+import DogsAdoption from './pages/DogsAdoption';
+import EditProfile from './pages/EditProfile';
+import LikedPets from './pages/LikedPets';
+import MyPets from './pages/MyPets';
+import Profile from './pages/Profile';
+import Settings from './pages/Settings';
 import Inicio from './pages/Inicio';
 import Home from './pages/Home';
 import CadastroDePet from './pages/CadastroDePet';
@@ -24,7 +32,7 @@ function IndexPage() {
         </h1>
         <button
           className="App-button"
-          onClick={() => navigate('/signup')}
+          onClick={() => navigate('/sign-up')}
         >
           Criar Conta
         </button>
@@ -44,7 +52,43 @@ function IndexPage() {
           className="App-button"
           onClick={() => navigate('/cadastro-de-pet')}
         >
-          Cadastrar Pet
+          Cadastrar Pet Para Adoção
+        </button>
+        <button
+          className="App-button"
+          onClick={() => navigate('/dogs-adoption')}
+        >
+          Quero Adotar
+        </button>
+        <button
+          className="App-button"
+          onClick={() => navigate('/edit-profile')}
+        >
+          Editar Perfil
+        </button>
+        <button
+          className="App-button"
+          onClick={() => navigate('/liked-pets')}
+        >
+          Pets curtidos
+        </button>
+        <button
+          className="App-button"
+          onClick={() => navigate('/my-pets')}
+        >
+          Meus pets para adoção
+        </button>
+        <button
+          className="App-button"
+          onClick={() => navigate('/profile')}
+        >
+          Perfil
+        </button>
+        <button
+          className="App-button"
+          onClick={() => navigate('/settings')}
+        >
+          Configurações
         </button>
       </div>
     </div>
@@ -56,10 +100,17 @@ function App() {
     <Router>
       <Routes>
         <Route path="/" element={<IndexPage />} />
+        <Route path="/sign-up" element={<SignUp />} />
+        <Route path="/login" element={<Login />} />
         <Route path="/inicio" element={<Inicio />} />
         <Route path="/home" element={<Home />} />
         <Route path="/cadastro-de-pet" element={<CadastroDePet />} />
-        {/* Add more routes for other screens as needed */}
+        <Route path="/dogs-adoption" element={<DogsAdoption />} />
+        <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/liked-pets" element={<LikedPets />} />
+        <Route path="/my-pets" element={<MyPets />} />
+        <Route path="/profile" element={<Profile />} />
+        <Route path="/settings" element={<Settings />} />
       </Routes>
     </Router>
   );
