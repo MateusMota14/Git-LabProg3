@@ -15,6 +15,7 @@ import { useRouter } from "expo-router";
 import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
 import { globalStyles } from "../../assets/constants/styles";
 import { Ip } from "@/assets/constants/config";
+import Login from "./Login";
 
 interface FormData {
   name: string;
@@ -124,7 +125,7 @@ const SignupScreen: React.FC = () => {
 
       if (response.ok && data.message === "User created") {
         Alert.alert("Sucesso", "Conta criada com sucesso!");
-        router.back();
+        router.back()
       } else if (data.message === "User already exists") {
         setErrors((prev) => ({ ...prev, email: true }));
         Alert.alert("Erro", "Este e-mail já está em uso. Por favor, tente outro.");
