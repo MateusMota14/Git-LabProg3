@@ -62,7 +62,7 @@ public class UserController {
     }
 
     @DeleteMapping("/user/delete")
-    public ApiResponse<UserEntity> deleteUser(@RequestBody UserEntity user) {
+    public ApiResponse<UserEntity> deleteUser(@RequestBody UserEntity user) {q
         return userService.deleteUser(user);
     }
 
