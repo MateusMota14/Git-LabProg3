@@ -2,19 +2,24 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import AdotaPetBackground from '../assets/components/AdotaPetBackground';
-import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
+import { globalStyles } from '../assets/constants/styles';
 
 export default function DogProfile() {
   const router = useRouter();
 
-  // Lista de nomes dos botões com ícones correspondentes (Ionicons e FontAwesome)
-  const buttonData = [
-    { label: "Quero Adotar", icon: "paw", iconPack: 'Ionicons', name: 'dogsAdoption' },  // Nome da tela de redirecionamento
-    { label: "Pets Curtidos", icon: "heart", iconPack: 'Ionicons', name: 'likedPets' },  // Nome da tela de redirecionamento
-    { label: "Meus pets para adoção", icon: "dog", iconPack: 'FontAwesome5', name: 'meusPets' },  // Nome da tela de redirecionamento
-    { label: "Cadastrar pet para adoção", icon: "plus-circle", iconPack: 'FontAwesome5', name: 'cadastroDePet' },  // Nome da tela de redirecionamento
-  ];
-  
+  // Example dog data (replace with API data)
+  const dog = {
+    name: 'Buddy',
+    breed: 'Golden Retriever',
+    age: '2 years',
+    size: 'Large',
+    gender: 'Male',
+    photos: [
+      require('../assets/images/icon.png'),
+      require('../assets/images/icon.png'),
+    ],
+  };
+
   return (
     <AdotaPetBackground>
       <ScrollView contentContainerStyle={styles.container}>

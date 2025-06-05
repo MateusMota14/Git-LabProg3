@@ -24,12 +24,7 @@ Clique em Continuar.
 Agora basta ir para a pasta adotapet (p minusculo) dentro de Backend e rodar o comando:
 
 .\gradlew.bat bootRun
-Se ocorrer erro, falar com o GPT. O erro que deu para mim foi a versão do Java.
+A versão do Java deve o 17
 
-Solução:
-
-Fui para o arquivo build.gradle e troquei:
-
-languageVersion = JavaLanguageVersion.of(21)
-Isso porque minha versão do Java é 21.
+Por último, em adotaPet\assets\constants\config.js deve ser colocado o IP do computador.
 
