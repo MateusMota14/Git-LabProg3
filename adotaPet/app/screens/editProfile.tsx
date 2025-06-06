@@ -29,7 +29,7 @@ interface FormData {
   zcode: string;
 }
 
-const SignupScreen: React.FC = () => {
+const UpdateScreen: React.FC = () => {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
   id: -1,  
@@ -129,7 +129,33 @@ useEffect(() => {
   };
 
   const handleSignup = async () => {
-
+  const newErrors: Partial<Record<keyof FormData, boolean>> = {};
+  
+      // valida campos vazios
+      (Object.keys(formData) as (keyof FormData)[]).forEach((field) => {
+        const value = formData[field];
+        if (typeof value === "string" && !value.trim()) {
+          newErrors[field] = true;
+        }
+      });
+  
+      // valida senha
+      if (formData.password !== formData.confirmPassword) {
+        newErrors.password = true;
+        newErrors.confirmPassword = true;
+        Alert.alert("Erro", "As senhas não coincidem.");
+      }
+  
+      // valida formato do CEP
+      if (!/^\d{8}$/.test(formData.zcode.replace(/\D/g, ""))) {
+        newErrors.zcode = true;
+        Alert.alert("Erro", "Informe um CEP brasileiro válido (8 dígitos).");
+      }
+  
+      if (Object.keys(newErrors).length > 0) {
+        setErrors(newErrors);
+        return;
+      }
   try {
     const response = await fetch(`http://${Ip}:8080/user/update`, {
       method: "POST",
@@ -244,4 +270,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SignupScreen;
+export default UpdateScreen;
