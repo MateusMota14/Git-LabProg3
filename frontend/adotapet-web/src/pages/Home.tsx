@@ -41,7 +41,17 @@ export default function Home() {
     }}>
       {/* Cabeçalho amarelo */}
       <header style={styles.header}>
-        <span style={styles.headerTitle}>Início</span>
+        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button
+            style={styles.headerProfileButton}
+            onClick={() => navigate('/profile')}
+            aria-label="Perfil"
+          >
+            👤 Perfil
+          </button>
+          <span style={styles.headerTitle}>Início</span>
+          <span style={{ width: 80 }} /> {/* Espaço para equilibrar visualmente */}
+        </div>
       </header>
 
       {/* Card do usuário */}
@@ -102,10 +112,11 @@ const styles = {
     backgroundColor: '#FFD54F',
     padding: '20px 0 10px 0',
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-start', // Alinha à esquerda
     alignItems: 'center',
     marginBottom: 24,
     boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+    gap: 16, // Espaço entre botão e título
   },
   headerTitle: {
     fontSize: 22,
@@ -184,5 +195,18 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     cursor: 'pointer',
+  },
+  headerProfileButton: {
+    backgroundColor: '#FFD54F',
+    border: 'none',
+    borderRadius: 8,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    padding: '8px 16px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
   },
 };

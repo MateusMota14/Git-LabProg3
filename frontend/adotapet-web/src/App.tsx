@@ -13,6 +13,7 @@ import Home from './pages/Home';
 import CadastroDePet from './pages/CadastroDePet';
 import './App.css';
 import logo from './icon_3x.png';
+import ChangePassword from './pages/ChangePassword';
 
 function IndexPage() {
   const navigate = useNavigate();
@@ -78,6 +79,7 @@ function App() {
         <Route path="/my-pets" element={<MyPets />} />
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
+        <Route path="/change-password" element={<ChangePassword />} />
       </Routes>
     </Router>
   );
