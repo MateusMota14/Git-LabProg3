@@ -14,8 +14,8 @@ import {
 import * as ImagePicker from 'expo-image-picker';
 import { useRouter, useNavigation } from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { globalStyles } from "../../assets/constants/styles";
-import AdotaPetBackground from '../../assets/components/AdotaPetBackground';
+import { globalStyles } from "@/assets/constants/styles";
+import AdotaPetBackground from "@/assets/components/AdotaPetBackground";
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
 import { Ip } from "@/assets/constants/config";
 
@@ -153,7 +153,7 @@ const AdoptionRegistration: React.FC = () => {
     <AdotaPetBackground>
       <KeyboardAvoidingView style={{ flex: 1, width: "100%" }} behavior={Platform.OS === "ios" ? "padding" : undefined}>
         <ScrollView contentContainerStyle={styles.container}>
-          <Text style={globalStyles.title}>Registrar Pet</Text>
+          <Text style={globalStyles.title}>Editar Pet</Text>
 
           <TextInput
             placeholder="Nome do Pet"

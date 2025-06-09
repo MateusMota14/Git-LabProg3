@@ -162,7 +162,7 @@ export default function VisitanteProfileScreen() {
                 {/* botão de edição abaixo da foto */}
                 <TouchableOpacity
                   style={styles.editButton}
-                  onPress={() => router.push(`/screens/${item.id}`)}
+                  onPress={() => router.push(`/screens/dogs/editarDog/${item.id}`)}
                 >
                   <Text style={styles.editButtonText}>Editar</Text>
                 </TouchableOpacity>

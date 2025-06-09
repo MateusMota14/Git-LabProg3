@@ -72,6 +72,7 @@ public class DogService {
 
         // Associa o usuário ao cachorro
         dog.setUser(userOptional.get());
+        //System.out.println("Usuário associado ao cachorro: " + dog.getUser().getId());
 
         // Salva o cachorro no banco de dados
         DogEntity savedDog = dogRepository.save(dog);
@@ -128,28 +129,28 @@ public class DogService {
         return new ApiResponse<>("Id Usuario: " + userId, result);
     }
 
-    public ApiResponse<DogEntity> updateDog(DogEntity dog) {
-        Optional<DogEntity> dogOptional = dogRepository.findById(dog.getId());
-        Optional<UserEntity> userOptional = userRepository.findById(dog.getUser().getId());
-
-        if (dogOptional.isPresent()) {
-
-            if (userOptional.isPresent()) {
-                DogEntity updateDog = dogOptional.get();
-                updateDog.setName(dog.getName());
-                updateDog.setAge(dog.getAge());
-                updateDog.setUrlPhotos(dog.getUrlPhotos());
-
-                dogRepository.save(updateDog);
-                return new ApiResponse<>("Dog updated", dog);
-
-            } else {
-                return new ApiResponse<>("User this dog not found", null);
-            }
-        } else {
-            return new ApiResponse<>("Dog not found", null);
-        }
+    public ApiResponse<DogEntity> updateDog(DogEntity dog, Integer userId) {
+    Optional<DogEntity> dogOptional = dogRepository.findById(dog.getId());
+    if (dogOptional.isEmpty()) {
+        return new ApiResponse<>("Dog not found", null);
     }
+
+    Optional<UserEntity> userOptional = userRepository.findById(userId);
+    if (userOptional.isEmpty()) {
+        return new ApiResponse<>("User not found", null);
+    }
+
+    DogEntity updateDog = dogOptional.get();
+    updateDog.setName(dog.getName());
+    updateDog.setAge(dog.getAge());
+    updateDog.setUrlPhotos(dog.getUrlPhotos());
+    updateDog.setUser(userOptional.get());  // associa o usuário aqui
+
+    dogRepository.save(updateDog);
+    return new ApiResponse<>("Dog updated", updateDog);
+}
+
+
 
     @Transactional
     public ApiResponse<Set<Integer>> addUserLike(Integer userId, Integer dogId) {
