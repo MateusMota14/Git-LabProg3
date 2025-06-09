@@ -21,14 +21,14 @@ export default function Profile() {
         const userId = localStorage.getItem('userId');
         if (!userId) throw new Error('Usuário não logado');
 
-        const res = await fetch(`/api/user/id?id=${userId}`);
+        const res = await fetch(`http://localhost:8080/user/id?id=${userId}`);
         const json = await res.json();
         setUser(json.data);
 
-        const imgRes = await fetch(`/api/user/img/${userId}`);
+        const imgRes = await fetch(`http://localhost:8080/user/img/${userId}`);
         const imgJson = await imgRes.json();
         if (imgJson.data) {
-          setAvatarUrl(`/api/${imgJson.data}`);
+          setAvatarUrl(`http://localhost:8080/${imgJson.data}`);
         }
       } catch (err) {
         console.error(err);

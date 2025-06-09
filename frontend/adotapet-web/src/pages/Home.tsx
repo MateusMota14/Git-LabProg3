@@ -1,11 +1,29 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Alfredo from '../assets/images/Alfredo.png';
 import patas from '../pata.png';
 import '../App.css';
 
 export default function Home() {
   const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    console.log('userId na Home:', userId);
+    if (!userId) {
+      navigate('/login');
+      return;
+    }
+    fetch(`http://localhost:8080/user/id?id=${userId}`)
+      .then(res => res.json())
+      .then(json => setUser(json.data));
+    fetch(`http://localhost:8080/user/img/${userId}`)
+      .then(res => res.json())
+      .then(json => {
+        if (json.data) setAvatarUrl(`http://localhost:8080/${json.data}`);
+      });
+  }, [navigate]);
 
   const buttonData = [
     { label: "Quero Adotar", name: '/dogs-adoption', icon: '🐾' },
@@ -29,11 +47,17 @@ export default function Home() {
       {/* Card do usuário */}
       <div style={styles.userCard}>
         <img
-          src={Alfredo}
-          alt="Alfredo"
+          src={avatarUrl || 'https://ui-avatars.com/api/?name=' + (user?.name || 'User')}
+          alt={user?.name || 'Usuário'}
           style={styles.avatar}
         />
-        <h2 style={styles.greeting}>Olá, Alfredo</h2>
+        <h2 style={styles.greeting}>Olá, {user?.name || 'Usuário'}</h2>
+        <p style={{ margin: 0, color: '#333', fontSize: 14 }}>
+          {user?.email && <>Email: {user.email}<br /></>}
+          {user?.city && <>Cidade: {user.city}<br /></>}
+          {user?.state && <>Estado: {user.state}<br /></>}
+          {user?.country && <>País: {user.country}</>}
+        </p>
       </div>
 
       {/* Botões */}
@@ -71,7 +95,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column' as 'column',
     alignItems: 'center',
-    paddingBottom: 70, // espaço para o rodapé
+    paddingBottom: 70,
   },
   header: {
     width: '100%',
