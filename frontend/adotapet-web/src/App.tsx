@@ -17,6 +17,21 @@ import logo from './icon_3x.png';
 function IndexPage() {
   const navigate = useNavigate();
 
+  // Estilo para os botões
+  const buttonStyle: React.CSSProperties = {
+    width: 220,
+    height: 50,
+    fontSize: 18,
+    fontWeight: 'bold',
+    margin: '10px 0',
+    borderRadius: 8,
+    backgroundColor: '#FFD54F',
+    color: '#222',
+    border: 'none',
+    cursor: 'pointer',
+    transition: 'background 0.2s',
+  };
+
   return (
     <div className="App">
       <div style={{ paddingTop: 60, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
@@ -31,64 +46,16 @@ function IndexPage() {
           Bem-vindo ao AdotaPet!
         </h1>
         <button
-          className="App-button"
+          style={buttonStyle}
           onClick={() => navigate('/sign-up')}
         >
           Criar Conta
         </button>
         <button
-          className="App-button"
+          style={buttonStyle}
           onClick={() => navigate('/login')}
         >
           Login
-        </button>
-        <button
-          className="App-button"
-          onClick={() => navigate('/home')}
-        >
-          Home
-        </button>
-        <button
-          className="App-button"
-          onClick={() => navigate('/cadastro-de-pet')}
-        >
-          Cadastrar Pet Para Adoção
-        </button>
-        <button
-          className="App-button"
-          onClick={() => navigate('/dogs-adoption')}
-        >
-          Quero Adotar
-        </button>
-        <button
-          className="App-button"
-          onClick={() => navigate('/edit-profile')}
-        >
-          Editar Perfil
-        </button>
-        <button
-          className="App-button"
-          onClick={() => navigate('/liked-pets')}
-        >
-          Pets curtidos
-        </button>
-        <button
-          className="App-button"
-          onClick={() => navigate('/my-pets')}
-        >
-          Meus pets para adoção
-        </button>
-        <button
-          className="App-button"
-          onClick={() => navigate('/profile')}
-        >
-          Perfil
-        </button>
-        <button
-          className="App-button"
-          onClick={() => navigate('/settings')}
-        >
-          Configurações
         </button>
       </div>
     </div>

@@ -19,7 +19,7 @@ export default function Login() {
 
   const handleLogin = async () => {
     try {
-      const response = await fetch(`/api/user/login`, {
+      const response = await fetch('http://localhost:8080/user/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -27,22 +27,20 @@ export default function Login() {
           password: login.password,
         }),
       });
+
       const data = await response.json();
-      const message = data.message;
+      console.log('Resposta do login:', data);
 
-      if (message?.startsWith('Login Sucessfull') && data.data?.id) {
-        // Guarda o ID do usuário para uso em outras telas
+      if (response.ok && data.message && data.message.toLowerCase().includes('login sucessful')) {
+        console.log('teste');
         localStorage.setItem('userId', String(data.data.id));
-        localStorage.setItem('city', String(data.data.city));
-
-        alert('Login realizado com sucesso!');
         navigate('/home');
-      } else if (message === 'Password incorrect') {
+      } else if (data.message && data.message.toLowerCase().includes('password incorrect')) {
         alert('Senha incorreta. Tente novamente.');
-      } else if (message === 'User not found') {
+      } else if (data.message && data.message.toLowerCase().includes('user not found')) {
         alert('Usuário não encontrado. Verifique o e‑mail.');
       } else {
-        alert(message || 'Erro ao fazer login.');
+        alert(data.message || 'Erro ao fazer login.');
       }
     } catch (error) {
       console.error(error);
