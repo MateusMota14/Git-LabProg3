@@ -175,7 +175,7 @@ public class DogService {
         if (!dog.getUserLike().contains(userId)) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot match: user has not liked this dog");
         }
-        dog.removeUserLike(userId);
+        //dog.removeUserLike(userId);
         dog.addUserMatch(userId);
         dogRepository.save(dog);
 

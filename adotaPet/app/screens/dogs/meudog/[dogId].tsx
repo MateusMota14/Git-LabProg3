@@ -1,241 +1,225 @@
-// import React, { useEffect, useState } from 'react';
-// import {
-//   View,
-//   Text,
-//   Image,
-//   StyleSheet,
-//   FlatList,
-//   Dimensions,
-//   ActivityIndicator,
-//   SafeAreaView,
-//   TouchableOpacity,
-//   Platform,
-//   StatusBar
-// } from 'react-native';
-// import { useLocalSearchParams, useRouter } from 'expo-router';
-// import AsyncStorage from '@react-native-async-storage/async-storage';
-// import { Ionicons } from '@expo/vector-icons';
-// import AdotaPetBackground from '../../../../assets/components/AdotaPetBackground';
-// import { Ip } from '@/assets/constants/config';
+// app/screens/dogs/meudog/[dogId].tsx
 
-// const { width: windowWidth } = Dimensions.get('window');
-// const imageHeight = windowWidth; // quadrado
+import React, { useEffect, useState } from 'react';
+import {
+  View, Text, Image, StyleSheet, FlatList,
+  Dimensions, ActivityIndicator, SafeAreaView,
+  TouchableOpacity, Platform, StatusBar, ImageStyle, Alert
+} from 'react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Ionicons } from '@expo/vector-icons';
+import AdotaPetBackground from '../../../../assets/components/AdotaPetBackground';
+import { Ip } from '@/assets/constants/config';
 
-// interface DogDetail {
-//   id: number;
-//   name: string;
-//   breed: string;
-//   age: number;
-//   size: string;
-//   gender: string;
-//   urlPhotos: string[];
-//   // pode vir [{ id: 1 }] ou [1]
-//   userLike: Array<{ id: number | string } | number>;
-// }
+const windowWidth = Dimensions.get('window').width;
+const CARD_MARGIN = 10;
+const CARD_WIDTH = (windowWidth - CARD_MARGIN * 3) / 2;
 
-// export default function DogProfileScreen() {
-//   const router = useRouter();
-//   const { dogId } = useLocalSearchParams<{ dogId: string }>();
+interface UserCard { id: number; name: string; imgUri: string; }
+interface FallbackImageProps { uri: string; style?: ImageStyle; }
 
-//   const [dog, setDog] = useState<DogDetail | null>(null);
-//   const [photos, setPhotos] = useState<string[]>([]);
-//   const [loading, setLoading] = useState(true);
+const FallbackImage: React.FC<FallbackImageProps> = ({ uri, style }) => {
+  const [errored, setErrored] = useState(false);
+  return (
+    <Image
+      source={ errored
+        ? require('../../../../assets/images/user_default.png')
+        : { uri }
+      }
+      style={style}
+      onError={() => setErrored(true)}
+    />
+  );
+};
 
-//   const [liked, setLiked] = useState(false);
-//   const [isLiking, setIsLiking] = useState(false);
+export default function DogLikesScreen() {
+  const { dogId } = useLocalSearchParams<{ dogId: string }>();
+  const [users, setUsers] = useState<UserCard[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState<number[]>([]);
+  const router = useRouter();
 
-//   useEffect(() => {
-//     async function loadDog() {
-//       try {
-//         const res = await fetch(`http://${Ip}:8080/dog/id?id=${dogId}`);
-//         const json = await res.json();
-//         const data: DogDetail = json.data;
-//         setDog(data);
+  useEffect(() => {
+    (async () => {
+      try {
+        // busca dog para extrair userLike[]
+        const resDog = await fetch(`http://${Ip}:8080/dog/id?id=${dogId}`);
+        const { data: dog } = await resDog.json();
+        const likedIds: number[] = dog.userLike;
 
-//         // monta URLs de foto
-//         const uris = data.urlPhotos?.map(path => {
-//           const idx = path.indexOf('/static/');
-//           if (idx >= 0) {
-//             const rel = path.substring(idx + '/static/'.length);
-//             return `http://${Ip}/${rel}`;
-//           }
-//           return `http://${Ip}/${path}`;
-//         }) ?? [];
-//         setPhotos(uris);
+        const cards: UserCard[] = [];
+        for (const uid of likedIds) {
+          const resUser = await fetch(`http://${Ip}:8080/user/id?id=${uid}`);
+          const { data: u } = await resUser.json();
+          let path = u.img.replace(/\\/g, '/');
+          const idx = path.indexOf('static/');
+          if (idx >= 0) path = path.substring(idx + 7);
+          const imgUri = `http://${Ip}:8080/${path}`;
+          cards.push({ id: u.id, name: u.name, imgUri });
+        }
+        setUsers(cards);
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoading(false);
+      }
+    })();
+  }, [dogId]);
 
-//         // recupera userId
-//         const me = await AsyncStorage.getItem('userId');
-//         const uid = me ? Number(me) : null;
+  const handleMatch = async (userId: number) => {
+    if (processing.includes(userId)) return;
+    setProcessing(ps => [...ps, userId]);
 
-//         if (uid !== null) {
-//           // extrai todos os IDs numericamente
-//           const likedIds = data.userLike.map(u =>
-//             typeof u === 'number' ? u : Number(u.id)
-//           );
-//           if (likedIds.includes(uid)) {
-//             setLiked(true);
-//           }
-//         }
-//       } catch (err) {
-//         console.error('Erro ao carregar detalhes do cão:', err);
-//       } finally {
-//         setLoading(false);
-//       }
-//     }
-//     loadDog();
-//   }, [dogId]);
+    try {
+      const resMatch = await fetch(
+        `http://${Ip}:8080/dog/usermatch/${userId}/${dogId}`,
+        { method: 'POST' }
+      );
+      const jsonMatch = await resMatch.json();
 
-//   const handleLike = async () => {
-//     if (liked || isLiking) return;
+      if (Array.isArray(jsonMatch.data) && jsonMatch.data.length > 0) {
+        await fetch(`http://${Ip}:8080/chat`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            userOwner: { id: Number(await AsyncStorage.getItem('userId')) },
+            userAdopt: { id: userId }
+          })
+        });
+        router.push('/screens/chat/chatListScreen');
+      } else {
+        Alert.alert('Match não confirmado', jsonMatch.message);
+      }
+    } catch (e) {
+      console.error('Erro ao dar match:', e);
+    } finally {
+      setProcessing(ps => ps.filter(id => id !== userId));
+    }
+  };
 
-//     setIsLiking(true);
-//     const me = await AsyncStorage.getItem('userId');
-//     const uid = me ? Number(me) : null;
-//     if (uid === null) {
-//       setIsLiking(false);
-//       return;
-//     }
+  if (loading) {
+    return (
+      <SafeAreaView style={styles.loaderContainer}>
+        <ActivityIndicator size="large" />
+      </SafeAreaView>
+    );
+  }
 
-//     try {
-//       const res = await fetch(
-//         `http://${Ip}:8080/dog/userlike/${uid}/${dogId}`,
-//         { method: 'POST' }
-//       );
-//       const body = await res.json();
-//       if (res.ok) {
-//         setLiked(true);
-//       } else {
-//         console.warn('Erro no like:', body);
-//       }
-//     } catch (err) {
-//       console.error('Falha de rede ao dar like:', err);
-//     } finally {
-//       setIsLiking(false);
-//     }
-//   };
+  return (
+    <AdotaPetBackground>
+      <SafeAreaView style={styles.container}>
+        <View style={styles.header}>
+          <Text style={styles.title}>Quem Curtiu</Text>
+          <View style={{ width: 24 }} />
+        </View>
 
-//   if (loading || !dog) {
-//     return (
-//       <SafeAreaView style={styles.loaderContainer}>
-//         <ActivityIndicator size="large" />
-//       </SafeAreaView>
-//     );
-//   }
+        {users.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>Ainda não há curtidas.</Text>
+          </View>
+        ) : (
+          <FlatList
+            data={users}
+            numColumns={2}
+            keyExtractor={i => i.id.toString()}
+            contentContainerStyle={styles.list}
+            renderItem={({ item }) => (
+              <View style={styles.card}>
+                <FallbackImage uri={item.imgUri} style={styles.avatar} />
+                <Text style={styles.name}>{item.name}</Text>
+                <TouchableOpacity
+                  style={styles.likeBtn}
+                  onPress={() => handleMatch(item.id)}
+                  disabled={processing.includes(item.id)}
+                >
+                  <Ionicons
+                    name="heart"
+                    size={24}
+                    color={processing.includes(item.id) ? 'gray' : 'gray'}
+                  />
+                </TouchableOpacity>
+              </View>
+            )}
+          />
+        )}
 
-//   const displayPhotos = photos.length
-//     ? photos
-//     : [require('../../../../assets/images/dog_default.jpg')];
+        <View style={styles.bottomNavigation}>
+                  <TouchableOpacity onPress={() => router.push('/screens/home')} style={styles.navButton}>
+                    <Ionicons name="home" size={20} color="#FFD54F" />
+                    <Text style={styles.navButtonText}>Home</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity onPress={() => router.push('/screens/chat/chatListScreen')} style={styles.navButton}>
+                    <Ionicons name="chatbubble" size={20} color="#FFD54F" />
+                    <Text style={styles.navButtonText}>Chat</Text>
+                  </TouchableOpacity>
+                </View>
+      </SafeAreaView>
+    </AdotaPetBackground>
+  );
+}
 
-//   return (
-//     <AdotaPetBackground>
-//       <SafeAreaView style={styles.container}>
-//         {/* Header */}
-//         <View style={styles.header}>
-//           <TouchableOpacity onPress={() => router.back()}>
-//             <Ionicons name="arrow-back" size={24} color="black" />
-//           </TouchableOpacity>
-//           <Text style={styles.headerTitle}>{dog.name}</Text>
-//           <View style={{ width: 24 }} />
-//         </View>
-
-//         {/* Carousel */}
-//         <FlatList
-//           data={displayPhotos}
-//           horizontal
-//           pagingEnabled
-//           showsHorizontalScrollIndicator={false}
-//           style={styles.flatList}
-//           keyExtractor={(_, idx) => idx.toString()}
-//           renderItem={({ item }) => (
-//             <Image
-//               source={typeof item === 'string' ? { uri: item } : item}
-//               style={styles.image}
-//             />
-//           )}
-//         />
-
-//         {/* Info */}
-//         <View style={[styles.infoContainer, { top: imageHeight * 1.2 }]}>
-//           <View style={styles.infoHeader}>
-//             <Text style={styles.name}>{dog.name}</Text>
-//             <TouchableOpacity
-//               onPress={handleLike}
-//               disabled={liked || isLiking}
-//             >
-//               <Ionicons
-//                 name="heart"
-//                 size={28}
-//                 color={liked ? 'red' : 'gray'}
-//               />
-//             </TouchableOpacity>
-//           </View>
-//           <Text style={styles.text}>Raça: {dog.breed}</Text>
-//           <Text style={styles.text}>Idade: {dog.age} anos</Text>
-//           <Text style={styles.text}>Gênero: {dog.gender}</Text>
-//           <Text style={styles.text}>Tamanho: {dog.size}</Text>
-//         </View>
-//       </SafeAreaView>
-//     </AdotaPetBackground>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   loaderContainer: {
-//     flex: 1,
-//     justifyContent: 'center',
-//     alignItems: 'center'
-//   },
-//   container: {
-//     flex: 1,
-//     backgroundColor: 'transparent'
-//   },
-//   header: {
-//     height:
-//       50 + (Platform.OS === 'android' ? StatusBar.currentHeight || 0 : 0),
-//     flexDirection: 'row',
-//     alignItems: 'center',
-//     justifyContent: 'space-between',
-//     paddingHorizontal: 20,
-//     backgroundColor: '#FFD54F',
-//     paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0
-//   },
-//   headerTitle: {
-//     fontSize: 18,
-//     fontWeight: 'bold',
-//     color: 'black'
-//   },
-//   flatList: {
-//     flexGrow: 0
-//   },
-//   image: {
-//     width: windowWidth,
-//     height: imageHeight,
-//     resizeMode: 'cover'
-//   },
-//   infoContainer: {
-//     position: 'absolute',
-//     left: 20,
-//     right: 20,
-//     backgroundColor: 'transparent'
-//   },
-//   infoHeader: {
-//     flexDirection: 'row',
-//     justifyContent: 'space-between',
-//     alignItems: 'center'
-//   },
-//   name: {
-//     fontSize: 28,
-//     fontWeight: 'bold',
-//     marginBottom: 4,
-//     color: '#333'
-//   },
-//   text: {
-//     fontSize: 18,
-//     marginBottom: 4,
-//     color: '#333',
-//     backgroundColor: '#FFD54F',
-//     borderRadius: 10,
-//     paddingHorizontal: 10,
-//     alignSelf: 'flex-start'
-//   }
-// });
+const styles = StyleSheet.create({
+  loaderContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyContainer: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+  emptyText: { fontSize: 16, color: '#555' },
+  container: {
+    flex: 1,
+    paddingTop: Platform.OS === 'android' ? StatusBar.currentHeight : 0,
+    paddingBottom: 80
+  },
+  header: {
+    height: 50,
+    backgroundColor: '#FFD54F',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 16
+  },
+  title: { fontSize: 20, fontWeight: 'bold', color: 'black' },
+  list: {
+    paddingHorizontal: CARD_MARGIN,
+    paddingTop: 15,
+    alignItems: 'center'
+  },
+  card: {
+    width: CARD_WIDTH,
+    margin: CARD_MARGIN / 2,
+    backgroundColor: '#FFD54F',
+    borderRadius: 8,
+    alignItems: 'center',
+    paddingVertical: 10,
+    elevation: 2
+  },
+  avatar: {
+    width: CARD_WIDTH - 20,
+    height: CARD_WIDTH - 20,
+    borderRadius: (CARD_WIDTH - 20) / 2,
+    marginBottom: 8
+  },
+  name: { fontSize: 16, fontWeight: 'bold', marginBottom: 4 },
+  likeBtn: { marginTop: 6 },
+  bottomNavigation: {
+    flexDirection: 'row',
+    justifyContent: 'space-around',
+    alignItems: 'center',
+    padding: 10,
+    backgroundColor: 'black',
+    borderTopWidth: 1,
+    borderColor: '#ddd',
+    position: 'absolute',
+    bottom: 0,
+    width: '100%'
+  },
+  navButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    padding: 10
+  },
+  navButtonText: {
+    fontSize: 16,
+    fontWeight: 'bold',
+    color: '#FFD54F',
+    marginLeft: 5
+  }
+});

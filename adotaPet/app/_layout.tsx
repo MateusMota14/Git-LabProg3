@@ -31,16 +31,26 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={{ flex: 1 }}> {/* Envolva a navegação com GestureHandlerRootView */}
       <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
-        <Stack>
-          <Stack.Screen name="index" options={{ title: "Início" }} />
-          <Stack.Screen name="auth/SignupScreen" options={{ title: "Cadastro" }} />
-          <Stack.Screen name="auth/Login" options={{ title: "Login" }} />
-          <Stack.Screen name="screens/meusPets" options={{ title: "MeusPets" }} /> {/* import { useNavigation } from '@react-navigation/native';
-                                                                                                            const navigation = useNavigation();
-                                                                                                            useEffect(() => {
-                                                                                                              navigation.setOptions({ title: user.name });
-                                                                                                            }, [user]);*/}
+        <Stack
+          screenOptions={{
+            headerTitle: '',           // sem título
+            headerBackTitle: '',       // sem texto ao lado da seta
+            headerTransparent: true,   // só a seta, sem barra visível
+            headerTintColor: '#000',   // cor da seta (ajuste se precisar)
+          }}
+        >
+          {/* raiz: sem header nenhum */}
+          <Stack.Screen
+            name="index"
+            options={{ headerShown: false }}
+          />
+
+          todas as outras mostram só a seta
+          <Stack.Screen name="auth/SignupScreen" options={{ title: 'Cadastro' }} />
+          <Stack.Screen name="auth/Login" options={{ /* herda só a seta */ }} />
+          <Stack.Screen name="screens/meusPets" options={{ title: 'MeusPets' }} />
         </Stack>
+
         <StatusBar style="auto" />
       </ThemeProvider>
     </GestureHandlerRootView>

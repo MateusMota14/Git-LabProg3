@@ -16,6 +16,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
 import { Ip } from "../../assets/constants/config";
 import { useRouter } from "expo-router";
+import { Ionicons } from "@expo/vector-icons";
 
 const windowWidth = Dimensions.get("window").width;
 
@@ -80,20 +81,16 @@ export default function VisitanteProfileScreen() {
         }
 
         // lista de dogs
-        const dogRes = await fetch(
-          `http://${Ip}:8080/user/dogs?userId=${id}`
-        );
+        const dogRes = await fetch(`http://${Ip}:8080/user/dogs?userId=${id}`);
         const dogJson = await dogRes.json();
-        const dogArray: any[] = Array.isArray(dogJson.data)
-          ? dogJson.data
-          : [];
+        const dogArray: any[] = Array.isArray(dogJson.data) ? dogJson.data : [];
 
         const dogList: Dog[] = dogArray.map((dog) => ({
           id: dog.id,
           name: dog.name,
           gender: dog.gender,
           age: `${dog.age} anos`,
-          imgUri: `http://${Ip}:8080/dog/img/${dog.id}`, // só a URI
+          imgUri: `http://${Ip}:8080/dog/img/${dog.id}`,
         }));
 
         setDogs(dogList);
@@ -116,8 +113,10 @@ export default function VisitanteProfileScreen() {
     );
   }
 
-  const getProfileImage = () => {
-    if (userImgUrl && !imgError) return { uri: userImgUrl };
+  const getProfileImageSource = () => {
+    if (userImgUrl && !imgError) {
+      return { uri: userImgUrl };
+    }
     return require("../../assets/images/user_default.png");
   };
 
@@ -125,11 +124,18 @@ export default function VisitanteProfileScreen() {
     <SafeAreaView style={{ flex: 1 }}>
       <AdotaPetBackground>
         <ScrollView contentContainerStyle={styles.container}>
-          <Image
-            source={getProfileImage()}
-            style={styles.profileImage}
-            onError={() => setImgError(true)}
-          />
+          {/* Torna a imagem clicável */}
+          <TouchableOpacity
+            onPress={() => router.push("/screens/profile")}
+            activeOpacity={0.7}
+          >
+            <Image
+              source={getProfileImageSource()}
+              style={styles.profileImage}
+              onError={() => setImgError(true)}
+            />
+          </TouchableOpacity>
+
           <Text style={styles.name}>{user?.name}</Text>
           <Text style={styles.location}>
             {user ? `${user.city} - ${user.state}, ${user.country}` : ""}
@@ -140,17 +146,9 @@ export default function VisitanteProfileScreen() {
             numColumns={2}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
-              <TouchableOpacity
-                style={styles.dogCard}
-                onPress={() =>
-                  router.push(`/screens/dogs/meudog/${item.id}`)
-                }
-              >
-                {/* aqui o fallback */}
-                <FallbackImage
-                  uri={item.imgUri}
-                  style={styles.dogImage}
-                />
+              <View style={styles.dogCard}>
+                {/* imagem do cão */}
+                <FallbackImage uri={item.imgUri} style={styles.dogImage} />
 
                 <View style={styles.dogInfo}>
                   <Text style={styles.dogName}>{item.name}</Text>
@@ -160,7 +158,15 @@ export default function VisitanteProfileScreen() {
                     <Text style={styles.dogAge}>{item.age}</Text>
                   </View>
                 </View>
-              </TouchableOpacity>
+
+                {/* botão de edição abaixo da foto */}
+                <TouchableOpacity
+                  style={styles.editButton}
+                  onPress={() => router.push(`/screens/${item.id}`)}
+                >
+                  <Text style={styles.editButtonText}>Editar</Text>
+                </TouchableOpacity>
+              </View>
             )}
             contentContainerStyle={styles.dogList}
             scrollEnabled={false}
@@ -169,25 +175,61 @@ export default function VisitanteProfileScreen() {
             )}
           />
         </ScrollView>
+
+        <View style={styles.bottomNavigation}>
+          <TouchableOpacity
+            onPress={() => router.push("/screens/home")}
+            style={styles.navButton}
+          >
+            <Ionicons name="home" size={20} color="#FFD54F" />
+            <Text style={styles.navButtonText}>Home</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            onPress={() => router.push("/screens/chat/chatListScreen")}
+            style={styles.navButton}
+          >
+            <Ionicons name="chatbubble" size={20} color="#FFD54F" />
+            <Text style={styles.navButtonText}>Chat</Text>
+          </TouchableOpacity>
+        </View>
       </AdotaPetBackground>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  loaderContainer: { flex: 1, justifyContent: "center", alignItems: "center" },
-  container: { padding: 20, alignItems: "center" },
+  loaderContainer: {
+    flex: 1,
+    justifyContent: "center",
+    alignItems: "center"
+  },
+  container: {
+    padding: 20,
+    alignItems: "center"
+  },
   profileImage: {
     width: 120,
     height: 120,
     borderRadius: 60,
     borderWidth: 2,
     borderColor: "#FFD54F",
-    marginBottom: 10,
+    marginBottom: 10
   },
-  name: { fontSize: 22, fontWeight: "bold", color: "#333" },
-  location: { fontSize: 16, color: "#666", marginBottom: 20 },
-  dogList: { width: "100%", justifyContent: "space-between", paddingBottom: 20 },
+  name: {
+    fontSize: 22,
+    fontWeight: "bold",
+    color: "#333"
+  },
+  location: {
+    fontSize: 16,
+    color: "#666",
+    marginBottom: 20
+  },
+  dogList: {
+    width: "100%",
+    justifyContent: "space-between",
+    paddingBottom: 20
+  },
   dogCard: {
     width: (windowWidth - 60) / 2,
     marginBottom: 15,
@@ -196,18 +238,81 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     backgroundColor: "#FFD54F",
     elevation: 2,
+    alignItems: "center",  // centraliza o conteúdo
+    paddingBottom: 10      // espaço inferior para o botão
   },
-  dogImage: { width: "100%", height: 200 },
-  dogInfo: { padding: 10, alignItems: "center" },
-  dogName: { fontSize: 16, fontWeight: "bold", color: "#333" },
-  separator: { width: "100%", height: 1, backgroundColor: "#fff", marginVertical: 6 },
+  dogImage: {
+    width: "100%",
+    height: 200
+  },
+  dogInfo: {
+    padding: 10,
+    alignItems: "center"
+  },
+  dogName: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#333"
+  },
+  separator: {
+    width: "100%",
+    height: 1,
+    backgroundColor: "#fff",
+    marginVertical: 6
+  },
   detailsRow: {
     flexDirection: "row",
     justifyContent: "space-between",
     width: "100%",
-    paddingHorizontal: 10,
+    paddingHorizontal: 10
   },
-  dogGender: { fontSize: 14, color: "#777" },
-  dogAge: { fontSize: 14, color: "#555" },
-  emptyText: { fontSize: 16, color: "#555", marginTop: 20 },
+  dogGender: {
+    fontSize: 14,
+    color: "#777"
+  },
+  dogAge: {
+    fontSize: 14,
+    color: "#555"
+  },
+  editButton: {
+    marginTop: 8,
+    backgroundColor: "black",
+    paddingVertical: 6,
+    paddingHorizontal: 12,
+    borderRadius: 6,
+    borderWidth: 1,
+  },
+  editButtonText: {
+    color: "#FFD54F",
+    fontSize: 14,
+    fontWeight: "bold"
+  },
+  emptyText: {
+    fontSize: 16,
+    color: "#555",
+    marginTop: 20
+  },
+  bottomNavigation: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    padding: 10,
+    backgroundColor: "black",
+    borderTopWidth: 1,
+    borderColor: "#ddd",
+    position: "absolute",
+    bottom: 0,
+    width: "100%"
+  },
+  navButton: {
+    flexDirection: "row",
+    alignItems: "center",
+    padding: 10
+  },
+  navButtonText: {
+    fontSize: 16,
+    fontWeight: "bold",
+    color: "#FFD54F",
+    marginLeft: 5
+  }
 });
