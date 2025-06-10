@@ -1,11 +1,14 @@
 import React, { useState } from 'react';
+import patas from '../pata.png'; // Adicione este import
 
 interface FormData {
   petName: string;
   petAge: string;
   petBreed: string;
   petDescription: string;
-  petImages: string[];
+  petGender: string;
+  petSize: string;
+  petImages: File[];
 }
 
 export default function CadastroDePet() {
@@ -14,9 +17,12 @@ export default function CadastroDePet() {
     petAge: '',
     petBreed: '',
     petDescription: '',
+    petGender: '',
+    petSize: '',
     petImages: [],
   });
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, boolean>>>({});
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -24,101 +30,317 @@ export default function CadastroDePet() {
   };
 
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const files = Array.from(e.target.files);
-      const uris = files.map(file => URL.createObjectURL(file));
-      setFormData((prev) => ({ ...prev, petImages: uris }));
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      setFormData((prev) => ({ ...prev, petImages: Array.from(files) }));
       if (errors.petImages) setErrors((prev) => ({ ...prev, petImages: false }));
     }
   };
 
-  const validateForm = async () => {
-  const newErrors: Partial<Record<keyof FormData, boolean>> = {};
-  (Object.keys(formData) as (keyof FormData)[]).forEach((field) => {
-    const value = formData[field];
-    if (typeof value === 'string') {
-      if (!value.trim()) newErrors[field] = true;
-    } else if (Array.isArray(value)) {
-      if (value.length === 0) newErrors[field] = true;
-    }
-  });
-  setErrors(newErrors);
-  if (Object.keys(newErrors).length === 0) {
-    // Monta o formData para envio de imagens
-    const data = new FormData();
-    data.append('petName', formData.petName);
-    data.append('petAge', formData.petAge);
-    data.append('petBreed', formData.petBreed);
-    data.append('petDescription', formData.petDescription);
-    // Adiciona as imagens
-    const fileInput = document.querySelector('input[type="file"]') as HTMLInputElement;
-    if (fileInput && fileInput.files) {
-      Array.from(fileInput.files).forEach((file) => {
-        data.append('petImages', file);
-      });
-    }
+  const validateForm = () => {
+    const newErrors: Partial<Record<keyof FormData, boolean>> = {};
+    if (!formData.petName.trim()) newErrors.petName = true;
+    if (!formData.petBreed.trim()) newErrors.petBreed = true;
+    if (!formData.petAge.trim()) newErrors.petAge = true;
+    if (!formData.petDescription.trim()) newErrors.petDescription = true;
+    if (!formData.petGender) newErrors.petGender = true;
+    if (!formData.petSize) newErrors.petSize = true;
+    if (!formData.petImages.length) newErrors.petImages = true;
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!validateForm()) return;
+    setLoading(true);
 
     try {
-      const response = await fetch('/api/pets', {
+      // 1. Cria o dog no backend
+      const userId = localStorage.getItem('userId');
+      if (!userId) throw new Error('Usuário não logado');
+
+      const dogRes = await fetch('http://localhost:8080/dog/create', {
         method: 'POST',
-        body: data,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: formData.petName,
+          breed: formData.petBreed,
+          age: formData.petAge,
+          description: formData.petDescription,
+          gender: formData.petGender,
+          size: formData.petSize,
+          user: { id: Number(userId) }
+        }),
       });
-      if (response.ok) {
-        alert('Pet cadastrado com sucesso!');
-        // Limpe o formulário ou redirecione se quiser
-      } else {
+
+      const dogData = await dogRes.json();
+      if (!dogRes.ok || !dogData.data || !dogData.data.id) {
         alert('Erro ao cadastrar pet');
+        setLoading(false);
+        return;
       }
+      const dogId = dogData.data.id;
+
+      // 2. Faz upload das fotos
+      for (const file of formData.petImages) {
+        const reader = new FileReader();
+        await new Promise<void>((resolve, reject) => {
+          reader.onload = async () => {
+            const base64 = (reader.result as string).split(',')[1];
+            await fetch('http://localhost:8080/dog/upload-photo', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({
+                id: dogId,
+                photoBase64: base64,
+              }),
+            });
+            resolve();
+          };
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      }
+
+      alert('Pet cadastrado com sucesso!');
+      // Limpe o formulário ou redirecione se quiser
+      setFormData({
+        petName: '',
+        petAge: '',
+        petBreed: '',
+        petDescription: '',
+        petGender: '',
+        petSize: '',
+        petImages: [],
+      });
     } catch (err) {
-      alert('Erro de conexão com o servidor');
+      alert('Erro ao conectar ao servidor');
+    } finally {
+      setLoading(false);
     }
-  }
-};
+  };
 
   return (
-    <div style={{ padding: 40, maxWidth: 500, margin: '0 auto' }}>
-      <h2 style={{ marginBottom: 20 }}>Registrar Pet</h2>
-      <input
-        type="text"
-        placeholder="Nome do Pet"
-        value={formData.petName}
-        onChange={e => handleChange('petName', e.target.value)}
-        style={{ width: '100%', height: 40, marginBottom: 10, borderRadius: 8, border: errors.petName ? '2px solid #FF3B30' : '1px solid #FFD54F', padding: 8 }}
-      />
-      <input
-        type="text"
-        placeholder="Raça"
-        value={formData.petBreed}
-        onChange={e => handleChange('petBreed', e.target.value)}
-        style={{ width: '100%', height: 40, marginBottom: 10, borderRadius: 8, border: errors.petBreed ? '2px solid #FF3B30' : '1px solid #FFD54F', padding: 8 }}
-      />
-      <input
-        type="text"
-        placeholder="Idade do Pet"
-        value={formData.petAge}
-        onChange={e => handleChange('petAge', e.target.value)}
-        style={{ width: '100%', height: 40, marginBottom: 10, borderRadius: 8, border: errors.petAge ? '2px solid #FF3B30' : '1px solid #FFD54F', padding: 8 }}
-      />
-      <input
-        type="text"
-        placeholder="Bio"
-        value={formData.petDescription}
-        onChange={e => handleChange('petDescription', e.target.value)}
-        style={{ width: '100%', height: 40, marginBottom: 10, borderRadius: 8, border: errors.petDescription ? '2px solid #FF3B30' : '1px solid #FFD54F', padding: 8 }}
-      />
-      <input
-        type="file"
-        accept="image/*"
-        multiple
-        onChange={handleImageChange}
-        style={{ marginBottom: 10 }}
-      />
-      <div style={{ display: 'flex', flexWrap: 'wrap', marginBottom: 10 }}>
-        {formData.petImages.map((uri, idx) => (
-          <img key={idx} src={uri} alt="pet" style={{ width: 100, height: 100, margin: 5, borderRadius: 8 }} />
-        ))}
-      </div>
-      <button className="App-button" onClick={validateForm}>Enviar</button>
+    <div style={styles.page}>
+      <button style={styles.backButton} onClick={() => window.history.back()} aria-label="Voltar">←</button>
+      <h2 style={styles.title}>Registrar Pet</h2>
+      <form style={styles.form} onSubmit={handleSubmit}>
+        <input
+          type="text"
+          placeholder="Nome do Pet"
+          value={formData.petName}
+          onChange={e => handleChange('petName', e.target.value)}
+          style={{ ...styles.input, border: errors.petName ? '2px solid #FF3B30' : styles.input.border }}
+        />
+        <input
+          type="text"
+          placeholder="Raça"
+          value={formData.petBreed}
+          onChange={e => handleChange('petBreed', e.target.value)}
+          style={{ ...styles.input, border: errors.petBreed ? '2px solid #FF3B30' : styles.input.border }}
+        />
+        <input
+          type="text"
+          placeholder="Idade do Pet"
+          value={formData.petAge}
+          onChange={e => handleChange('petAge', e.target.value)}
+          style={{ ...styles.input, border: errors.petAge ? '2px solid #FF3B30' : styles.input.border }}
+        />
+        <input
+          type="text"
+          placeholder="Bio"
+          value={formData.petDescription}
+          onChange={e => handleChange('petDescription', e.target.value)}
+          style={{ ...styles.input, border: errors.petDescription ? '2px solid #FF3B30' : styles.input.border }}
+        />
+
+        <div style={styles.radioGroup}>
+          <label style={styles.radioLabel}>
+            <input
+              type="radio"
+              name="gender"
+              value="Macho"
+              checked={formData.petGender === 'Macho'}
+              onChange={() => handleChange('petGender', 'Macho')}
+            /> Macho
+          </label>
+          <label style={styles.radioLabel}>
+            <input
+              type="radio"
+              name="gender"
+              value="Fêmea"
+              checked={formData.petGender === 'Fêmea'}
+              onChange={() => handleChange('petGender', 'Fêmea')}
+            /> Fêmea
+          </label>
+        </div>
+
+        <div style={styles.radioGroup}>
+          <label style={styles.radioLabel}>
+            <input
+              type="radio"
+              name="size"
+              value="Pequeno"
+              checked={formData.petSize === 'Pequeno'}
+              onChange={() => handleChange('petSize', 'Pequeno')}
+            /> Pequeno
+          </label>
+          <label style={styles.radioLabel}>
+            <input
+              type="radio"
+              name="size"
+              value="Médio"
+              checked={formData.petSize === 'Médio'}
+              onChange={() => handleChange('petSize', 'Médio')}
+            /> Médio
+          </label>
+          <label style={styles.radioLabel}>
+            <input
+              type="radio"
+              name="size"
+              value="Grande"
+              checked={formData.petSize === 'Grande'}
+              onChange={() => handleChange('petSize', 'Grande')}
+            /> Grande
+          </label>
+        </div>
+
+        <label style={styles.selectImageLabel}>
+          <input
+            type="file"
+            accept="image/*"
+            multiple
+            onChange={handleImageChange}
+            style={{ display: 'none' }}
+          />
+          <span style={styles.selectImageButton}>Selecionar Imagem</span>
+        </label>
+        {errors.petImages && <span style={{ color: '#FF3B30', fontSize: 12 }}>Selecione pelo menos uma imagem</span>}
+
+        <div style={styles.previewContainer}>
+          {formData.petImages.map((file, idx) => (
+            <img
+              key={idx}
+              src={URL.createObjectURL(file)}
+              alt="pet"
+              style={styles.previewImage}
+            />
+          ))}
+        </div>
+
+        <button type="submit" style={styles.submitButton} disabled={loading}>
+          {loading ? 'Enviando...' : 'Enviar'}
+        </button>
+      </form>
     </div>
   );
 }
+
+const styles = {
+  page: {
+    minHeight: '20vh',
+    backgroundColor: '#ffffff',
+    backgroundImage: `url(${patas})`, // Use a imagem importada
+    backgroundRepeat: 'repeat',
+    backgroundSize: '45px',
+    padding: '24px 0',
+    position: 'relative' as 'relative',
+  },
+  backButton: {
+    position: 'absolute' as 'absolute',
+    left: 20,
+    top: 24,
+    background: 'none',
+    border: 'none',
+    fontSize: 28,
+    cursor: 'pointer',
+    color: '#333',
+    fontWeight: 'bold',
+  },
+  title: {
+    textAlign: 'center' as 'center',
+    fontSize: 32,
+    fontWeight: 'bold',
+    marginBottom: 24,
+    marginTop: 16,
+    color: '#222',
+  },
+  form: {
+    maxWidth: 400,
+    margin: '0 auto',
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    gap: 10,
+    background: 'rgba(255,255,255,0.95)',
+    borderRadius: 16,
+    padding: 24,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+  },
+  input: {
+    width: '96%',
+    height: 40,
+    marginBottom: 0,
+    borderRadius: 8,
+    border: '1px solid #FFD54F',
+    padding: 8,
+    fontSize: 16,
+    background: '#fff',
+  },
+  radioGroup: {
+    display: 'flex',
+    flexDirection: 'row' as 'row',
+    justifyContent: 'center',
+    gap: 24,
+    marginBottom: 0,
+  },
+  radioLabel: {
+    fontSize: 16,
+    color: '#333',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 4,
+  },
+  selectImageLabel: {
+    display: 'block',
+    margin: '16px 0 8px 0',
+    textAlign: 'center' as 'center',
+    cursor: 'pointer',
+  },
+  selectImageButton: {
+    background: '#FFD54F',
+    color: '#222',
+    fontWeight: 'bold',
+    padding: '12px 24px',
+    borderRadius: 8,
+    fontSize: 16,
+    display: 'inline-block',
+    cursor: 'pointer',
+    border: 'none',
+  },
+  previewContainer: {
+    display: 'flex',
+    flexWrap: 'wrap' as 'wrap',
+    gap: 8,
+    justifyContent: 'center',
+    marginBottom: 8,
+  },
+  previewImage: {
+    width: 80,
+    height: 80,
+    objectFit: 'cover' as 'cover',
+    borderRadius: 8,
+    border: '1px solid #FFD54F',
+  },
+  submitButton: {
+    background: '#FFD54F',
+    color: '#222',
+    fontWeight: 'bold',
+    padding: '12px 24px',
+    borderRadius: 8,
+    fontSize: 18,
+    border: 'none',
+    cursor: 'pointer',
+    marginTop: 10,
+  },
+};
