@@ -44,7 +44,7 @@ public class UserEntity {
     }
 
     public UserEntity(String name, String email, String password,
-            String country, String state, String city, String zCode) {
+        String country, String state, String city, String zCode) {
         this.name = name;
         this.email = email;
         this.password = password;
