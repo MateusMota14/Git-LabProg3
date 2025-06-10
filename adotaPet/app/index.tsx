@@ -2,7 +2,7 @@ import React from 'react';
 import { View, Text, Image, StyleSheet, TouchableOpacity, ScrollView } from 'react-native';
 import { useRouter } from 'expo-router';
 import AdotaPetBackground from '../assets/components/AdotaPetBackground';
-import { globalStyles } from '../assets/constants/styles';
+import { Ionicons, FontAwesome5 } from '@expo/vector-icons';
 
 export default function DogProfile() {
   const router = useRouter();
