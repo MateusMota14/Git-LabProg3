@@ -144,21 +144,18 @@ export default function VisitanteProfileScreen() {
           <FlatList
             data={dogs}
             numColumns={2}
+            contentContainerStyle={styles.dogList}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <View style={styles.dogCard}>
                 {/* imagem do cão */}
-                
-                <FallbackImage uri={item.imgUri} style={styles.dogImage} />
+                  <TouchableOpacity
+                    style={styles.dogImage}
+                    onPress={() => router.push(`/screens/dogs/meusDogs/${item.id}`)}
+                  >
+                    <FallbackImage uri={`http://${Ip}:8080/dog/img/${item.id}`}style={styles.dogImage} />
 
-                <View style={styles.dogInfo}>
-                  <Text style={styles.dogName}>{item.name}</Text>
-                  <View style={styles.separator} />
-                  <View style={styles.detailsRow}>
-                    <Text style={styles.dogGender}>{item.gender}</Text>
-                    <Text style={styles.dogAge}>{item.age}</Text>
-                  </View>
-                </View>
+                </TouchableOpacity>
 
                 {/* botão de edição abaixo da foto */}
                 <TouchableOpacity
@@ -169,7 +166,6 @@ export default function VisitanteProfileScreen() {
                 </TouchableOpacity>
               </View>
             )}
-            contentContainerStyle={styles.dogList}
             scrollEnabled={false}
             ListEmptyComponent={() => (
               <Text style={styles.emptyText}>Nenhum pet cadastrado</Text>
@@ -244,10 +240,11 @@ const styles = StyleSheet.create({
   },
   dogImage: {
     width: "100%",
-    height: 200
+    height: 200,
+    paddingBottom:0,
   },
   dogInfo: {
-    padding: 10,
+    padding: 0,
     alignItems: "center"
   },
   dogName: {

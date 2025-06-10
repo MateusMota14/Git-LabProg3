@@ -16,7 +16,7 @@ import {
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Ionicons } from '@expo/vector-icons';
-import AdotaPetBackground from '../../../assets/components/AdotaPetBackground';
+import AdotaPetBackground from '../../../../assets/components/AdotaPetBackground';
 import { Ip } from '@/assets/constants/config';
 
 const { width: windowWidth, height: windowHeight } = Dimensions.get('window');
@@ -29,7 +29,7 @@ const FallbackImage: React.FC<{ uri: string; style?: ImageStyle }> = ({ uri, sty
     <Image
       source={
         errored
-          ? require('../../../assets/images/dog_default.jpg')
+          ? require('../../../../assets/images/dog_default.jpg')
           : { uri }
       }
       style={style}
@@ -153,7 +153,7 @@ export default function DogProfileScreen() {
           renderItem={({ item }) =>
             item === 'DEFAULT' ? (
               <Image
-                source={require('../../../assets/images/dog_default.jpg')}
+                source={require('../../../../assets/images/dog_default.jpg')}
                 style={styles.image}
               />
             ) : (
@@ -166,13 +166,13 @@ export default function DogProfileScreen() {
         <View style={[styles.infoContainer, { top: imageHeight * 1.1 }]}>
           <View style={styles.infoHeader}>
             <Text style={styles.name}>{dog.name}</Text>
-            {/* <TouchableOpacity onPress={handleLike} disabled={liked || isLiking}>
+            <TouchableOpacity onPress={handleLike} disabled={liked || isLiking}>
               <Ionicons
                 name="heart"
                 size={28}
                 color={liked ? 'red' : 'gray'}
               />
-            </TouchableOpacity> */}
+            </TouchableOpacity>
           </View>
           <Text style={styles.text}>Raça: {dog.breed}</Text>
           <Text style={styles.text}>Idade: {dog.age} anos</Text>
