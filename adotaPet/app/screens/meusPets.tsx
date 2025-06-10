@@ -148,6 +148,7 @@ export default function VisitanteProfileScreen() {
             renderItem={({ item }) => (
               <View style={styles.dogCard}>
                 {/* imagem do cão */}
+                
                 <FallbackImage uri={item.imgUri} style={styles.dogImage} />
 
                 <View style={styles.dogInfo}>

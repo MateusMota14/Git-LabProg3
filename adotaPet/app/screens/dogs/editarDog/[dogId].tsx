@@ -12,7 +12,7 @@ import {
   Image,
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter, useNavigation } from "expo-router";
+import { useRouter, useNavigation, useLocalSearchParams} from "expo-router";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { globalStyles } from "@/assets/constants/styles";
 import AdotaPetBackground from "@/assets/components/AdotaPetBackground";
@@ -23,29 +23,30 @@ interface FormData {
   petName: string;
   petAge: string;
   petBreed: string;
-  //petImages: string[];
+  petImages: string[];
   petGender: string,
   petSize: string,
   userId: number,
+  petId: number,
 }
 
 const AdoptionRegistration: React.FC = () => {
   const router = useRouter();
+  const {dogId} = useLocalSearchParams();
 
   const [formData, setFormData] = useState<FormData>({
     petName: '',
     petAge: '',
     petBreed: '',
-    //petImages: [],
+    petImages: [],
     petGender: '',
     petSize:'',
     userId: -1,
+    petId:-1,
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, boolean>>>({});
   const navigation = useNavigation();
-  const [userId, setUserId] = useState<number | null>(null);
-  
   // buscar userId
   useEffect(() => {
     (async () => {
@@ -55,10 +56,19 @@ const AdoptionRegistration: React.FC = () => {
         return;
       }
       const id = parseInt(stored, 10);
-      setUserId(id);
       setFormData((prev) => ({ ...prev, userId: id }));
+      setFormData((prev) => ({ ...prev, petId: dogId }));
+
+      console.log("user:",formData.userId);
     })();
   }, []);
+
+  // useEffect(() => {
+  //   if(!router.isReady) return;
+  //   const {Id} = router.params;
+  //   setFormData((prev) => ({ ...prev, petId: Id }));
+  //   console.log("pet: ",petId);
+  // }, [router.isReady]);
 
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -78,25 +88,25 @@ const AdoptionRegistration: React.FC = () => {
   };
 
 
-//   const pickImages = async () => {
-//   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-//   if (!permission.granted) {
-//     Alert.alert("Permissão negada", "Permita o acesso à galeria.");
-//     return;
-//   }
+  const pickImages = async () => {
+  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!permission.granted) {
+    Alert.alert("Permissão negada", "Permita o acesso à galeria.");
+    return;
+  }
 
-//   const result = await ImagePicker.launchImageLibraryAsync({
-//     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-//     allowsMultipleSelection: true,
-//     quality: 1,
-//   });
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsMultipleSelection: true,
+    quality: 1,
+  });
 
-//   if (!result.canceled) {
-//     const uris = result.assets.map(asset => asset.uri);
-//     setFormData((prev) => ({ ...prev, petImages: uris }));
-//     if (errors.petImages) setErrors((prev) => ({ ...prev, petImages: false }));
-//   }
-// };
+  if (!result.canceled) {
+    const uris = result.assets.map(asset => asset.uri);
+    setFormData((prev) => ({ ...prev, petImages: uris }));
+    if (errors.petImages) setErrors((prev) => ({ ...prev, petImages: false }));
+  }
+};
 
 
   const validateForm = async () => {
@@ -117,7 +127,7 @@ const AdoptionRegistration: React.FC = () => {
     }
 
     try {
-      const response = await fetch(`http://${Ip}:8080/dog/create`, {
+      const response = await fetch(`http://${Ip}:8080/dog/update`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -127,7 +137,8 @@ const AdoptionRegistration: React.FC = () => {
           breed: formData.petBreed,
           gender: formData.petGender,
           size: formData.petSize,
-          //urlPhotos: formData.petImages,
+          urlPhotos: formData.petImages,
+          id:formData.petId,
         },
         userId: formData.userId,
       }),
@@ -136,9 +147,9 @@ const AdoptionRegistration: React.FC = () => {
       const data = await response.json();
 
       console.log(formData);
-      if (response.ok && data.message === "Dog created") {
-        Alert.alert("Sucesso", "Conta criada com sucesso!");
-        router.back();
+      if (response.ok && data.message === "Dog updated") {
+        console.log("update de cão feito");
+        router.push("../../home");
       }
        else {
         Alert.alert("Erro", data.message || "Erro ao criar conta.");
@@ -229,11 +240,11 @@ const AdoptionRegistration: React.FC = () => {
             </RadioButtonGroup>
           </View>
 
-          {/* <TouchableOpacity style={globalStyles.button} onPress={pickImages}>
+          <TouchableOpacity style={globalStyles.button} onPress={pickImages}>
             <Text style={globalStyles.buttonText}>Selecionar Imagem</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
 
-          {/* {formData.petImages.length > 0 && (
+          {formData.petImages.length > 0 && (
             <View style={{ flexDirection: "row", flexWrap: "wrap", marginVertical: 10 }}>
                 {formData.petImages.map((uri, index) => (
                 <Image
@@ -243,7 +254,7 @@ const AdoptionRegistration: React.FC = () => {
                 />
                 ))}
             </View>
-            )} */}
+            )}
 
 
           <TouchableOpacity style={globalStyles.button} onPress={validateForm}>

@@ -23,7 +23,7 @@ interface FormData {
   petName: string;
   petAge: string;
   petBreed: string;
-  //petImages: string[];
+  petImages: string[];
   petGender: string,
   petSize: string,
   userId: number,
@@ -36,7 +36,7 @@ const AdoptionRegistration: React.FC = () => {
     petName: '',
     petAge: '',
     petBreed: '',
-    //petImages: [],
+    petImages: [],
     petGender: '',
     petSize:'',
     userId: -1,
@@ -78,25 +78,25 @@ const AdoptionRegistration: React.FC = () => {
   };
 
 
-//   const pickImages = async () => {
-//   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
-//   if (!permission.granted) {
-//     Alert.alert("Permissão negada", "Permita o acesso à galeria.");
-//     return;
-//   }
+  const pickImages = async () => {
+  const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  if (!permission.granted) {
+    Alert.alert("Permissão negada", "Permita o acesso à galeria.");
+    return;
+  }
 
-//   const result = await ImagePicker.launchImageLibraryAsync({
-//     mediaTypes: ImagePicker.MediaTypeOptions.Images,
-//     allowsMultipleSelection: true,
-//     quality: 1,
-//   });
+  const result = await ImagePicker.launchImageLibraryAsync({
+    mediaTypes: ImagePicker.MediaTypeOptions.Images,
+    allowsMultipleSelection: true,
+    quality: 1,
+  });
 
-//   if (!result.canceled) {
-//     const uris = result.assets.map(asset => asset.uri);
-//     setFormData((prev) => ({ ...prev, petImages: uris }));
-//     if (errors.petImages) setErrors((prev) => ({ ...prev, petImages: false }));
-//   }
-// };
+  if (!result.canceled) {
+    const uris = result.assets.map(asset => asset.uri);
+    setFormData((prev) => ({ ...prev, petImages: uris }));
+    if (errors.petImages) setErrors((prev) => ({ ...prev, petImages: false }));
+  }
+};
 
 
   const validateForm = async () => {
@@ -127,7 +127,7 @@ const AdoptionRegistration: React.FC = () => {
           breed: formData.petBreed,
           gender: formData.petGender,
           size: formData.petSize,
-          //urlPhotos: formData.petImages,
+          urlPhotos: formData.petImages,
         },
         userId: formData.userId,
       }),
@@ -137,7 +137,7 @@ const AdoptionRegistration: React.FC = () => {
 
       console.log(formData);
       if (response.ok && data.message === "Dog created") {
-        Alert.alert("Sucesso", "Conta criada com sucesso!");
+        console.log("cachorro criado com sucesso");
         router.back();
       }
        else {
@@ -147,6 +147,7 @@ const AdoptionRegistration: React.FC = () => {
       console.error(error);
       Alert.alert("Erro", "Falha ao conectar ao servidor.");
     }
+
   };
 
   return (
@@ -229,11 +230,11 @@ const AdoptionRegistration: React.FC = () => {
             </RadioButtonGroup>
           </View>
 
-          {/* <TouchableOpacity style={globalStyles.button} onPress={pickImages}>
+          <TouchableOpacity style={globalStyles.button} onPress={pickImages}>
             <Text style={globalStyles.buttonText}>Selecionar Imagem</Text>
-          </TouchableOpacity> */}
+          </TouchableOpacity>
 
-          {/* {formData.petImages.length > 0 && (
+          {formData.petImages.length > 0 && (
             <View style={{ flexDirection: "row", flexWrap: "wrap", marginVertical: 10 }}>
                 {formData.petImages.map((uri, index) => (
                 <Image
@@ -243,7 +244,7 @@ const AdoptionRegistration: React.FC = () => {
                 />
                 ))}
             </View>
-            )} */}
+            )}
 
 
           <TouchableOpacity style={globalStyles.button} onPress={validateForm}>
