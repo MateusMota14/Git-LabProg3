@@ -15,7 +15,10 @@ import CadastroDePet from './pages/CadastroDePet';
 import './App.css';
 import logo from './icon_3x.png';
 import ChangePassword from './pages/ChangePassword';
+<<<<<<< HEAD
 import DogProfilePage from './pages/DogProfilePage';
+=======
+>>>>>>> boots
 
 function IndexPage() {
   const navigate = useNavigate();
@@ -83,7 +86,10 @@ function App() {
         <Route path="/profile" element={<Profile />} />
         <Route path="/settings" element={<Settings />} />
         <Route path="/change-password" element={<ChangePassword />} />
+<<<<<<< HEAD
         <Route path="/dog/:dogId" element={<DogProfilePage />} />
+=======
+>>>>>>> boots
       </Routes>
     </Router>
   );

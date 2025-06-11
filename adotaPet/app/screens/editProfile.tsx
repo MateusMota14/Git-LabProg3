@@ -1,8 +1,9 @@
-import React, { useState,  useEffect } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
+  Image,
   TouchableOpacity,
   StyleSheet,
   Alert,
@@ -12,77 +13,109 @@ import {
   TextInputProps,
 } from "react-native";
 import { useRouter, useNavigation } from "expo-router";
+import * as ImagePicker from 'expo-image-picker';
+
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import AdotaPetBackground from "../../assets/components/AdotaPetBackground";
 import { globalStyles } from "../../assets/constants/styles";
 import { Ip } from "@/assets/constants/config";
+
+// Defina a interface UserProfile para tipagem
+interface UserProfile {
+  id: number;
+  name: string;
+  email: string;
+  password?: string; // Senha é opcional aqui, pois não é retornada diretamente
+  country: string;
+  state: string;
+  city: string;
+  zcode: string; // Corrigido para 'zcode' conforme a entidade UserEntity
+}
 
 interface FormData {
   id: number;
   name: string;
   email: string;
   password: string;
-  confirmPassword: string;
   country: string;
   state: string;
   city: string;
-  zcode: string;
+  zcode: string; // Usando 'zcode' para o formulário, mas 'zcode' para a entidade
 }
 
-const SignupScreen: React.FC = () => {
+const UpdateScreen: React.FC = () => {
   const router = useRouter();
   const [formData, setFormData] = useState<FormData>({
-  id: -1,  
-  name: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-  country: "",
-  state: "",
-  city: "",
-  zcode: "",
-});
+    id: -1,
+    name: "",
+    email: "",
+    password: "",
+    country: "",
+    state: "",
+    city: "",
+    zcode: "",
+  });
 
-const [errors, setErrors] = useState<Partial<Record<keyof FormData, boolean>>>({});
-const navigation = useNavigation();
-const [userId, setUserId] = useState<number | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<keyof FormData, boolean>>>({});
+  const navigation = useNavigation();
+  const [userId, setUserId] = useState<number | null>(null); // Estado para armazenar o userId
+  const [user, setUser] = useState<UserProfile | null>(null); // Mantido para caso precise do objeto completo do usuário
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [logoutLoading, setLogoutLoading] = useState(false); // Não usado neste código
 
-// buscar userId
-useEffect(() => {
-  (async () => {
-    const stored = await AsyncStorage.getItem("userId");
-    if (!stored) {
-      navigation.navigate("Login" as never);
-      return;
-    }
-    const id = parseInt(stored, 10);
-    setUserId(id);
-  })();
-}, []);
+  // Buscar userId e dados do usuário na montagem
+  useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        const storedUserId = await AsyncStorage.getItem("userId");
+        if (!storedUserId) {
+          throw new Error("Usuário não logado");
+        }
 
-// buscar dados do usuário
-useEffect(() => {
-  if (userId === null) return;
+        const numericUserId = Number(storedUserId); // Converter para número
+        setUserId(numericUserId); // Atualiza o estado userId
 
-  (async () => {
-    const response = await fetch(`http://${Ip}:8080/user/id?id=${userId}`);
-    const result = await response.json();
-    const data = result.data;
-    setFormData({
-      id:userId,
-      name: data.name || "",
-      email: data.email || "",
-      password: "",
-      confirmPassword: "",
-      country: data.country || "",
-      state: data.state || "",
-      city: data.city || "",
-      zcode: data.zcode || "",
-    });
-    console.log("Dados carregados:", formData.id);
-  })();
-}, [userId]);
+        // Buscar dados do usuário
+        const res = await fetch(`http://${Ip}:8080/user/id?id=${numericUserId}`);
+        if (!res.ok) {
+          throw new Error(`Erro ao buscar perfil: ${res.statusText}`);
+        }
+        const json = await res.json();
+        const userData: UserProfile = json.data;
 
+        setUser(userData); // Define o objeto UserProfile completo
+
+        // Preenche o formData com os dados do banco de dados
+        setFormData({
+          id: numericUserId,
+          name: userData.name || "",
+          email: userData.email || "",
+          password: "", // Senha não é preenchida por segurança
+          country: userData.country || "",
+          state: userData.state || "",
+          city: userData.city || "",
+          zcode: userData.zcode || "", // Usando 'zcode' da entidade
+        });
+
+        // Buscar imagem do usuário
+        const imgRes = await fetch(`http://${Ip}:8080/user/img/${numericUserId}`);
+        const imgJson = await imgRes.json();
+        if (imgJson.data) {
+          setAvatarUrl(`http://${Ip}:8080/${imgJson.data}`);
+        }
+
+      } catch (err) {
+        console.error("Erro ao carregar perfil:", err);
+        Alert.alert("Erro", "Não foi possível carregar os dados do perfil.");
+        // Opcional: Redirecionar para a tela de login se o usuário não estiver logado
+        // router.replace('/login');
+      } finally {
+        setLoading(false);
+      }
+    };
+    loadProfile();
+  }, []); // Array de dependências vazio para rodar apenas na montagem
 
 
   const handleChange = (field: keyof FormData, value: string) => {
@@ -128,29 +161,122 @@ useEffect(() => {
     }
   };
 
-  const handleSignup = async () => {
+  // const pickImages = async () => {
+  //   const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+  //   if (!permission.granted) {
+  //     Alert.alert("Permissão negada", "Permita o acesso à galeria.");
+  //     return;
+  //   }
 
-  try {
-    const response = await fetch(`http://${Ip}:8080/user/update`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
+  //   const result = await ImagePicker.launchImageLibraryAsync({
+  //     mediaTypes: ImagePicker.MediaTypeOptions.Images,
+  //     allowsMultipleSelection: false, // Alterado para selecionar apenas uma imagem para perfil
+  //     quality: 0.7, // Reduz a qualidade para uploads mais rápidos
+  //   });
+
+  //   if (!result.canceled && result.assets.length > 0) {
+  //     const selectedImage = result.assets[0];
+  //     setLoading(true); // Opcional: iniciar loading para o upload da imagem
+
+  //     if (userId === null) {
+  //       Alert.alert("Erro", "ID do usuário não disponível para upload da imagem.");
+  //       setLoading(false);
+  //       return;
+  //     }
+
+  //     const formDataImage = new FormData();
+  //     formDataImage.append('file', {
+  //       uri: selectedImage.uri,
+  //       name: `avatar_${userId}.${selectedImage.uri.split('.').pop()}`, // Nome único para o arquivo
+  //       type: selectedImage.type || 'image/jpeg', // Define o tipo de arquivo
+  //     } as any); // 'as any' para contornar problemas de tipagem com FormData para arquivos
+
+  //     try {
+  //       const response = await fetch(`http://${Ip}:8080/user/img/${userId}`, {
+  //         method: 'POST',
+  //         body: formDataImage,
+  //         headers: {
+  //           'Content-Type': 'multipart/form-data', // Importante para envio de arquivos
+  //         },
+  //       });
+
+  //       const responseData = await response.json();
+
+  //       if (response.ok && responseData.data) {
+  //         setAvatarUrl(`http://${Ip}:8080/${responseData.data}`); // Atualiza o avatar na UI imediatamente
+  //         Alert.alert("Sucesso", "Imagem de perfil atualizada!");
+  //       } else {
+  //         Alert.alert("Erro", responseData.message || "Erro ao atualizar a imagem de perfil.");
+  //       }
+  //     } catch (error) {
+  //       console.error("Erro ao enviar imagem:", error);
+  //       Alert.alert("Erro", "Falha ao conectar ao servidor para enviar a imagem.");
+  //     } finally {
+  //       setLoading(false); // Finaliza o loading
+  //     }
+  //   }
+  // };
+
+
+  const handleSignup = async () => {
+    const newErrors: Partial<Record<keyof FormData, boolean>> = {};
+
+    // valida campos vazios
+    // Exclua a senha da validação de campo vazio se ela for opcional na atualização
+    const fieldsToValidate: (keyof FormData)[] = ["name", "email", "country", "state", "city", "zcode"];
+
+    fieldsToValidate.forEach((field) => {
+      const value = formData[field];
+      if (typeof value === "string" && !value.trim()) {
+        newErrors[field] = true;
+      }
     });
 
-    const data = await response.json();
-    console.log("Dados da resposta:", data);
-
-    if (response.ok && (data.message === "User updated" || data.message === "Password changed successfully")) {
-        Alert.alert("Sucesso", data.message);
-        router.back();
-        } else {
-        Alert.alert("Erro", data.message || "Erro ao atualizar conta.");
+    // valida formato do CEP
+    if (!/^\d{8}$/.test(formData.zcode.replace(/\D/g, ""))) {
+      newErrors.zcode = true;
+      Alert.alert("Erro", "Informe um CEP brasileiro válido (8 dígitos).");
     }
-  } catch (error) {
-    console.error("Erro no fetch:", error);
-    Alert.alert("Erro", "Falha ao conectar ao servidor.");
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://${Ip}:8080/user/update`, {
+        method: "POST", // Geralmente PUT ou PATCH para atualizações
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+      console.log("Dados da resposta:", data);
+
+      if (response.ok && (data.message === "User updated" || data.message === "Password changed successfully")) {
+        console.log("Sucesso", data.message);
+        router.back();
+      } else {
+        Alert.alert("Erro", data.message || "Erro ao atualizar conta.");
+      }
+    } catch (error) {
+      console.error("Erro no fetch:", error);
+      Alert.alert("Erro", "Falha ao conectar ao servidor.");
+    }
+    //`http://${{Ip}:8080/user/img/${userId}`)
+    // console.log("Tentando upload de imagem para URL:",`http://${Ip}:8080/user/img`) ;
+    // console.log("Valor de userId:", userId);
+  };
+
+  if (loading) {
+    return (
+      <AdotaPetBackground>
+        <View style={styles.loadingContainer}>
+          <Text style={globalStyles.text}>Carregando dados do perfil...</Text>
+        </View>
+      </AdotaPetBackground>
+    );
   }
-};
 
   return (
     <AdotaPetBackground>
@@ -159,7 +285,13 @@ useEffect(() => {
         behavior={Platform.OS === "ios" ? "padding" : undefined}
       >
         <ScrollView contentContainerStyle={styles.container}>
-          <Text style={globalStyles.title}>foto</Text>
+          {avatarUrl && (
+            // <TouchableOpacity
+              //onPress={pickImages}
+            //>
+              <Image source={{ uri: avatarUrl }} style={styles.profileImage} />
+            //</TouchableOpacity>
+          )}
 
           {[
             { placeholder: "Nome", field: "name" },
@@ -168,12 +300,6 @@ useEffect(() => {
               field: "email",
               keyboardType: "email-address",
               autoCapitalize: "none",
-            },
-            { placeholder: "Alterar Senha", field: "password", secureTextEntry: true },
-            {
-              placeholder: "Confirmar Senha",
-              field: "confirmPassword",
-              secureTextEntry: true,
             },
             { placeholder: "CEP", field: "zcode", keyboardType: "numeric" },
           ].map(({ placeholder, field, ...rest }) => (
@@ -212,9 +338,19 @@ useEffect(() => {
             onChangeText={(value) => handleChange("city", value)}
             style={[styles.input, errors.city && styles.inputError]}
           />
+          <TextInput
+            placeholder="Senha Para Confirmar Alterações (Opcional, deixe em branco para não alterar)"
+            // O campo "field" na definição da interface TextInputProps não é usado aqui,
+            // mas 'secureTextEntry' e 'onChangeText' são importantes.
+            secureTextEntry={true}
+            placeholderTextColor="#555"
+            value={formData.password}
+            onChangeText={(value) => handleChange("password", value)}
+            style={[styles.input, errors.password && styles.inputError]} // Use errors.password
+          />
 
           <TouchableOpacity style={globalStyles.button} onPress={handleSignup}>
-            <Text style={globalStyles.buttonText}>Criar Conta</Text>
+            <Text style={globalStyles.buttonText}>Editar Conta</Text>
           </TouchableOpacity>
         </ScrollView>
       </KeyboardAvoidingView>
@@ -223,6 +359,7 @@ useEffect(() => {
 };
 
 const styles = StyleSheet.create({
+  profileImage: { width: 120, height: 120, borderRadius: 60, marginBottom: 12 },
   container: {
     alignItems: "center",
     justifyContent: "center",
@@ -242,6 +379,11 @@ const styles = StyleSheet.create({
   inputError: {
     borderColor: "#FF3B30",
   },
+  loadingContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
-export default SignupScreen;
+export default UpdateScreen;
