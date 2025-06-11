@@ -24,26 +24,11 @@ const FallbackImage: React.FC<{ uri: string; style?: React.CSSProperties }> = ({
 
   if (errored) {
     return (
-<<<<<<< HEAD
       <img
         src={require('../assets/images/dog_default.jpg')}
         style={style}
         alt="Dog default"
       />
-=======
-      <div
-        style={{
-          ...style,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#fff',
-        }}
-      >
-        {/* Você pode colocar um SVG, emoji ou texto aqui */}
-        <span role="img" aria-label="dog" style={{ fontSize: 48, color: '#ccc' }}>🐶</span>
-      </div>
->>>>>>> boots
     );
   }
 
