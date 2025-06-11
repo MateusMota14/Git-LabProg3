@@ -100,7 +100,7 @@ export default function Profile() {
           style={styles.actionButton}
           onClick={() => navigate('/edit-profile')}
         >
-          Atualizar Perfil
+          Editar Perfil
         </button>
 
         <button

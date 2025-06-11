@@ -170,7 +170,7 @@ const handleSave = async () => {
 
   return (
     <div style={styles.pageContainer}>
-      <Header title="Configurações" />
+      <Header title="Editar Perfil" />
       <div style={styles.userCard}>
         <img
           src={avatarUrl || 'https://ui-avatars.com/api/?name=' + (user?.name || 'User')}
