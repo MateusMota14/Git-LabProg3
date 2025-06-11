@@ -49,26 +49,34 @@ const AdoptionRegistration: React.FC = () => {
   const navigation = useNavigation();
   // buscar userId
   useEffect(() => {
-    (async () => {
-      const stored = await AsyncStorage.getItem("userId");
-      if (!stored) {
-        navigation.navigate("Login" as never);
-        return;
-      }
-      const id = parseInt(stored, 10);
-      setFormData((prev) => ({ ...prev, userId: id }));
-      setFormData((prev) => ({ ...prev, petId: dogId }));
+  (async () => {
+    
+    try {
+      const response = await fetch(`http://${Ip}:8080/dog/id?id=${dogId}`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+      });
 
-      console.log("user:",formData.userId);
-    })();
-  }, []);
+      const data = await response.json();
+      // use os dados aqui, por exemplo:
+      setFormData({
+          petName: data.data.name || "",
+          petAge: data.data.age || "",
+          petBreed: data.data.breed || "",
+          petSize: data.data.size || "",
+          petGender: data.data.gender || "",
+          petImages:[],
+          petId:data.data.id,
+          userId: data.data.user.id
 
-  // useEffect(() => {
-  //   if(!router.isReady) return;
-  //   const {Id} = router.params;
-  //   setFormData((prev) => ({ ...prev, petId: Id }));
-  //   console.log("pet: ",petId);
-  // }, [router.isReady]);
+        });
+      console.log(data.data.id);
+    } catch (error) {
+      console.error("Erro ao buscar o pet:", error);
+    }
+  })();
+}, []);
+
 
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -110,24 +118,24 @@ const AdoptionRegistration: React.FC = () => {
 
 
   const validateForm = async () => {
-    const newErrors: Partial<Record<keyof FormData, boolean>> = {};
+  const newErrors: Partial<Record<keyof FormData, boolean>> = {};
 
-    (Object.keys(formData) as (keyof FormData)[]).forEach((field) => {
+  (Object.keys(formData) as (keyof FormData)[]).forEach((field) => {
     const value = formData[field];
     if (typeof value === 'string') {
-        if (!value.trim()) newErrors[field] = true;
+      if (!value.trim()) newErrors[field] = true;
     } else if (Array.isArray(value)) {
-        if (value.length === 0) newErrors[field] = true;
+      if (value.length === 0) newErrors[field] = true;
     }
-    });
+  });
 
-    if (Object.keys(newErrors).length > 0) {
-      setErrors(newErrors);
-      return;
-    }
+  if (Object.keys(newErrors).length > 0) {
+    setErrors(newErrors);
+    return;
+  }
 
-    try {
-      const response = await fetch(`http://${Ip}:8080/dog/update`, {
+  try {
+    const response = await fetch(`http://${Ip}:8080/dog/update`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -138,27 +146,56 @@ const AdoptionRegistration: React.FC = () => {
           gender: formData.petGender,
           size: formData.petSize,
           urlPhotos: formData.petImages,
-          id:formData.petId,
+          id: formData.petId,
         },
         userId: formData.userId,
       }),
     });
 
-      const data = await response.json();
+    const data = await response.json();
 
-      console.log(formData);
-      if (response.ok && data.message === "Dog updated") {
-        console.log("update de cão feito");
-        router.push("../../home");
+    if (response.ok && data.message === "Dog updated") {
+      for (const uri of formData.petImages) {
+        const base64 = await getBase64FromUri(uri);
+        await fetch(`http://${Ip}:8080/dog/upload-photo`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            id: formData.petId,
+            photoBase64: base64,
+          }),
+        });
       }
-       else {
-        Alert.alert("Erro", data.message || "Erro ao criar conta.");
-      }
-    } catch (error) {
-      console.error(error);
-      Alert.alert("Erro", "Falha ao conectar ao servidor.");
+
+      router.push("../../home");
+    } else {
+      Alert.alert("Erro", data.message || "Erro ao atualizar pet.");
     }
-  };
+  } catch (error) {
+    console.error(error);
+    Alert.alert("Erro", "Falha ao conectar ao servidor.");
+  }
+};
+
+const getBase64FromUri = async (uri: string): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.onload = function () {
+      const reader = new FileReader();
+      reader.onloadend = function () {
+        const result = reader.result as string;
+        const base64 = result.split(',')[1]; // remove o prefixo "data:image/jpeg;base64,"
+        resolve(base64);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(xhr.response);
+    };
+    xhr.onerror = reject;
+    xhr.responseType = 'blob';
+    xhr.open('GET', uri, true);
+    xhr.send();
+  });
+};
 
   return (
     <AdotaPetBackground>

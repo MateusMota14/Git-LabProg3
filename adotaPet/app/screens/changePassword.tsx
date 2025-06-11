@@ -111,8 +111,9 @@ useEffect(() => {
 
     const data = await response.json();
 
-    if (response.ok && data.message === "Password changed successfully") {
-      Alert.alert("Sucesso", "Senha alterada com sucesso!");
+    if (response.ok && data.message === "Password changed") {
+      router.back();
+      console.log("Sucesso", "Senha alterada com sucesso!");
       setFormData((prev) => ({
         ...prev,
         currentPassword: "",

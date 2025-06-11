@@ -23,10 +23,6 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 
 import com.adotapet.adotapet.DTO.Login;
-import com.adotapet.adotapet.DTO.PhotoUpdateRequest;
-import com.adotapet.adotapet.DTO.PhotoUploadRequest;
-
-
 
 @RestController
 public class UserController {
@@ -90,66 +86,13 @@ public class UserController {
         return userService.logOut(id);
     }
 
-    public static class UploadPhotoRequest {
-        public Integer userId;
-        public String base64Image;
-    }
-
     @PostMapping("/user/upload-photo")
-    public ApiResponse<UserEntity> uploadPhoto(@RequestBody UploadPhotoRequest request) {
-        try {
-            if (request.userId == null || request.base64Image == null) {
-                return new ApiResponse<>(null, "Parâmetros obrigatórios faltando");
-            }
+    public ApiResponse<UserEntity> uploadFotoBase64(@RequestBody Map<String, String> payload) {
+        String base64Image = payload.get("photoBase64");
+        Integer userId = Integer.parseInt(payload.get("id"));
 
-            UserEntity user = userRepository.findById(request.userId).orElse(null);
-            if (user == null) {
-                return new ApiResponse<>(null, "Usuário não encontrado");
-            }
-
-            byte[] imageBytes = Base64.getDecoder().decode(request.base64Image);
-            Path imagePath = Paths.get("src/main/resources/static/Users/" + request.userId + ".jpg");
-            Files.write(imagePath, imageBytes);
-
-            user.setImg("Users/" + request.userId + ".jpg");
-            userRepository.save(user);
-
-            return new ApiResponse<>(user, "Foto atualizada com sucesso");
-        } catch (Exception e) {
-            return new ApiResponse<>(null, "Erro ao salvar imagem: " + e.getMessage());
-        }
+        return userService.uploadPhoto(userId, base64Image);
     }
-
-
-
-
-    @PostMapping("/user/update-photo")
-    public ApiResponse<UserEntity> updatePhoto(@RequestBody PhotoUpdateRequest req) {
-        try {
-            UserEntity user = userRepository.findById(req.getUserId()).orElse(null);
-            if (user == null) {
-                return new ApiResponse<>(null, "Usuário não encontrado");
-            }
-
-            Path imagePath = Paths.get("src/main/resources/static/Users/" + req.getUserId() + ".jpg");
-
-            if (Files.exists(imagePath)) {
-                Files.delete(imagePath);
-            }
-
-            byte[] imageBytes = Base64.getDecoder().decode(req.getBase64Image());
-            Files.write(imagePath, imageBytes);
-
-            user.setImg("Users/" + req.getUserId() + ".jpg");
-            userRepository.save(user);
-
-            return new ApiResponse<>(user, "Foto atualizada com sucesso");
-        } catch (Exception e) {
-            return new ApiResponse<>(null, "Erro ao atualizar imagem: " + e.getMessage());
-        }
-    }
-
-
 
     @DeleteMapping("/user/delete-photo")
     public ApiResponse<UserEntity> detetePhoto(@RequestBody UserEntity user) {

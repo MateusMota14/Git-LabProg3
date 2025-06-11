@@ -254,7 +254,7 @@ const UpdateScreen: React.FC = () => {
       console.log("Dados da resposta:", data);
 
       if (response.ok && (data.message === "User updated" || data.message === "Password changed successfully")) {
-        Alert.alert("Sucesso", data.message);
+        console.log("Sucesso", data.message);
         router.back();
       } else {
         Alert.alert("Erro", data.message || "Erro ao atualizar conta.");

@@ -25,6 +25,7 @@ const imageHeight = windowWidth; // manter quadrado
 // Componente que tenta carregar da URI e faz fallback na default
 const FallbackImage: React.FC<{ uri: string; style?: ImageStyle }> = ({ uri, style }) => {
   const [errored, setErrored] = useState(false);
+  console.log(uri);
   return (
     <Image
       source={
@@ -166,13 +167,13 @@ export default function DogProfileScreen() {
         <View style={[styles.infoContainer, { top: imageHeight * 1.1 }]}>
           <View style={styles.infoHeader}>
             <Text style={styles.name}>{dog.name}</Text>
-            <TouchableOpacity onPress={handleLike} disabled={liked || isLiking}>
+            {/* <TouchableOpacity onPress={handleLike} disabled={liked || isLiking}>
               <Ionicons
                 name="heart"
                 size={28}
                 color={liked ? 'red' : 'gray'}
               />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
           </View>
           <Text style={styles.text}>Raça: {dog.breed}</Text>
           <Text style={styles.text}>Idade: {dog.age} anos</Text>
