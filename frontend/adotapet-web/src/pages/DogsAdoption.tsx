@@ -48,6 +48,7 @@ export default function DogsInCity() {
   const [likeLoading, setLikeLoading] = useState<number | null>(null);
   const [likedDogs, setLikedDogs] = useState<number[]>([]);
   const navigate = useNavigate();
+  const [city, setCity] = useState('');
 
   useEffect(() => {
     const loadData = async () => {
@@ -64,6 +65,8 @@ export default function DogsInCity() {
         const dogRes = await fetch(`http://localhost:8080/dog/city/${encodeURIComponent(city)}`);
         const dogJson = await dogRes.json();
         const dogArray: any[] = Array.isArray(dogJson.data) ? dogJson.data : [];
+
+        setCity(userJson.data.city);
 
         const dogList: Dog[] = dogArray
           .filter(dog => dog.user?.id !== Number(userId))
@@ -135,7 +138,7 @@ export default function DogsInCity() {
         backgroundSize: '45px',
       }}
     >
-      <Header title="Pets na sua cidade" />
+      <Header title={"Pets em " + city} />
       <Footer />
 
       {/* Espaço entre header e cards */}
@@ -145,7 +148,7 @@ export default function DogsInCity() {
       <div style={styles.dogList}>
         {dogs.length === 0 ? (
           <div style={styles.emptyContainer}>
-            <p style={styles.emptyText as React.CSSProperties}>Nenhum pet encontrado na sua cidade</p>
+            <p style={styles.emptyText as React.CSSProperties}>Nenhum pet encontrado em {city}</p>
           </div>
         ) : (
           dogs.map(dog => (

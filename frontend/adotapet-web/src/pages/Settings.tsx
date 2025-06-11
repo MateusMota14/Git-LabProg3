@@ -30,38 +30,37 @@ export default function Settings() {
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const navigate = useNavigate();
 
+  // Função para buscar dados atualizados do usuário
+  const fetchUserData = async (userId: string) => {
+    const res = await fetch(`http://localhost:8080/user/id?id=${userId}`);
+    const json = await res.json();
+    setUser(prev => ({
+      ...prev,
+      name: json.data.name || '',
+      email: json.data.email || '',
+      country: json.data.country || '',
+      state: json.data.state || '',
+      city: json.data.city || '',
+      zCode: json.data.zCode || '',
+    }));
+    // Buscar imagem do usuário
+    const imgRes = await fetch(`http://localhost:8080/user/img/${userId}`);
+    const imgJson = await imgRes.json();
+    if (imgJson.data) {
+      setUser(prev => ({
+        ...prev,
+        img: `http://localhost:8080/${imgJson.data}`,
+      }));
+    }
+  };
+
   useEffect(() => {
     const userId = localStorage.getItem('userId');
     if (!userId) {
       navigate('/login');
       return;
     }
-    fetch(`http://localhost:8080/user/id?id=${userId}`)
-      .then(res => res.json())
-      .then(json => {
-        setUser(prev => ({
-          ...prev,
-          name: json.data.name || '',
-          email: json.data.email || '',
-          country: json.data.country || '',
-          state: json.data.state || '',
-          city: json.data.city || '',
-          zCode: json.data.zCode || '',
-        }));
-        // Buscar imagem do usuário
-        fetch(`http://localhost:8080/user/img/${userId}`)
-          .then(res => res.json())
-          .then(imgJson => {
-            if (imgJson.data) {
-              setUser(prev => ({
-                ...prev,
-                img: `http://localhost:8080/${imgJson.data}`,
-              }));
-            }
-          });
-      })
-      .catch(() => alert('Erro ao carregar dados do usuário'))
-      .finally(() => setLoading(false));
+    fetchUserData(userId).finally(() => setLoading(false));
   }, [navigate]);
 
   const handleEditToggle = () => {
@@ -72,66 +71,79 @@ export default function Settings() {
     }
   };
 
-  const handleSave = async () => {
-    setSaving(true);
-    try {
-      const userId = localStorage.getItem('userId');
-      if (!userId) {
-        alert('Usuário não logado');
-        return;
-      }
-      if (!password) {
-        alert('Senha obrigatória para atualizar o perfil.');
-        return;
-      }
-      // Atualizar dados do usuário
-      const res = await fetch(`http://localhost:8080/user/update`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          id: userId,
-          name: user.name,
-          email: user.email,
-          country: user.country,
-          state: user.state,
-          city: user.city,
-          zCode: user.zCode,
-          rawPassword: password,
-        }),
-      });
-      const data = await res.json();
-      if (!res.ok) {
-        alert(data.message || 'Erro ao atualizar dados.');
-        setSaving(false);
-        return;
-      }
-      // Se trocou a foto, faz upload dela
-      if (photoFile) {
-        const reader = new FileReader();
-        reader.onloadend = async () => {
-          const base64 = reader.result?.toString().split(',')[1];
-          await fetch('http://localhost:8080/user/upload-photo', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-              id: userId,
-              photoBase64: base64,
-            }),
-          });
-          setPhotoFile(null);
-        };
-        reader.readAsDataURL(photoFile);
-      }
-      alert('Dados atualizados com sucesso!');
-      setEditing(false);
-      setShowPassword(false);
-      setPassword('');
-    } catch {
-      alert('Erro ao conectar ao servidor.');
-    } finally {
+const handleSave = async () => {
+  setSaving(true);
+  try {
+    const userId = localStorage.getItem('userId');
+    if (!userId) {
+      alert('Usuário não logado');
       setSaving(false);
+      return;
     }
-  };
+    if (!password) {
+      alert('Senha obrigatória para atualizar o perfil.');
+      setSaving(false);
+      return;
+    }
+    // Atualizar dados do usuário
+    const res = await fetch(`http://localhost:8080/user/update`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        id: Number(userId),
+        name: user.name,
+        email: user.email,
+        country: user.country,
+        state: user.state,
+        city: user.city,
+        zCode: user.zCode,
+        password: password, // <-- campo correto
+      }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+      alert(data.message || 'Erro ao atualizar dados.');
+      setSaving(false);
+      return;
+    }
+    // Se trocou a foto, faz upload dela
+    if (photoFile) {
+      const reader = new FileReader();
+      reader.onloadend = async () => {
+        const base64 = reader.result?.toString().split(',')[1];
+        await fetch('http://localhost:8080/user/upload-photo', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            id: Number(userId), // envie como número
+            photoBase64: base64,
+          }),
+        });
+        setPhotoFile(null);
+        // Após upload da foto, buscar imagem atualizada
+        await fetchUserData(userId);
+        alert('Dados atualizados com sucesso!');
+        setEditing(false);
+        setShowPassword(false);
+        setPassword('');
+        setSaving(false);
+      };
+      reader.readAsDataURL(photoFile);
+      return; // aguarde o FileReader terminar antes de finalizar a função
+    } else {
+      // Se não trocou a foto, buscar dados atualizados normalmente
+      await fetchUserData(userId);
+    }
+    alert('Dados atualizados com sucesso!');
+    setEditing(false);
+    setShowPassword(false);
+    setPassword('');
+  } catch {
+    alert('Erro ao conectar ao servidor.');
+  } finally {
+    setSaving(false);
+  }
+};
 
   const handleInputChange = (field: string, value: string) => {
     setUser(prevUser => ({
@@ -239,7 +251,7 @@ export default function Settings() {
         )}
         {showPassword && (
           <div style={{ marginTop: 16, width: '100%' }}>
-            <label>Senha atual</label>
+            <label style={styles.label}>Senha atual</label>
             <input
               type="password"
               style={styles.input}
@@ -365,13 +377,19 @@ const styles = {
     backgroundSize: '45px',
     paddingBottom: 90,
   },
-    input: {
+  input: {
     width: '100%',
     borderWidth: '1px',
     borderColor: '#ccc',
     borderRadius: '6px',
     padding: '10px',
     marginTop: '4px',
+  },
+  label: {
+    display: 'block',
+    fontSize: '16px',
+    color: '#333',
+    marginTop: '12px',
   },
   header: {
     width: '100%',
