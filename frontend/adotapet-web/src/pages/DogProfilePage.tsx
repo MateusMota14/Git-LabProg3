@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import patas from '../pata.png';
 
 interface DogDetail {
   id: number;
@@ -9,7 +10,6 @@ interface DogDetail {
   description?: string;
   gender: string;
   size: string;
-  urlPhotos?: string[];
   userLike?: number[];
 }
 
@@ -27,19 +27,24 @@ export default function DogProfilePage() {
   useEffect(() => {
     async function loadDog() {
       try {
+        // Busca dados do cachorro
         const res = await fetch(`http://localhost:8080/dog/id?id=${dogId}`);
         const json = await res.json();
         const data: DogDetail = json.data;
         setDog(data);
 
-        // Monta as URLs das fotos (backend retorna caminhos relativos)
-        const uris =
-          data.urlPhotos?.map((path) =>
-            path.startsWith('http')
-              ? path
-              : `http://localhost:8080/${path.replace('src/main/resources/static/', '')}`
-          ) ?? [];
-        setPhotos(uris);
+        // Busca fotos do cachorro
+        const photosRes = await fetch(`http://localhost:8080/dog/all-photos?dogId=${dogId}`);
+        const photosJson = await photosRes.json();
+        const photoList: string[] =
+          Array.isArray(photosJson.data) && photosJson.data.length > 0
+            ? photosJson.data.map((photo: any) =>
+                photo.url && photo.url.startsWith('http')
+                  ? photo.url
+                  : `http://localhost:8080/${photo.url || ''}`
+              )
+            : [];
+        setPhotos(photoList);
 
         // Checa se o usuário já curtiu esse dog
         const userId = localStorage.getItem('userId');
@@ -110,7 +115,14 @@ export default function DogProfilePage() {
   const nextPhoto = () => setPhotoIdx(idx => (idx === displayPhotos.length - 1 ? 0 : idx + 1));
 
   return (
-    <div style={styles.bg}>
+    <div
+      style={{
+        ...styles.bg,
+        backgroundImage: `url(${patas})`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: '45px',
+      }}
+    >
       <div style={styles.container}>
         {/* Header */}
         <div style={styles.header}>
@@ -122,7 +134,7 @@ export default function DogProfilePage() {
         {/* Carrossel de fotos */}
         <div style={styles.carouselContainer}>
           {displayPhotos.length > 1 && (
-            <button style={styles.carouselBtn} onClick={prevPhoto} aria-label="Foto anterior">
+            <button style={{ ...styles.carouselBtn, left: 10, right: undefined }} onClick={prevPhoto} aria-label="Foto anterior">
               ‹
             </button>
           )}
@@ -133,7 +145,7 @@ export default function DogProfilePage() {
             onError={e => (e.currentTarget.src = require('../assets/images/dog_default.jpg'))}
           />
           {displayPhotos.length > 1 && (
-            <button style={styles.carouselBtn} onClick={nextPhoto} aria-label="Próxima foto">
+            <button style={{ ...styles.carouselBtn, right: 10, left: undefined }} onClick={nextPhoto} aria-label="Próxima foto">
               ›
             </button>
           )}
@@ -143,10 +155,15 @@ export default function DogProfilePage() {
         <div style={styles.infoCard}>
           <div style={styles.infoHeader}>
             <span style={styles.name}>{dog.name}</span>
+          </div>
+          <div>
             <button
               style={{
                 ...styles.likeButton,
                 ...(liked ? styles.liked : {}),
+                marginLeft: 0,    // mais à esquerda
+                marginTop: 24,    // mais para baixo
+                display: 'block', // força nova linha
               }}
               onClick={handleLike}
               disabled={liked || isLiking}
@@ -171,13 +188,13 @@ export default function DogProfilePage() {
 const styles: { [key: string]: React.CSSProperties } = {
   bg: {
     minHeight: '100vh',
-    background: '#f9f9f9',
+    minWidth: '100vw',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
   },
   container: {
-    width: 370,
+    width: 450,
     background: '#fff',
     borderRadius: 18,
     boxShadow: '0 2px 16px rgba(0,0,0,0.10)',
@@ -188,7 +205,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     alignItems: 'center',
   },
   header: {
-    width: '100%',
+    width: '92%',
     background: '#FFD54F',
     borderTopLeftRadius: 18,
     borderTopRightRadius: 18,
@@ -225,7 +242,7 @@ const styles: { [key: string]: React.CSSProperties } = {
   },
   carouselBtn: {
     position: 'absolute',
-    top: '50%',
+    top: '35%', // diminua de '50%' para '35%' para subir as setas
     transform: 'translateY(-50%)',
     background: '#FFD54F',
     border: 'none',
@@ -236,13 +253,14 @@ const styles: { [key: string]: React.CSSProperties } = {
     color: '#333',
     cursor: 'pointer',
     zIndex: 2,
-    left: 10,
-    right: 10,
     userSelect: 'none',
+    padding: 0,
+    lineHeight: 1,         // <-- Adicione esta linha
+    paddingTop: 2,         // <-- E esta linha para subir a seta
   },
   infoCard: {
     width: '100%',
-    padding: '24px 24px 32px 24px',
+    padding: '24px 24px 32px 350px', // aumente o último valor para mover para a direita
     display: 'flex',
     flexDirection: 'column',
     alignItems: 'flex-start',
@@ -269,6 +287,7 @@ const styles: { [key: string]: React.CSSProperties } = {
     padding: '8px 18px',
     fontWeight: 'bold',
     marginLeft: 10,
+    marginTop: 12, // <-- adiciona espaço acima do botão
     transition: 'background 0.2s, color 0.2s',
   },
   liked: {
