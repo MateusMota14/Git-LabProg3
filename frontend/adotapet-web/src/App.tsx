@@ -4,6 +4,7 @@ import Login from './pages/auth/Login';
 import SignUp from './pages/auth/SignUp';
 import DogsAdoption from './pages/DogsAdoption';
 import EditProfile from './pages/EditProfile';
+import EditPet from './pages/EditPet';
 import LikedPets from './pages/LikedPets';
 import MyPets from './pages/MyPets';
 import Profile from './pages/Profile';
@@ -75,6 +76,7 @@ function App() {
         <Route path="/cadastro-de-pet" element={<CadastroDePet />} />
         <Route path="/dogs-adoption" element={<DogsAdoption />} />
         <Route path="/edit-profile" element={<EditProfile />} />
+        <Route path="/edit-pet/:petId" element={<EditPet />} />
         <Route path="/liked-pets" element={<LikedPets />} />
         <Route path="/my-pets" element={<MyPets />} />
         <Route path="/profile" element={<Profile />} />

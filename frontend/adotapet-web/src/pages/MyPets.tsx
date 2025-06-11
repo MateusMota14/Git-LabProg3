@@ -159,7 +159,7 @@ export default function MyPets() {
                 </div>
                 <button
                   style={styles.editButton}
-                  onClick={() => navigate(`/edit-dog/${dog.id}`)}
+                  onClick={() => navigate(`/edit-pet/${dog.id}`)}
                 >
                   Editar
                 </button>

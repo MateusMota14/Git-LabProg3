@@ -250,7 +250,7 @@ const handleSave = async () => {
           </button>
         )}
         {showPassword && (
-          <div style={{ marginTop: 16, width: '100%' }}>
+          <div style={{ marginTop: 0, width: '70%' }}>
             <label style={styles.label}>Senha atual</label>
             <input
               type="password"
@@ -259,7 +259,7 @@ const handleSave = async () => {
               onChange={e => setPassword(e.target.value)}
               autoFocus
             />
-            <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+            <div style={{ display: 'flex', gap: 3, marginTop: 10, justifyContent: 'center' }}>
               <button
                 style={styles.actionButton}
                 onClick={handleSave}
@@ -273,7 +273,6 @@ const handleSave = async () => {
                   ...styles.actionButton,
                   backgroundColor: '#eee',
                   color: '#333',
-                  marginTop: 10,
                 }}
                 onClick={() => {
                   setShowPassword(false);
@@ -314,7 +313,7 @@ const styles = {
     alignItems: 'center',
     padding: 24,
     marginBottom: 32,
-    width: 220,
+    width: 260,
   },
   buttonsContainer: {
     display: 'flex',
