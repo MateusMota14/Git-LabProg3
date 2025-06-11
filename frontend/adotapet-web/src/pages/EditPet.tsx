@@ -22,11 +22,19 @@ export default function EditPet() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-  // Função para buscar dados atualizados do pet (inclusive imagem)
+  // Busca os dados do pet
   const fetchPetData = async (id: string | number) => {
+    if (!id) return;
     const res = await fetch(`http://localhost:8080/dog/id?id=${id}`);
     const json = await res.json();
+    if (!json.data || !json.data.id) {
+      alert('Pet não encontrado!');
+      navigate('/mypets');
+      return;
+    }
     setPet({
       id: json.data.id,
       name: json.data.name || '',
@@ -42,6 +50,7 @@ export default function EditPet() {
   useEffect(() => {
     if (!petId) return;
     fetchPetData(petId);
+    // eslint-disable-next-line
   }, [petId]);
 
   const handleInputChange = (field: keyof PetData, value: string) => {
@@ -56,21 +65,36 @@ export default function EditPet() {
   };
 
   const handleSave = async () => {
-    if (!pet) return;
+    if (!pet || !pet.id) {
+      alert('ID do pet não encontrado!');
+      setSaving(false);
+      return;
+    }
     setSaving(true);
     try {
-      // Atualiza dados do pet
+      const userId = localStorage.getItem('userId');
+      if (!userId) {
+        alert('Usuário não logado');
+        setSaving(false);
+        return;
+      }
+
+      // Atualiza dados do pet (enviando userId e user dentro do dog)
       const res = await fetch('http://localhost:8080/dog/update', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          id: pet.id,
-          name: pet.name,
-          breed: pet.breed,
-          age: pet.age,
-          description: pet.description,
-          gender: pet.gender,
-          size: pet.size,
+          dog: {
+            id: pet.id,
+            name: pet.name,
+            breed: pet.breed,
+            age: pet.age,
+            description: pet.description,
+            gender: pet.gender,
+            size: pet.size,
+            user: { id: Number(userId) }
+          },
+          userId: Number(userId)
         }),
       });
       const data = await res.json();
@@ -93,7 +117,6 @@ export default function EditPet() {
             }),
           });
           setPhotoFile(null);
-          // Busca imagem real do backend após upload
           await fetchPetData(pet.id);
           alert('Pet atualizado com sucesso!');
           setEditing(false);
@@ -102,7 +125,6 @@ export default function EditPet() {
         reader.readAsDataURL(photoFile);
         return;
       }
-      // Atualiza dados do pet após salvar (caso backend altere algo)
       await fetchPetData(pet.id);
       alert('Pet atualizado com sucesso!');
       setEditing(false);
@@ -110,6 +132,28 @@ export default function EditPet() {
       alert('Erro ao conectar ao servidor.');
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleDelete = async () => {
+    if (!pet || !pet.id) return;
+    setDeleting(true);
+    try {
+      const res = await fetch(`http://localhost:8080/dog/delete/${pet.id}`, {
+        method: 'DELETE',
+      });
+      if (res.ok) {
+        alert('Pet excluído com sucesso!');
+        navigate('/mypets');
+      } else {
+        const data = await res.json();
+        alert(data.message || 'Erro ao excluir pet.');
+      }
+    } catch {
+      alert('Erro ao conectar ao servidor.');
+    } finally {
+      setDeleting(false);
+      setShowDeleteConfirm(false);
     }
   };
 
@@ -220,26 +264,59 @@ export default function EditPet() {
               /> Grande
             </label>
           </div>
-          <div style={{ display: 'flex', gap: 12, marginTop: 16 }}>
+          <div style={{ display: 'flex', gap: 12, marginTop: 16, justifyContent: 'center' }}>
             <button
               type="button"
               style={styles.actionButton}
-              onClick={() => setEditing(!editing)}
-              disabled={saving}
+              onClick={() => editing ? handleSave() : setEditing(true)}
+              disabled={saving || deleting}
             >
               {editing ? 'Salvar' : 'Editar'}
             </button>
+            {!editing && (
+              <button
+                type="button"
+                style={styles.deleteButton}
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={saving || deleting}
+              >
+                Excluir
+              </button>
+            )}
             {editing && (
               <button
                 type="button"
                 style={{ ...styles.actionButton, backgroundColor: '#eee', color: '#333' }}
                 onClick={() => setEditing(false)}
-                disabled={saving}
+                disabled={saving || deleting}
               >
                 Cancelar
               </button>
             )}
           </div>
+          {showDeleteConfirm && (
+            <div style={styles.confirmOverlay}>
+              <div style={styles.confirmBox}>
+                <p>Tem certeza que deseja excluir este pet?</p>
+                <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 12 }}>
+                  <button
+                    style={styles.deleteButton}
+                    onClick={handleDelete}
+                    disabled={deleting}
+                  >
+                    {deleting ? 'Excluindo...' : 'Sim, excluir'}
+                  </button>
+                  <button
+                    style={styles.actionButton}
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={deleting}
+                  >
+                    Cancelar
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </form>
       </div>
       <Footer />
@@ -274,6 +351,7 @@ const styles = {
     borderRadius: 16,
     padding: 24,
     boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+    position: 'relative' as 'relative',
   },
   input: {
     width: '96%',
@@ -318,5 +396,36 @@ const styles = {
     border: 'none',
     cursor: 'pointer',
     marginTop: 0,
+  },
+  deleteButton: {
+    background: '#E53935',
+    color: '#fff',
+    fontWeight: 'bold',
+    padding: '12px 24px',
+    borderRadius: 8,
+    fontSize: 16,
+    border: 'none',
+    cursor: 'pointer',
+    marginTop: 0,
+  },
+  confirmOverlay: {
+    position: 'fixed' as 'fixed',
+    top: 0,
+    left: 0,
+    width: '100vw',
+    height: '100vh',
+    background: 'rgba(0,0,0,0.25)',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    zIndex: 1000,
+  },
+  confirmBox: {
+    background: '#fff',
+    borderRadius: 12,
+    padding: 32,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.15)',
+    minWidth: 280,
+    textAlign: 'center' as 'center',
   },
 };
