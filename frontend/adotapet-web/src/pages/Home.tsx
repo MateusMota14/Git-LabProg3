@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import patas from '../pata.png';
 import '../App.css';
 
+
 export default function Home() {
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
@@ -87,9 +88,6 @@ export default function Home() {
 
       {/* Rodapé fixo */}
       <div style={styles.footer}>
-        <button className="App-button" style={styles.footerButton} onClick={() => navigate('/home')}>
-          🏠 Home
-        </button>
         <button className="App-button" style={styles.footerButton} onClick={() => navigate('/chat')}>
           💬 Chat
         </button>
@@ -183,7 +181,7 @@ const styles = {
     background: 'black',
     display: 'flex',
     justifyContent: 'space-around',
-    padding: 10,
+    padding: 5,
     zIndex: 10,
   },
   footerButton: {

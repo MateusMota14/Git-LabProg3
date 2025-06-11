@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 export default function ChangePassword() {
   const [currentPassword, setCurrentPassword] = useState('');
@@ -51,8 +53,10 @@ export default function ChangePassword() {
   };
 
   return (
+    <>
+     <Header title="Alterar Senha" />
+     <Footer />
     <div style={styles.container}>
-      <h2 style={styles.title}>Alterar Senha</h2>
       <form onSubmit={handleSubmit} style={{ width: '100%' }}>
         <label style={styles.label}>Senha atual</label>
         <input
@@ -95,6 +99,7 @@ export default function ChangePassword() {
         </button>
       </form>
     </div>
+    </>
   );
 }
 

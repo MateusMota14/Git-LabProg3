@@ -1,5 +1,7 @@
 import React, { useState } from 'react';
-import patas from '../pata.png'; // Adicione este import
+import patas from '../pata.png';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 interface FormData {
   petName: string;
@@ -123,8 +125,9 @@ export default function CadastroDePet() {
 
   return (
     <div style={styles.page}>
-      <button style={styles.backButton} onClick={() => window.history.back()} aria-label="Voltar">←</button>
-      <h2 style={styles.title}>Registrar Pet</h2>
+
+      <Header title="Registrar Pet" />
+      <div style={styles.content}>
       <form style={styles.form} onSubmit={handleSubmit}>
         <input
           type="text"
@@ -233,19 +236,28 @@ export default function CadastroDePet() {
           {loading ? 'Enviando...' : 'Enviar'}
         </button>
       </form>
+      </div>
+     <Footer />
     </div>
   );
 }
 
 const styles = {
   page: {
-    minHeight: '20vh',
+    minHeight: '100vh',
     backgroundColor: '#ffffff',
     backgroundImage: `url(${patas})`, // Use a imagem importada
     backgroundRepeat: 'repeat',
     backgroundSize: '45px',
-    padding: '24px 0',
     position: 'relative' as 'relative',
+    paddingBottom: 90, // ou 100, ajuste conforme a altura real do seu Footer
+  },
+    content: {
+    flex: 1,
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   backButton: {
     position: 'absolute' as 'absolute',
@@ -257,14 +269,6 @@ const styles = {
     cursor: 'pointer',
     color: '#333',
     fontWeight: 'bold',
-  },
-  title: {
-    textAlign: 'center' as 'center',
-    fontSize: 32,
-    fontWeight: 'bold',
-    marginBottom: 24,
-    marginTop: 16,
-    color: '#222',
   },
   form: {
     maxWidth: 400,

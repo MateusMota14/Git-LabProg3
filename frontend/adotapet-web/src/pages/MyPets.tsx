@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import patas from '../pata.png';
 import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 interface Dog {
   id: number;
@@ -119,12 +121,8 @@ export default function MyPets() {
         backgroundSize: '45px',
       }}
     >
-      {/* Header apenas com botão voltar */}
-      <header style={styles.header}>
-        <button style={styles.backButton} onClick={() => navigate('/home')} aria-label="Voltar">←</button>
-        <span style={styles.headerTitle}>Meus Pets</span>
-        <span style={{ width: 40 }} />
-      </header>
+      <Header title="Meus Pets" />
+      <Footer />
 
       {/* Card do perfil do usuário, igual ao Profile */}
       <div style={styles.userCard}>

@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import patas from '../pata.png';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 interface UserProfile {
   name: string;
@@ -79,28 +81,13 @@ export default function Profile() {
   // Atualize o retorno do componente para envolver a imagem, nome e localização em um card
   return (
     <div style={styles.pageContainer}>
-      <header style={styles.header}>
-        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <button
-            style={styles.headerBackButton}
-            onClick={() => navigate('/home')}
-            aria-label="Voltar"
-          >
-            ← Voltar
-          </button>
-          <span style={styles.headerTitle}>Perfil</span>
-          <span style={{ width: 80 }} />
-        </div>
-      </header>
-
+      <Header title="Perfil" />
       <div style={styles.userCard}>
-        {avatarUrl && (
-          <img
-            src={avatarUrl}
-            style={styles.profileImage}
-            alt="User"
-          />
-        )}
+        <img
+        src={avatarUrl || 'https://ui-avatars.com/api/?name=' + (user?.name || 'User')}
+        style={styles.profileImage}
+        alt={user?.name || 'Usuário'}
+      />
         <h1 style={styles.name}>{user?.name}</h1>
         <p style={styles.location}>
           {user?.city} - {user?.state}, {user?.country}
@@ -110,9 +97,16 @@ export default function Profile() {
       <div style={styles.buttonsContainer}>
         <button
           style={styles.actionButton}
-          onClick={() => navigate('/edit-profile')}
+          onClick={() => navigate('/settings')}
         >
           Atualizar Perfil
+        </button>
+
+        <button
+          style={styles.actionButton}
+          onClick={() => navigate('/edit-profile')}
+        >
+          Atualizar Localização
         </button>
 
         <button
@@ -138,11 +132,11 @@ export default function Profile() {
           )}
         </button>
       </div>
+      <Footer />
     </div>
   );
 }
 
-// Adicione estes novos estilos
 const styles = {
   loaderContainer: {
     display: 'flex',
@@ -165,7 +159,7 @@ const styles = {
     alignItems: 'center',
     padding: 24,
     marginBottom: 32,
-    width: 220, // Alterado de 280 para 220 para alinhar com os botões
+    width: 220, 
   },
   buttonsContainer: {
     display: 'flex',
@@ -173,7 +167,7 @@ const styles = {
     alignItems: 'center',
     gap: 12,
     width: '100%',
-    maxWidth: 220, // Alterado de 280 para 220 para manter consistência
+    maxWidth: 220, 
   },
   profileImage: {
     width: 100,
@@ -226,6 +220,7 @@ const styles = {
     backgroundImage: `url(${patas})`,
     backgroundRepeat: 'repeat',
     backgroundSize: '45px',
+    paddingBottom: '130px', // ajuste conforme a altura do seu Footer
   },
   header: {
     width: '100%',

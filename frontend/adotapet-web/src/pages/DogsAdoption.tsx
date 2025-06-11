@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import patas from '../pata.png';
 import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 interface Dog {
   id: number;
@@ -133,12 +135,8 @@ export default function DogsInCity() {
         backgroundSize: '45px',
       }}
     >
-      {/* Header apenas com botão voltar */}
-      <header style={styles.header}>
-        <button style={styles.backButton} onClick={() => navigate('/home')} aria-label="Voltar">←</button>
-        <span style={styles.headerTitle}>Pets na sua cidade</span>
-        <span style={{ width: 40 }} />
-      </header>
+      <Header title="Pets na sua cidade" />
+      <Footer />
 
       {/* Espaço entre header e cards */}
       <div style={{ height: 18 }} />
@@ -186,8 +184,8 @@ const styles = {
   page: {
     minHeight: '100vh',
     backgroundColor: '#fff',
-    paddingBottom: 40,
     position: 'relative' as 'relative',
+    paddingBottom: 40,
   },
   loaderContainer: {
     display: 'flex',
