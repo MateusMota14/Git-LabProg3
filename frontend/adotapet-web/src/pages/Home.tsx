@@ -1,11 +1,30 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import Alfredo from '../assets/images/Alfredo.png';
 import patas from '../pata.png';
 import '../App.css';
 
+
 export default function Home() {
   const navigate = useNavigate();
+  const [user, setUser] = useState<any>(null);
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    const userId = localStorage.getItem('userId');
+    console.log('userId na Home:', userId);
+    if (!userId) {
+      navigate('/login');
+      return;
+    }
+    fetch(`http://localhost:8080/user/id?id=${userId}`)
+      .then(res => res.json())
+      .then(json => setUser(json.data));
+    fetch(`http://localhost:8080/user/img/${userId}`)
+      .then(res => res.json())
+      .then(json => {
+        if (json.data) setAvatarUrl(`http://localhost:8080/${json.data}`);
+      });
+  }, [navigate]);
 
   const buttonData = [
     { label: "Quero Adotar", name: '/dogs-adoption', icon: '🐾' },
@@ -23,17 +42,33 @@ export default function Home() {
     }}>
       {/* Cabeçalho amarelo */}
       <header style={styles.header}>
-        <span style={styles.headerTitle}>Início</span>
+        <div style={{ width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <button
+            style={styles.headerProfileButton}
+            onClick={() => navigate('/profile')}
+            aria-label="Perfil"
+          >
+            👤 Perfil
+          </button>
+          <span style={styles.headerTitle}>Início</span>
+          <span style={{ width: 80 }} /> {/* Espaço para equilibrar visualmente */}
+        </div>
       </header>
 
       {/* Card do usuário */}
       <div style={styles.userCard}>
         <img
-          src={Alfredo}
-          alt="Alfredo"
+          src={avatarUrl || 'https://ui-avatars.com/api/?name=' + (user?.name || 'User')}
+          alt={user?.name || 'Usuário'}
           style={styles.avatar}
         />
-        <h2 style={styles.greeting}>Olá, Alfredo</h2>
+        <h2 style={styles.greeting}>Olá, {user?.name || 'Usuário'}</h2>
+        <p style={{ margin: 0, color: '#333', fontSize: 14 }}>
+          {user?.email && <>Email: {user.email}<br /></>}
+          {user?.city && <>Cidade: {user.city}<br /></>}
+          {user?.state && <>Estado: {user.state}<br /></>}
+          {user?.country && <>País: {user.country}</>}
+        </p>
       </div>
 
       {/* Botões */}
@@ -53,9 +88,6 @@ export default function Home() {
 
       {/* Rodapé fixo */}
       <div style={styles.footer}>
-        <button className="App-button" style={styles.footerButton} onClick={() => navigate('/home')}>
-          🏠 Home
-        </button>
         <button className="App-button" style={styles.footerButton} onClick={() => navigate('/chat')}>
           💬 Chat
         </button>
@@ -71,17 +103,18 @@ const styles = {
     display: 'flex',
     flexDirection: 'column' as 'column',
     alignItems: 'center',
-    paddingBottom: 70, // espaço para o rodapé
+    paddingBottom: 70,
   },
   header: {
     width: '100%',
     backgroundColor: '#FFD54F',
     padding: '20px 0 10px 0',
     display: 'flex',
-    justifyContent: 'center',
+    justifyContent: 'flex-start', // Alinha à esquerda
     alignItems: 'center',
     marginBottom: 24,
     boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+    gap: 16, // Espaço entre botão e título
   },
   headerTitle: {
     fontSize: 22,
@@ -148,7 +181,7 @@ const styles = {
     background: 'black',
     display: 'flex',
     justifyContent: 'space-around',
-    padding: 10,
+    padding: 5,
     zIndex: 10,
   },
   footerButton: {
@@ -160,5 +193,18 @@ const styles = {
     display: 'flex',
     alignItems: 'center',
     cursor: 'pointer',
+  },
+  headerProfileButton: {
+    backgroundColor: '#FFD54F',
+    border: 'none',
+    borderRadius: 8,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    padding: '8px 16px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
   },
 };

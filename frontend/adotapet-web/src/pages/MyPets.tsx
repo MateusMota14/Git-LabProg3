@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
-
-const CARD_MARGIN = 10;
-const CARD_WIDTH = `calc((100% - ${CARD_MARGIN * 3}px) / 2)`;
+import patas from '../pata.png';
+import { useNavigate } from 'react-router-dom';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 interface Dog {
   id: number;
@@ -21,9 +22,26 @@ interface UserProfile {
 const FallbackImage: React.FC<{ uri: string; style?: React.CSSProperties }> = ({ uri, style }) => {
   const [errored, setErrored] = useState(false);
 
+  if (errored) {
+    return (
+      <div
+        style={{
+          ...style,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#fff',
+        }}
+      >
+        {/* Você pode colocar um SVG, emoji ou texto aqui */}
+        <span role="img" aria-label="dog" style={{ fontSize: 48, color: '#ccc' }}>🐶</span>
+      </div>
+    );
+  }
+
   return (
     <img
-      src={errored ? '/assets/images/dog_default.jpg' : uri}
+      src={uri}
       style={style}
       onError={() => setErrored(true)}
       alt="Dog"
@@ -37,6 +55,7 @@ export default function MyPets() {
   const [imgError, setImgError] = useState(false);
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [loading, setLoading] = useState(true);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const loadProfile = async () => {
@@ -44,31 +63,33 @@ export default function MyPets() {
         const userId = localStorage.getItem('userId');
         if (!userId) throw new Error('Usuário não logado');
 
-        const userRes = await fetch(`/api/user/id?id=${userId}`);
+        // Busca dados do usuário
+        const userRes = await fetch(`http://localhost:8080/user/id?id=${userId}`);
         const userJson = await userRes.json();
         setUser(userJson.data);
 
-        const imgRes = await fetch(`/api/user/img/${userId}`);
+        // Busca imagem do usuário
+        const imgRes = await fetch(`http://localhost:8080/user/img/${userId}`);
         const imgJson = await imgRes.json();
         if (imgJson.message === 'OK' && imgJson.data) {
-          setUserImgUrl(`/api/${imgJson.data}`);
+          setUserImgUrl(`http://localhost:8080/${imgJson.data}`);
         }
 
-        const dogRes = await fetch(`/api/user/dogs?userId=${userId}`);
+        // Busca dogs do usuário
+        const dogRes = await fetch(`http://localhost:8080/user/dogs?userId=${userId}`);
         const dogJson = await dogRes.json();
         const dogArray: any[] = Array.isArray(dogJson.data) ? dogJson.data : [];
 
         const dogList: Dog[] = dogArray.map(dog => ({
           id: dog.id,
           name: dog.name,
-          gender: dog.gender,
-          age: `${dog.age} anos`,
-          imgUri: `/api/dog/img/${dog.id}`,
+          gender: dog.gender?.toLowerCase(),
+          age: dog.age,
+          imgUri: `http://localhost:8080/dog/img/${dog.id}`,
         }));
 
         setDogs(dogList);
       } catch (err) {
-        console.error('Erro ao carregar perfil ou pets:', err);
         setDogs([]);
       } finally {
         setLoading(false);
@@ -92,130 +113,214 @@ export default function MyPets() {
   };
 
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
+    <div
+      style={{
+        ...styles.page,
+        backgroundImage: `url(${patas})`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: '45px',
+      }}
+    >
+      <Header title="Meus Pets" />
+      <Footer />
+
+      {/* Card do perfil do usuário, igual ao Profile */}
+      <div style={styles.userCard}>
         <img
           src={getProfileImage()}
           style={styles.profileImage as React.CSSProperties}
           onError={() => setImgError(true)}
           alt="User"
         />
-        <h1 style={styles.name as React.CSSProperties}>{user?.name}</h1>
-        <p style={styles.location as React.CSSProperties}>
+        <h1 style={styles.name}>{user?.name}</h1>
+        <p style={styles.location}>
           {user ? `${user.city} - ${user.state}, ${user.country}` : ''}
         </p>
-      </header>
+      </div>
 
-      {dogs.length === 0 ? (
-        <div style={styles.emptyContainer}>
-          <p style={styles.emptyText as React.CSSProperties}>Nenhum pet cadastrado</p>
-        </div>
-      ) : (
-        <div style={styles.dogList}>
-          {dogs.map(dog => (
-            <div key={dog.id} style={styles.dogCard as React.CSSProperties}>
-              <FallbackImage uri={dog.imgUri} style={styles.dogImage as React.CSSProperties} />
-              <div style={styles.dogInfo as React.CSSProperties}>
-                <h2 style={styles.dogName as React.CSSProperties}>{dog.name}</h2>
-                <div style={styles.separator as React.CSSProperties} />
-                <div style={styles.detailsRow as React.CSSProperties}>
-                  <span style={styles.dogGender as React.CSSProperties}>{dog.gender}</span>
-                  <span style={styles.dogAge as React.CSSProperties}>{dog.age}</span>
+      {/* Espaço entre o perfil e os cards dos cachorros */}
+      <div style={{ height: 18 }} />
+
+      {/* Lista de pets */}
+      <div style={styles.dogList}>
+        {dogs.length === 0 ? (
+          <div style={styles.emptyContainer}>
+            <p style={styles.emptyText as React.CSSProperties}>Nenhum pet cadastrado</p>
+          </div>
+        ) : (
+          dogs.map(dog => (
+            <div key={dog.id} style={styles.dogCard}>
+              <FallbackImage uri={dog.imgUri} style={styles.dogImage} />
+              <div style={styles.dogInfo}>
+                <div style={styles.dogName}>{dog.name}</div>
+                <div style={styles.dogDetailsRow}>
+                  <span style={styles.dogGender}>{dog.gender}</span>
+                  <span style={styles.dogAge}>{dog.age} anos</span>
                 </div>
+                <button
+                  style={styles.editButton}
+                  onClick={() => navigate(`/edit-pet/${dog.id}`)}
+                >
+                  Editar
+                </button>
               </div>
             </div>
-          ))}
-        </div>
-      )}
+          ))
+        )}
+      </div>
     </div>
   );
 }
 
 const styles = {
+  page: {
+    minHeight: '100vh',
+    backgroundColor: '#fff',
+    paddingBottom: 80,
+    position: 'relative' as 'relative',
+  },
   loaderContainer: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
   },
-  container: {
-    padding: '20px',
-  },
   header: {
-    textAlign: 'center' as 'center',
-    marginBottom: '20px',
+    width: '100%',
+    backgroundColor: '#FFD54F',
+    padding: '16px 0 8px 0',
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 24,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
   },
-  profileImage: {
-    width: '120px',
-    height: '120px',
-    borderRadius: '60px',
-    border: '2px solid #FFD54F',
-    marginBottom: '10px',
-  },
-  name: {
-    fontSize: '22px',
+  headerTitle: {
+    fontSize: 22,
     fontWeight: 'bold',
     color: '#333',
+    margin: '0 auto',
+  },
+  backButton: {
+    backgroundColor: '#FFD54F',
+    border: 'none',
+    borderRadius: 8,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    padding: '8px 16px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    marginLeft: 8,
+  },
+  userCard: {
+    background: '#FFD54F',
+    borderRadius: 16,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    alignItems: 'center',
+    padding: 24,
+    marginBottom: 32,
+    width: 220,
+    margin: '0 auto',
+  },
+  profileImage: {
+    width: 100,
+    height: 100,
+    borderRadius: 50,
+    border: '2px solid #fff',
+    marginBottom: 12,
+    objectFit: 'cover' as 'cover',
+  },
+  name: {
+    fontSize: 20,
+    fontWeight: 'bold',
+    color: '#333',
+    margin: 0,
+    marginBottom: 4,
   },
   location: {
-    fontSize: '16px',
-    color: '#666',
+    fontSize: 14,
+    color: '#333',
+    margin: 0,
   },
   dogList: {
     display: 'flex',
-    flexWrap: 'wrap' as 'wrap', 
-    gap: `${CARD_MARGIN}px`,
+    flexWrap: 'wrap' as 'wrap',
+    gap: 16,
     justifyContent: 'center' as 'center',
+    marginBottom: 80,
   },
   dogCard: {
-    width: CARD_WIDTH,
-    marginBottom: '15px',
-    borderRadius: '10px',
+    width: 220,
+    borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: '#FFD54F',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   dogImage: {
     width: '100%',
-    height: '200px',
+    height: 180,
     objectFit: 'cover' as 'cover',
+    background: '#eee',
   },
   dogInfo: {
-    padding: '10px',
-    textAlign: 'center' as 'center',
+    padding: '18px 12px 20px 12px',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    alignItems: 'center',
   },
   dogName: {
-    fontSize: '16px',
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#222',
+    marginBottom: 8,
+    textAlign: 'center' as 'center',
   },
-  separator: {
-    width: '100%',
-    height: '1px',
-    backgroundColor: '#fff',
-    margin: '6px 0',
-  },
-  detailsRow: {
+  dogDetailsRow: {
     display: 'flex',
-    justifyContent: 'space-between',
-    padding: '0 10px',
+    justifyContent: 'center',
+    gap: 16,
+    width: '100%',
+    fontSize: 17,
+    color: '#444',
+    marginBottom: 14,
+    textTransform: 'lowercase' as 'lowercase',
   },
   dogGender: {
-    fontSize: '14px',
-    color: '#777',
+    textTransform: 'lowercase' as 'lowercase',
   },
   dogAge: {
-    fontSize: '14px',
-    color: '#555',
+    textTransform: 'lowercase' as 'lowercase',
+  },
+  editButton: {
+    background: '#111',
+    color: '#FFD54F',
+    border: 'none',
+    borderRadius: 8,
+    padding: '8px 0',
+    width: '90%',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginTop: 6,
+    cursor: 'pointer',
   },
   emptyContainer: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '100vh',
+    minHeight: 120,
   },
   emptyText: {
-    fontSize: '16px',
+    fontSize: 16,
     color: '#555',
   },
 };

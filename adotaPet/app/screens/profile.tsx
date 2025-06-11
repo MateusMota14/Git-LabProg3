@@ -106,7 +106,7 @@ export default function ProfileScreen() {
             style={styles.updateButton}
             onPress={() => router.push("/screens/editProfile")}
           >
-            <Text style={styles.updateButtonText}>Atualizar Perfil</Text>
+            <Text style={styles.updateButtonText}>Meu Perfil</Text>
           </TouchableOpacity>
 
           <TouchableOpacity
@@ -117,7 +117,7 @@ export default function ProfileScreen() {
             {logoutLoading ? (
               <ActivityIndicator color="#FFF" />
             ) : (
-              <Text style={styles.logoutButtonText}>Logout</Text>
+              <Text style={styles.logoutButtonText}>Sair</Text>
             )}
           </TouchableOpacity>
         </ScrollView>

@@ -1,10 +1,14 @@
 import React, { useEffect, useState } from 'react';
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 export default function EditProfile() {
   const [city, setCity] = useState('');
   const [stateName, setStateName] = useState('');
   const [country, setCountry] = useState('');
   const [loading, setLoading] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState('');
 
   useEffect(() => {
     const loadCurrent = async () => {
@@ -33,23 +37,41 @@ export default function EditProfile() {
     loadCurrent();
   }, []);
 
-  const handleSubmit = async () => {
+   const handleSaveClick = (e: React.FormEvent) => {
+    e.preventDefault();
+    setShowPassword(true);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     const userId = localStorage.getItem('userId');
     if (!userId) {
       alert('Usuário não logado');
       return;
     }
+    if (!password) {
+      alert('Senha obrigatória para atualizar a localização.');
+      return;
+    }
 
     try {
-      const res = await fetch(`/api/user/residence`, {
-        method: 'PUT',
+      const res = await fetch('http://localhost:8080/user/update', {
+        method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ userId, city, state: stateName, country }),
+        body: JSON.stringify({
+          id: Number(userId),
+          city,
+          state: stateName,
+          country,
+          password: password,
+        }),
       });
 
       const json = await res.json();
       if (json.message === 'OK') {
         alert('Moradia atualizada com sucesso.');
+        setShowPassword(false);
+        setPassword('');
       } else {
         throw new Error(json.message || 'Erro ao atualizar');
       }
@@ -67,43 +89,90 @@ export default function EditProfile() {
   }
 
   return (
-    <div style={styles.container}>
-      <label style={styles.label}>Cidade</label>
-      <input
-        type="text"
-        style={styles.input}
-        value={city}
-        onChange={(e) => setCity(e.target.value)}
-      />
+    <>
+      <Header title="Atualizar Localização" />
+      <div style={styles.container}>
+        <form onSubmit={showPassword ? handleSubmit : handleSaveClick}>
+          <label style={styles.label}>Cidade</label>
+          <input
+            type="text"
+            style={styles.input}
+            value={city}
+            onChange={(e) => setCity(e.target.value)}
+          />
 
-      <label style={styles.label}>Estado</label>
-      <input
-        type="text"
-        style={styles.input}
-        value={stateName}
-        onChange={(e) => setStateName(e.target.value)}
-      />
+          <label style={styles.label}>Estado</label>
+          <input
+            type="text"
+            style={styles.input}
+            value={stateName}
+            onChange={(e) => setStateName(e.target.value)}
+          />
 
-      <label style={styles.label}>País</label>
-      <input
-        type="text"
-        style={styles.input}
-        value={country}
-        onChange={(e) => setCountry(e.target.value)}
-      />
+          <label style={styles.label}>País</label>
+          <input
+            type="text"
+            style={styles.input}
+            value={country}
+            onChange={(e) => setCountry(e.target.value)}
+          />
 
-      <button style={styles.saveButton as React.CSSProperties} onClick={handleSubmit}>
-        Salvar
-      </button>
-    </div>
+          {showPassword && (
+            <>
+              <label style={styles.label}>Digite sua senha para confirmar:</label>
+              <input
+                type="password"
+                style={styles.input}
+                value={password}
+                onChange={e => setPassword(e.target.value)}
+                autoFocus
+              />
+              <div style={{ display: 'flex', gap: 12, marginTop: 12 }}>
+                <button
+                  type="submit"
+                  style={styles.saveButton as React.CSSProperties}
+                >
+                  Confirmar
+                </button>
+                <button
+                  type="button"
+                  style={{
+                    ...styles.saveButton,
+                    backgroundColor: '#eee',
+                    color: '#333',
+                    border: '1px solid #ccc',
+                  }}
+                  onClick={() => {
+                    setShowPassword(false);
+                    setPassword('');
+                  }}
+                >
+                  Cancelar
+                </button>
+              </div>
+            </>
+          )}
+
+          {!showPassword && (
+            <button
+              type="submit"
+              style={styles.saveButton as React.CSSProperties}
+            >
+              Salvar
+            </button>
+          )}
+        </form>
+      </div>
+      <Footer />
+    </>
   );
 }
-
 const styles = {
   container: {
     padding: '20px',
     maxWidth: '400px',
     margin: '0 auto',
+    paddingBottom: '130px',
   },
   label: {
     display: 'block',
@@ -131,6 +200,6 @@ const styles = {
     marginTop: '24px',
     display: 'block',
     width: '100%',
-    textAlign: 'center' as 'center', 
+    textAlign: 'center' as 'center',
   },
 };
