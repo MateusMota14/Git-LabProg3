@@ -1,28 +1,40 @@
 import React, { useEffect, useState } from 'react';
+import patas from '../pata.png';
 import { useNavigate } from 'react-router-dom';
-
-const CARD_MARGIN = 10;
-const CARD_WIDTH = `calc((100% - ${CARD_MARGIN * 3}px) / 2)`;
+import Header from '../components/Header';
+import Footer from '../components/Footer';
 
 interface Dog {
   id: number;
   name: string;
   gender: string;
   age: string;
+  imgUri: string;
+  userId: number;
 }
 
-interface DogImageProps {
-  uri: string;
-  style?: React.CSSProperties;
-}
-
-/** Componente que tenta baixar a imagem e, se der erro, cai no default */
-const DogImage: React.FC<DogImageProps> = ({ uri, style }) => {
+const FallbackImage: React.FC<{ uri: string; style?: React.CSSProperties }> = ({ uri, style }) => {
   const [errored, setErrored] = useState(false);
+
+  if (errored) {
+    return (
+      <div
+        style={{
+          ...style,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: '#fff',
+        }}
+      >
+        <span role="img" aria-label="dog" style={{ fontSize: 48, color: '#ccc' }}>🐶</span>
+      </div>
+    );
+  }
 
   return (
     <img
-      src={errored ? '/assets/images/dog_default.jpg' : uri}
+      src={uri}
       style={style}
       onError={() => setErrored(true)}
       alt="Dog"
@@ -30,46 +42,84 @@ const DogImage: React.FC<DogImageProps> = ({ uri, style }) => {
   );
 };
 
-export default function DogsAdoption() {
+export default function DogsInCity() {
   const [dogs, setDogs] = useState<Dog[]>([]);
   const [loading, setLoading] = useState(true);
+  const [likeLoading, setLikeLoading] = useState<number | null>(null);
+  const [likedDogs, setLikedDogs] = useState<number[]>([]);
   const navigate = useNavigate();
+  const [city, setCity] = useState('');
 
   useEffect(() => {
-    const fetchDogsByCity = async () => {
+    const loadData = async () => {
       try {
-        const city = localStorage.getItem('city');
-        if (!city) throw new Error('City not found in storage');
+        const userId = localStorage.getItem('userId');
+        if (!userId) throw new Error('Usuário não logado');
 
-        const userIdStr = localStorage.getItem('userId');
-        const currentUserId = userIdStr ? Number(userIdStr) : null;
+        // Busca dados do usuário
+        const userRes = await fetch(`http://localhost:8080/user/id?id=${userId}`);
+        const userJson = await userRes.json();
 
-        const res = await fetch(`/api/dog/city/${encodeURIComponent(city)}`);
-        const json = await res.json();
-        const allDogs: any[] = Array.isArray(json.data) ? json.data : [];
+        // Busca dogs da cidade do usuário, exceto os do próprio usuário
+        const city = userJson.data.city;
+        const dogRes = await fetch(`http://localhost:8080/dog/city/${encodeURIComponent(city)}`);
+        const dogJson = await dogRes.json();
+        const dogArray: any[] = Array.isArray(dogJson.data) ? dogJson.data : [];
 
-        const filtered = currentUserId
-          ? allDogs.filter(d => d.user?.id !== currentUserId)
-          : allDogs;
+        setCity(userJson.data.city);
 
-        setDogs(
-          filtered.map(dog => ({
+        const dogList: Dog[] = dogArray
+          .filter(dog => dog.user?.id !== Number(userId))
+          .map(dog => ({
             id: dog.id,
             name: dog.name,
-            gender: dog.gender,
-            age: `${dog.age} anos`,
-          }))
+            gender: dog.gender?.toLowerCase(),
+            age: dog.age,
+            imgUri: `http://localhost:8080/dog/img/${dog.id}`,
+            userId: dog.user?.id,
+          }));
+
+        setDogs(dogList);
+
+        // Checa no backend se cada dog está curtido
+        const liked: number[] = [];
+        await Promise.all(
+          dogList.map(async (dog) => {
+            const res = await fetch(`http://localhost:8080/dog/id?id=${dog.id}`);
+            const json = await res.json();
+            if (json.data && Array.isArray(json.data.userLike) && json.data.userLike.includes(Number(userId))) {
+              liked.push(dog.id);
+            }
+          })
         );
-      } catch (error) {
-        console.error('Erro ao buscar cães por cidade:', error);
+        setLikedDogs(liked);
+
+      } catch (err) {
         setDogs([]);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchDogsByCity();
+    loadData();
   }, []);
+
+  const handleLike = async (dogId: number) => {
+    const userId = localStorage.getItem('userId');
+    if (!userId) return;
+    setLikeLoading(dogId);
+    try {
+      await fetch(`http://localhost:8080/dog/userlike/${userId}/${dogId}`, {
+        method: 'POST',
+      });
+      setLikedDogs(prev => [...prev, dogId]);
+      alert('Você curtiu esse pet!');
+    } catch {
+      alert('Erro ao curtir o pet.');
+    } finally {
+      setLikeLoading(null);
+    }
+  };
 
   if (loading) {
     return (
@@ -80,131 +130,181 @@ export default function DogsAdoption() {
   }
 
   return (
-    <div style={styles.container}>
-      <header style={styles.header as React.CSSProperties}>
-        <h1 style={styles.title as React.CSSProperties}>Cães para Adoção</h1>
-      </header>
+    <div
+      style={{
+        ...styles.page,
+        backgroundImage: `url(${patas})`,
+        backgroundRepeat: 'repeat',
+        backgroundSize: '45px',
+      }}
+    >
+      <Header title={"Pets em " + city} />
+      <Footer />
 
-      <div style={styles.dogList as React.CSSProperties}>
-        {dogs.map(dog => (
-          <div
-            key={dog.id}
-            style={styles.dogCard as React.CSSProperties}
-            onClick={() => navigate(`/dogs/${dog.id}`)}
-          >
-            <DogImage
-              uri={`/api/dog/img/${dog.id}`}
-              style={styles.dogImage as React.CSSProperties}
-            />
-            <div style={styles.dogInfo as React.CSSProperties}>
-              <h2 style={styles.dogName as React.CSSProperties}>{dog.name}</h2>
-              <div style={styles.separator as React.CSSProperties} />
-              <div style={styles.detailsRow as React.CSSProperties}>
-                <span style={styles.dogGender as React.CSSProperties}>{dog.gender}</span>
-                <span style={styles.dogAge as React.CSSProperties}>{dog.age}</span>
+      {/* Espaço entre header e cards */}
+      <div style={{ height: 18 }} />
+
+      {/* Lista de pets */}
+      <div style={styles.dogList}>
+        {dogs.length === 0 ? (
+          <div style={styles.emptyContainer}>
+            <p style={styles.emptyText as React.CSSProperties}>Nenhum pet encontrado em {city}</p>
+          </div>
+        ) : (
+          dogs.map(dog => (
+            <div key={dog.id} style={styles.dogCard}>
+              <FallbackImage uri={dog.imgUri} style={styles.dogImage} />
+              <div style={styles.dogInfo}>
+                <div style={styles.dogName}>{dog.name}</div>
+                <div style={styles.dogDetailsRow}>
+                  <span style={styles.dogGender}>{dog.gender}</span>
+                  <span style={styles.dogAge}>{dog.age} anos</span>
+                </div>
+                <button
+                  style={{
+                    ...styles.likeButton,
+                    ...(likedDogs.includes(dog.id) ? styles.likedButton : {})
+                  }}
+                  onClick={() => handleLike(dog.id)}
+                  disabled={likedDogs.includes(dog.id) || likeLoading === dog.id}
+                >
+                  {likedDogs.includes(dog.id)
+                    ? 'Curtido ✓'
+                    : likeLoading === dog.id
+                      ? 'Curtindo...'
+                      : 'Curtir'}
+                </button>
               </div>
             </div>
-          </div>
-        ))}
+          ))
+        )}
       </div>
-
-      <footer style={styles.bottomNavigation as React.CSSProperties}>
-        <button onClick={() => navigate('/home')} style={styles.navButton as React.CSSProperties}>
-          <span style={styles.navButtonText as React.CSSProperties}>Home</span>
-        </button>
-        <button onClick={() => navigate('/chat')} style={styles.navButton as React.CSSProperties}>
-          <span style={styles.navButtonText as React.CSSProperties}>Chat</span>
-        </button>
-      </footer>
     </div>
   );
 }
 
 const styles = {
+  page: {
+    minHeight: '100vh',
+    backgroundColor: '#fff',
+    position: 'relative' as 'relative',
+    paddingBottom: 40,
+  },
   loaderContainer: {
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
     height: '100vh',
   },
-  container: {
-    padding: '20px',
-  },
   header: {
-    textAlign: 'center' as 'center',
+    width: '100%',
     backgroundColor: '#FFD54F',
-    padding: '10px',
+    padding: '16px 0 8px 0',
+    display: 'flex',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+    marginBottom: 24,
+    boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
   },
-  title: {
-    fontSize: '24px',
+  headerTitle: {
+    fontSize: 22,
     fontWeight: 'bold',
-    color: 'black',
+    color: '#333',
+    margin: '0 auto',
+  },
+  backButton: {
+    backgroundColor: '#FFD54F',
+    border: 'none',
+    borderRadius: 8,
+    fontSize: 18,
+    fontWeight: 'bold',
+    color: '#333',
+    padding: '8px 16px',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    marginLeft: 8,
   },
   dogList: {
     display: 'flex',
-    flexWrap: 'wrap',
-    gap: `${CARD_MARGIN}px`,
-    justifyContent: 'center',
+    flexWrap: 'wrap' as 'wrap',
+    gap: 16,
+    justifyContent: 'center' as 'center',
+    marginBottom: 40,
   },
   dogCard: {
-    width: CARD_WIDTH,
-    marginBottom: '15px',
-    borderRadius: '10px',
+    width: 220,
+    borderRadius: 20,
     overflow: 'hidden',
     backgroundColor: '#FFD54F',
-    boxShadow: '0 2px 4px rgba(0,0,0,0.2)',
-    cursor: 'pointer',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    alignItems: 'center',
+    marginBottom: 12,
   },
   dogImage: {
     width: '100%',
-    height: '200px',
+    height: 180,
     objectFit: 'cover' as 'cover',
+    background: '#eee',
   },
   dogInfo: {
-    padding: '10px',
-    textAlign: 'center',
+    padding: '18px 12px 20px 12px',
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column' as 'column',
+    alignItems: 'center',
   },
   dogName: {
-    fontSize: '16px',
+    fontSize: 22,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#222',
+    marginBottom: 8,
+    textAlign: 'center' as 'center',
   },
-  separator: {
+  dogDetailsRow: {
+    display: 'flex',
+    justifyContent: 'center',
+    gap: 16,
     width: '100%',
-    height: '1px',
-    backgroundColor: '#fff',
-    margin: '6px 0',
+    fontSize: 17,
+    color: '#444',
+    marginBottom: 14,
+    textTransform: 'lowercase' as 'lowercase',
   },
-  detailsRow: {
-    display: 'flex',
-    justifyContent: 'space-between',
-    padding: '0 10px',
+  dogGender: {
+    textTransform: 'lowercase' as 'lowercase',
   },
-  dogGender: { fontSize: '14px', color: '#777' },
-  dogAge: { fontSize: '14px', color: '#555' },
-  bottomNavigation: {
-    display: 'flex',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-    padding: '10px',
-    backgroundColor: 'black',
-    borderTop: '1px solid #ddd',
-    position: 'fixed',
-    bottom: '0',
-    width: '100%',
+  dogAge: {
+    textTransform: 'lowercase' as 'lowercase',
   },
-  navButton: {
-    display: 'flex',
-    alignItems: 'center',
-    padding: '10px',
-    backgroundColor: 'transparent',
+  likeButton: {
+    background: '#111',
+    color: '#FFD54F',
     border: 'none',
+    borderRadius: 8,
+    padding: '8px 0',
+    width: '90%',
+    fontWeight: 'bold',
+    fontSize: 16,
+    marginTop: 6,
     cursor: 'pointer',
   },
-  navButtonText: {
-    fontSize: '16px',
-    fontWeight: 'bold',
-    color: '#FFD54F',
-    marginLeft: '5px',
+  likedButton: {
+    background: '#4CAF50', // verde ou outra cor de destaque
+    color: '#fff',
+    border: 'none',
+  },
+  emptyContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    minHeight: 120,
+  },
+  emptyText: {
+    fontSize: 16,
+    color: '#555',
   },
 };

@@ -98,17 +98,29 @@ export default function SignUp() {
       return;
     }
 
+    // Monta o objeto para o backend (UserEntity)
+    const userToSend = {
+      name: formData.name,
+      email: formData.email,
+      password: formData.password,
+      country: formData.country,
+      state: formData.state,
+      city: formData.city,
+      zipCode: formData.zipCode,
+    };
+
     try {
-      const response = await fetch(`/api/user/create`, {
+      const response = await fetch('http://localhost:8080/user/create', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(userToSend),
       });
 
       const data = await response.json();
 
-      if (response.ok && data.message === 'User created') {
-        alert('Conta criada com sucesso!');
+      console.log('Resposta do cadastro:', data);
+      if (response.ok && data.message && data.message.toLowerCase().includes('user created')) {
+        console.log('teste');
         navigate('/login');
       } else if (data.message === 'User already exists') {
         setErrors((prev) => ({ ...prev, email: true }));
@@ -180,6 +192,15 @@ export default function SignUp() {
       <button style={styles.button} onClick={handleSignup}>
         Criar Conta
       </button>
+      <p style={styles.linkText}>
+        Já tem uma conta?{' '}
+        <span
+          style={styles.link}
+          onClick={() => navigate('/login')}
+        >
+          Faça login aqui
+        </span>
+      </p>
     </div>
   );
 }
@@ -221,5 +242,15 @@ const styles = {
     fontWeight: 'bold',
     cursor: 'pointer',
     color: '#333',
+  },
+  linkText: {
+    fontSize: '16px',
+    marginTop: '10px',
+    color: '#000',
+  },
+  link: {
+    color: '#FFD54F',
+    cursor: 'pointer',
+    textDecoration: 'underline',
   },
 };
