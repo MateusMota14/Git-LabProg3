@@ -141,7 +141,13 @@ export default function LikedPets() {
         ) : (
           dogs.map(dog => (
             <div key={dog.id} style={styles.dogCard}>
-              <FallbackImage uri={dog.imgUri} style={styles.dogImage} />
+              <div
+                style={{ cursor: 'pointer', width: '100%' }}
+                onClick={() => navigate(`/dog/${dog.id}`)}
+                title="Ver perfil do pet"
+              >
+                <FallbackImage uri={dog.imgUri} style={styles.dogImage} />
+              </div>
               <div style={styles.dogInfo}>
                 <div style={styles.dogName}>{dog.name}</div>
                 <div style={styles.dogDetailsRow}>
