@@ -95,18 +95,12 @@ export default function Profile() {
       </div>
 
       <div style={styles.buttonsContainer}>
-        <button
-          style={styles.actionButton}
-          onClick={() => navigate('/settings')}
-        >
-          Atualizar Perfil
-        </button>
 
         <button
           style={styles.actionButton}
           onClick={() => navigate('/edit-profile')}
         >
-          Atualizar Localização
+          Atualizar Perfil
         </button>
 
         <button

@@ -8,7 +8,6 @@ import EditPet from './pages/EditPet';
 import LikedPets from './pages/LikedPets';
 import MyPets from './pages/MyPets';
 import Profile from './pages/Profile';
-import Settings from './pages/Settings';
 import Inicio from './pages/Inicio';
 import Home from './pages/Home';
 import CadastroDePet from './pages/CadastroDePet';
@@ -81,7 +80,6 @@ function App() {
         <Route path="/liked-pets" element={<LikedPets />} />
         <Route path="/my-pets" element={<MyPets />} />
         <Route path="/profile" element={<Profile />} />
-        <Route path="/settings" element={<Settings />} />
         <Route path="/change-password" element={<ChangePassword />} />
         <Route path="/dog/:dogId" element={<DogProfilePage />} />
       </Routes>
