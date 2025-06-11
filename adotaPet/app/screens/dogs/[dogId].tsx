@@ -25,6 +25,7 @@ const imageHeight = windowWidth; // manter quadrado
 // Componente que tenta carregar da URI e faz fallback na default
 const FallbackImage: React.FC<{ uri: string; style?: ImageStyle }> = ({ uri, style }) => {
   const [errored, setErrored] = useState(false);
+  console.log(uri);
   return (
     <Image
       source={

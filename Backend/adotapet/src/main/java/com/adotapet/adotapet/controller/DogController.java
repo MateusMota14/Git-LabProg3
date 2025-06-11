@@ -27,6 +27,9 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.http.MediaType;
 
 import com.adotapet.adotapet.services.DogService;
+import com.adotapet.adotapet.DTO.DogCreateRequest;
+import com.adotapet.adotapet.DTO.DogUpdateRequest;
+
 
 @RestController
 public class DogController {
@@ -43,9 +46,11 @@ public class DogController {
     }
 
     @PostMapping("/dog/create")
-    public ApiResponse<DogEntity> createUser(@RequestBody DogEntity dog) {
-
-        return dogService.createDog(dog, dog.getUser().getId());
+    public ResponseEntity<ApiResponse<DogEntity>> createDog(@RequestBody DogCreateRequest request) {
+        DogEntity dog = request.getDog();
+        Integer userId = request.getUserId();
+        ApiResponse<DogEntity> response = dogService.createDog(dog, userId);
+        return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/dog/delete")
@@ -54,8 +59,8 @@ public class DogController {
     }
 
     @PostMapping("/dog/update")
-    public ApiResponse<DogEntity> updateDog(@RequestBody DogEntity dog) {
-        return dogService.updateDog(dog);
+    public ApiResponse<DogEntity> updateDog(@RequestBody DogUpdateRequest request) {
+        return dogService.updateDog(request.getDog(), request.getUserId());
     }
 
     @PostMapping("/dog/userlike/{userLikeId}/{dogId}")
