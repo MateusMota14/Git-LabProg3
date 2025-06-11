@@ -18,17 +18,11 @@ const FallbackImage: React.FC<{ uri: string; style?: React.CSSProperties }> = ({
 
   if (errored) {
     return (
-      <div
-        style={{
-          ...style,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#fff',
-        }}
-      >
-        <span role="img" aria-label="dog" style={{ fontSize: 48, color: '#ccc' }}>🐶</span>
-      </div>
+      <img
+        src={require('../assets/images/dog_default.jpg')}
+        style={style}
+        alt="Dog default"
+      />
     );
   }
 

@@ -22,6 +22,7 @@ export default function DogProfilePage() {
   const [loading, setLoading] = useState(true);
   const [liked, setLiked] = useState(false);
   const [isLiking, setIsLiking] = useState(false);
+  const [photoIdx, setPhotoIdx] = useState(0);
 
   useEffect(() => {
     async function loadDog() {
@@ -99,123 +100,175 @@ export default function DogProfilePage() {
     );
   }
 
+  // Fotos ou fallback
   const displayPhotos = photos.length
     ? photos
-    : ['/assets/images/dog_default.jpg'];
+    : [require('../assets/images/dog_default.jpg')];
+
+  // Navegação do carrossel
+  const prevPhoto = () => setPhotoIdx(idx => (idx === 0 ? displayPhotos.length - 1 : idx - 1));
+  const nextPhoto = () => setPhotoIdx(idx => (idx === displayPhotos.length - 1 ? 0 : idx + 1));
 
   return (
-    <div style={styles.container}>
-      <header style={styles.header}>
-        <button style={styles.backButton} onClick={() => navigate(-1)}>
-          Voltar
-        </button>
-        <h1 style={styles.headerTitle}>{dog.name}</h1>
-      </header>
-
-      <div style={styles.carousel}>
-        {displayPhotos.map((photo, idx) => (
-          <img
-            key={idx}
-            src={photo}
-            alt={`Foto ${idx + 1}`}
-            style={styles.image}
-          />
-        ))}
-      </div>
-
-      <div style={styles.infoContainer}>
-        <div style={styles.infoHeader}>
-          <h2 style={styles.name}>{dog.name}</h2>
-          <button
-            style={{
-              ...styles.likeButton,
-              ...(liked ? styles.liked : {}),
-            }}
-            onClick={handleLike}
-            disabled={liked || isLiking}
-            title={liked ? 'Você já curtiu esse pet' : 'Curtir'}
-          >
-            {liked ? 'Curtido ✓' : 'Curtir'}
+    <div style={styles.bg}>
+      <div style={styles.container}>
+        {/* Header */}
+        <div style={styles.header}>
+          <button style={styles.backButton} onClick={() => navigate(-1)}>
+            ← Voltar
           </button>
         </div>
-        <p style={styles.text}><b>Raça:</b> {dog.breed}</p>
-        <p style={styles.text}><b>Idade:</b> {dog.age} anos</p>
-        <p style={styles.text}><b>Gênero:</b> {dog.gender}</p>
-        <p style={styles.text}><b>Tamanho:</b> {dog.size}</p>
-        {dog.description && (
-          <p style={styles.text}><b>Sobre:</b> {dog.description}</p>
-        )}
+
+        {/* Carrossel de fotos */}
+        <div style={styles.carouselContainer}>
+          {displayPhotos.length > 1 && (
+            <button style={styles.carouselBtn} onClick={prevPhoto} aria-label="Foto anterior">
+              ‹
+            </button>
+          )}
+          <img
+            src={displayPhotos[photoIdx]}
+            alt={`Foto ${photoIdx + 1}`}
+            style={styles.image}
+            onError={e => (e.currentTarget.src = require('../assets/images/dog_default.jpg'))}
+          />
+          {displayPhotos.length > 1 && (
+            <button style={styles.carouselBtn} onClick={nextPhoto} aria-label="Próxima foto">
+              ›
+            </button>
+          )}
+        </div>
+
+        {/* Informações */}
+        <div style={styles.infoCard}>
+          <div style={styles.infoHeader}>
+            <span style={styles.name}>{dog.name}</span>
+            <button
+              style={{
+                ...styles.likeButton,
+                ...(liked ? styles.liked : {}),
+              }}
+              onClick={handleLike}
+              disabled={liked || isLiking}
+              title={liked ? 'Você já curtiu esse pet' : 'Curtir'}
+            >
+              {liked ? 'Curtido ✓' : 'Curtir'}
+            </button>
+          </div>
+          <div style={styles.infoRow}><b>Raça:</b> {dog.breed}</div>
+          <div style={styles.infoRow}><b>Idade:</b> {dog.age} anos</div>
+          <div style={styles.infoRow}><b>Gênero:</b> {dog.gender}</div>
+          <div style={styles.infoRow}><b>Tamanho:</b> {dog.size}</div>
+          {dog.description && (
+            <div style={styles.infoRow}><b>Sobre:</b> {dog.description}</div>
+          )}
+        </div>
       </div>
     </div>
   );
 }
 
-const styles = {
-  loaderContainer: {
+const styles: { [key: string]: React.CSSProperties } = {
+  bg: {
+    minHeight: '100vh',
+    background: '#f9f9f9',
     display: 'flex',
     justifyContent: 'center',
     alignItems: 'center',
-    height: '100vh',
   },
   container: {
-    padding: '20px',
+    width: 370,
+    background: '#fff',
+    borderRadius: 18,
+    boxShadow: '0 2px 16px rgba(0,0,0,0.10)',
+    padding: 0,
+    margin: '32px 0',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
   },
   header: {
+    width: '100%',
+    background: '#FFD54F',
+    borderTopLeftRadius: 18,
+    borderTopRightRadius: 18,
+    padding: '12px 18px',
     display: 'flex',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    backgroundColor: '#FFD54F',
-    padding: '10px 20px',
-    borderRadius: '10px',
+    justifyContent: 'flex-start',
   },
   backButton: {
-    backgroundColor: 'transparent',
+    background: 'none',
     border: 'none',
-    fontSize: '16px',
-    cursor: 'pointer',
-  },
-  headerTitle: {
-    fontSize: '20px',
-    fontWeight: 'bold',
+    fontSize: 18,
     color: '#333',
+    fontWeight: 'bold',
+    cursor: 'pointer',
+    padding: 0,
   },
-  carousel: {
+  carouselContainer: {
+    width: '100%',
     display: 'flex',
-    overflowX: 'auto' as 'auto',
-    marginTop: '20px',
-    gap: '10px',
+    alignItems: 'center',
+    justifyContent: 'center',
+    margin: '24px 0 0 0',
+    position: 'relative',
+    minHeight: 320,
   },
   image: {
-    width: '300px',
-    height: '300px',
-    objectFit: 'cover' as 'cover',
-    borderRadius: '10px',
-    marginRight: '10px',
-    background: '#fff',
+    width: 300,
+    height: 300,
+    objectFit: 'cover',
+    borderRadius: 16,
+    background: '#eee',
+    boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
   },
-  infoContainer: {
-    marginTop: '20px',
+  carouselBtn: {
+    position: 'absolute',
+    top: '50%',
+    transform: 'translateY(-50%)',
+    background: '#FFD54F',
+    border: 'none',
+    borderRadius: '50%',
+    width: 36,
+    height: 36,
+    fontSize: 24,
+    color: '#333',
+    cursor: 'pointer',
+    zIndex: 2,
+    left: 10,
+    right: 10,
+    userSelect: 'none',
+  },
+  infoCard: {
+    width: '100%',
+    padding: '24px 24px 32px 24px',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   infoHeader: {
+    width: '100%',
     display: 'flex',
-    justifyContent: 'space-between',
     alignItems: 'center',
+    justifyContent: 'space-between',
+    marginBottom: 10,
   },
   name: {
-    fontSize: '24px',
+    fontSize: 26,
     fontWeight: 'bold',
-    color: '#333',
+    color: '#222',
   },
   likeButton: {
-    fontSize: '18px',
+    fontSize: 18,
     cursor: 'pointer',
     backgroundColor: '#111',
     color: '#FFD54F',
     border: 'none',
-    borderRadius: '8px',
+    borderRadius: 8,
     padding: '8px 18px',
     fontWeight: 'bold',
-    marginLeft: '10px',
+    marginLeft: 10,
     transition: 'background 0.2s, color 0.2s',
   },
   liked: {
@@ -223,9 +276,16 @@ const styles = {
     color: '#fff',
     cursor: 'default',
   },
-  text: {
-    fontSize: '16px',
-    marginTop: '10px',
+  infoRow: {
+    fontSize: 17,
     color: '#333',
+    margin: '8px 0 0 0',
+    width: '100%',
+  },
+  loaderContainer: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    height: '100vh',
   },
 };
