@@ -18,17 +18,11 @@ const FallbackImage: React.FC<{ uri: string; style?: React.CSSProperties }> = ({
 
   if (errored) {
     return (
-      <div
-        style={{
-          ...style,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: '#fff',
-        }}
-      >
-        <span role="img" aria-label="dog" style={{ fontSize: 48, color: '#ccc' }}>🐶</span>
-      </div>
+      <img
+        src={require('../assets/images/dog_default.jpg')}
+        style={style}
+        alt="Dog default"
+      />
     );
   }
 
@@ -141,7 +135,13 @@ export default function LikedPets() {
         ) : (
           dogs.map(dog => (
             <div key={dog.id} style={styles.dogCard}>
-              <FallbackImage uri={dog.imgUri} style={styles.dogImage} />
+              <div
+                style={{ cursor: 'pointer', width: '100%' }}
+                onClick={() => navigate(`/dog/${dog.id}`)}
+                title="Ver perfil do pet"
+              >
+                <FallbackImage uri={dog.imgUri} style={styles.dogImage} />
+              </div>
               <div style={styles.dogInfo}>
                 <div style={styles.dogName}>{dog.name}</div>
                 <div style={styles.dogDetailsRow}>
