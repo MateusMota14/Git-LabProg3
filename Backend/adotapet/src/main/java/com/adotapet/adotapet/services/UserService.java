@@ -140,6 +140,7 @@ public class UserService {
         }
     }
 
+    
     public ApiResponse<UserEntity> uploadPhoto(Integer userId, String base64Image) {
 
         String base64ImageNoPrefix = removerPrefixoBase64(base64Image);

@@ -124,7 +124,7 @@ const SignupScreen: React.FC = () => {
       const data = await response.json();
 
       if (response.ok && data.message === "User created") {
-        Alert.alert("Sucesso", "Conta criada com sucesso!");
+        console.log("Sucesso", "Conta criada com sucesso!");
         router.back()
       } else if (data.message === "User already exists") {
         setErrors((prev) => ({ ...prev, email: true }));

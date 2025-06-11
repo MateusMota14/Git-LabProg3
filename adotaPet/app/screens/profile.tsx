@@ -110,6 +110,13 @@ export default function ProfileScreen() {
           </TouchableOpacity>
 
           <TouchableOpacity
+            style={styles.updateButton}
+            onPress={() => router.push("/screens/changePassword")}
+          >
+            <Text style={styles.updateButtonText}>Alterar Senha</Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
             style={[styles.logoutButton, logoutLoading && styles.buttonDisabled]}
             onPress={handleLogout}
             disabled={logoutLoading}

@@ -47,7 +47,7 @@ const Login: React.FC = () => {
         await AsyncStorage.setItem("userId", String(data.data.id));
         await AsyncStorage.setItem("city", String(data.data.city));
 
-        Alert.alert("Sucesso", "Login realizado com sucesso!");
+        console.log("Sucesso", "Login realizado com sucesso!");
         router.push("/screens/home");
       } else if (message === "Password incorrect") {
         Alert.alert("Erro", "Senha incorreta. Tente novamente.");

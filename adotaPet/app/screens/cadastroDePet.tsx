@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,  useEffect } from "react";
 import {
   View,
   Text,
@@ -12,7 +12,8 @@ import {
   Image,
 } from "react-native";
 import * as ImagePicker from 'expo-image-picker';
-import { useRouter } from "expo-router";
+import { useRouter, useNavigation } from "expo-router";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { globalStyles } from "../../assets/constants/styles";
 import AdotaPetBackground from '../../assets/components/AdotaPetBackground';
 import RadioButtonGroup, { RadioButtonItem } from "expo-radio-button";
@@ -22,10 +23,10 @@ interface FormData {
   petName: string;
   petAge: string;
   petBreed: string;
-  petDescription: string;
   petImages: string[];
   petGender: string,
   petSize: string,
+  userId: number,
 }
 
 const AdoptionRegistration: React.FC = () => {
@@ -35,13 +36,29 @@ const AdoptionRegistration: React.FC = () => {
     petName: '',
     petAge: '',
     petBreed: '',
-    petDescription: '',
     petImages: [],
     petGender: '',
     petSize:'',
+    userId: -1,
   });
 
   const [errors, setErrors] = useState<Partial<Record<keyof FormData, boolean>>>({});
+  const navigation = useNavigation();
+  const [userId, setUserId] = useState<number | null>(null);
+  
+  // buscar userId
+  useEffect(() => {
+    (async () => {
+      const stored = await AsyncStorage.getItem("userId");
+      if (!stored) {
+        navigation.navigate("Login" as never);
+        return;
+      }
+      const id = parseInt(stored, 10);
+      setUserId(id);
+      setFormData((prev) => ({ ...prev, userId: id }));
+    })();
+  }, []);
 
   const handleChange = (field: keyof FormData, value: string) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -101,16 +118,26 @@ const AdoptionRegistration: React.FC = () => {
 
     try {
       const response = await fetch(`http://${Ip}:8080/dog/create`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
-      });
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dog: {
+          name: formData.petName,
+          age: formData.petAge,
+          breed: formData.petBreed,
+          gender: formData.petGender,
+          size: formData.petSize,
+          urlPhotos: formData.petImages,
+        },
+        userId: formData.userId,
+      }),
+    });
 
       const data = await response.json();
 
       console.log(formData);
-      if (response.ok && data.message === "User created") {
-        Alert.alert("Sucesso", "Conta criada com sucesso!");
+      if (response.ok && data.message === "Dog created") {
+        console.log("cachorro criado com sucesso");
         router.back();
       }
        else {
@@ -120,6 +147,7 @@ const AdoptionRegistration: React.FC = () => {
       console.error(error);
       Alert.alert("Erro", "Falha ao conectar ao servidor.");
     }
+
   };
 
   return (
@@ -148,13 +176,6 @@ const AdoptionRegistration: React.FC = () => {
             value={formData.petAge}
             onChangeText={(value) => handleChange("petAge", value)}
             style={[styles.input, errors.petAge && styles.inputError]}
-          />
-          <TextInput
-            placeholder="Bio"
-            placeholderTextColor="#555"
-            value={formData.petDescription}
-            onChangeText={(value) => handleChange("petDescription", value)}
-            style={[styles.input, errors.petDescription && styles.inputError]}
           />
           <View style={{ display: 'flex', flexDirection: 'row' }}>
             <RadioButtonGroup
