@@ -2,9 +2,9 @@
 
 ## 🚀 Passos para rodar o projeto
 
-Depois de criar branchs com base na `main`, você vai rodar o comando:
+Depois de criar branchs com base na `main`, você vai rodar o comando abaixo duas vezes,uma dentro da pasta adotaPet(atenção ao P maiúsculo) e outra dentro da pasta frontend:
 
-npm install
+npm install 
 Para checar se deu certo, vá para a pasta adotaPet (P maiusculo) e rode:
 
 npx expo start
